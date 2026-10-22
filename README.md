@@ -10,6 +10,12 @@
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy.conf
 
+## Clash iOS (mihomo)
+
+- **Clash/iOS/cy-clash-ios.yaml** — iPhone「Clash」App（mihomo 内核）完整配置，使用前把 proxy-providers 里的订阅链接 https://your-subscription-url 换成自己的（固定链接）
+
+  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Clash/iOS/cy-clash-ios.yaml
+
 ## Clash Verge 覆写 / 脚本
 
 - **Clash/APP/cy-rules.js** — Clash Verge 订阅覆写脚本（固定链接，推荐使用）
