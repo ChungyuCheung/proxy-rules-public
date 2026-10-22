@@ -12,7 +12,7 @@
 
 ## Clash iOS (mihomo)
 
-- **Clash/iOS/cy-clash-ios.yaml** — iPhone「Clash」App（mihomo 内核）完整配置，使用前把 proxy-providers 里的订阅链接 https://your-subscription-url 换成自己的（固定链接）
+- **Clash/iOS/cy-clash-ios.yaml** — iPhone「Clash」App（mihomo 内核）完整配置，支持多个机场订阅（airport1~3），使用前把 https://your-subscription-url-1/2/3 换成自己的订阅链接，不用的删掉（固定链接）
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Clash/iOS/cy-clash-ios.yaml
 
