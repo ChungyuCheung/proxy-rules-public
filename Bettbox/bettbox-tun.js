@@ -1,4 +1,7 @@
-// ===== Loyalsoldier 全局覆写脚本 v7.4-tun-webrtc-wa (Bettbox / Mihomo) =====
+// ===== Loyalsoldier 全局覆写脚本 v7.5-tun-webrtc-wa (Bettbox / Mihomo) =====
+// [v7.5] WhatsApp 组自动选节点：新增 fallback 组「♻️ WhatsApp 自动」，从当前订阅里
+//        挑名字含 香港/日本/新加坡/台湾(非家宽) 等的机房节点，按顺序选第一个可用的，
+//        节点挂了才切换；换订阅后无需手动重选。匹配不到时自动退回「⚡ 节点选择」。
 // [v7.4] WhatsApp 掉线修复：新增独立手动组「💬 WhatsApp」，WhatsApp/Meta 域名、
 //        IP-ASN 32934 及 WhatsApp.Root.exe 进程全部固定走该组；开启 TCP 保活
 //        (keep-alive 15s)，防止空闲长连接被节点/TUN 回收导致"计算机未连接至网络"。
@@ -20,6 +23,10 @@
 //       Google/YouTube/Discord 强制代理 + 仅Google QUIC阻断 + fake-ip + system直连DNS
 const PROXY = "⚡ 节点选择"
 const WA = "💬 WhatsApp"
+const WA_AUTO = "♻️ WhatsApp 自动"
+// WhatsApp 优先地区（按名字匹配），以及要排除的不稳定节点类型
+const WA_PREFER = /(香港|港|HK|Hong ?Kong|日本|JP|Japan|东京|大阪|新加坡|狮城|SG|Singapore|台湾|台|TW|Taiwan)/i
+const WA_AVOID = /(家庭|家宽|住宅|动态|Residential|Home|ISP)/i
 
 const RULE_CDN = "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release"
 
@@ -126,7 +133,13 @@ function main(config) {
     config["keep-alive-idle"] = 15
     config["disable-keep-alive"] = false
 
-    // ---- 1. 手动选择组 + WhatsApp 独立组 ----
+    // ---- 1. 手动选择组 + WhatsApp 组 ----
+    const nodeFilterRe = new RegExp(NODE_FILTER.replace('(?i)', ''), 'i')
+    const allNodes = (Array.isArray(config.proxies) ? config.proxies : [])
+        .map(p => p && p.name)
+        .filter(n => typeof n === 'string' && !nodeFilterRe.test(n))
+    const waNodes = allNodes.filter(n => WA_PREFER.test(n) && !WA_AVOID.test(n))
+
     config["proxy-groups"] = [
         {
             name: PROXY,
@@ -135,12 +148,20 @@ function main(config) {
             "exclude-filter": NODE_FILTER,
         },
         {
-            // 默认跟随主节点；建议手动固定一个低延迟、支持 UDP 的节点
+            // 默认用自动组；也可手动改选主节点或任一具体节点
             name: WA,
             type: "select",
-            proxies: [PROXY],
-            "include-all": true,
-            "exclude-filter": NODE_FILTER,
+            proxies: [WA_AUTO, PROXY, ...allNodes],
+        },
+        {
+            // 按顺序取第一个可用节点，不按延迟频繁切换；全部不可用时退回主节点
+            name: WA_AUTO,
+            type: "fallback",
+            proxies: [...waNodes, PROXY],
+            url: "https://www.gstatic.com/generate_204",
+            interval: 300,
+            timeout: 5000,
+            lazy: false,
         },
     ]
 
