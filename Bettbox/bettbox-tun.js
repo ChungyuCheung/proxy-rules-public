@@ -1,6 +1,9 @@
-// ===== Loyalsoldier 全局覆写脚本 v7.7-tun-webrtc-wa-mail (Bettbox / Mihomo) =====
+// ===== Loyalsoldier 全局覆写脚本 v7.8-tun-webrtc-wa-mail (Bettbox / Mihomo) =====
+// [v7.8] Foxmail 只走 NovixLink：「📧 Foxmail」= 当前订阅内的 NovixLink 节点 + 可选本地
+//        provider「NovixLink-Mail」(在 NOVIXLINK_URL 填订阅链接，仅本机，勿提交)，
+//        都不可用时兜底「⚡ 节点选择」。移除大航海/SeasLAB/一分机场节点。
 // [v7.7] Foxmail 独立组「📧 Foxmail」(fallback)：在每个订阅里按 MAIL_VERIFIED_NODES
-//        优先级挑已验证可通 Gmail 邮件端口的节点（NovixLink → 大航海/SeasLAB → 一分机场
+//        优先级挑已验证可通 Gmail 邮件端口的节点（v7.8 起仅 NovixLink；原含大航海/SeasLAB/一分机场
 //        仅收信），挂了才切换；当前订阅没有这些节点时退回「⚡ 节点选择」。
 //        Foxmail.exe 进程及 imap/smtp/pop.gmail.com、googlemail.com 固定走该组；网页版 Gmail 不受影响。
 //        健康检查仍用 generate_204（mihomo 只支持 http(s) 探测，无法直接测 993/465 端口）。
@@ -31,8 +34,16 @@
 const PROXY = "⚡ 节点选择"
 const WA = "💬 WhatsApp"
 const MAIL = "📧 Foxmail"
-// [v7.7] 已验证可通 Gmail 邮件端口的节点（只写节点名，不含服务器/密钥），按优先级排序。
-//        fallback 组按此顺序取第一个"可用"节点；在任何订阅里都只会匹配到该订阅实际存在的节点。
+// ==================== [v7.8] 仅在本机填写 ====================
+// 在下方引号内粘贴 NovixLink 订阅链接，使任何订阅下 Foxmail 都能走 NovixLink 节点。
+// 只在本地 Bettbox 的脚本里填写，切勿提交到仓库（公开仓库会泄露订阅）！
+// 每次从仓库更新本脚本后，需要重新粘贴。留空则只使用当前订阅里的 NovixLink 节点。
+const NOVIXLINK_URL = ""
+const MAIL_PROVIDER = "NovixLink-Mail"
+const MAIL_PROVIDER_GROUP = "📧 NovixLink 订阅"
+// ============================================================
+// [v7.8] 仅 NovixLink 节点（已验证可通 Gmail 邮件端口；只写节点名，不含服务器/密钥），按优先级排序。
+//        fallback 组按此顺序取第一个"可用"节点；只会匹配到当前订阅实际存在的节点。
 //        匹配时忽略空格、emoji/国旗及大小写，名字略有变化也能命中。可自行增删。
 const MAIL_VERIFIED_NODES = [
     // (a) NovixLink 自建美国 VPS：IMAP 993 + SMTP 465 均通过
@@ -43,30 +54,6 @@ const MAIL_VERIFIED_NODES = [
     "🇺🇸 VM-7CF6BpQtoc grpc-reality",
     "🇺🇸 VM-7CF6BpQtoc shadowsocks",
     "🇺🇸 VM-7CF6BpQtoc tuic",
-    // (b) IMAP 993 + SMTP 465 均通过：大航海、SeasLAB
-    "HY2|德国|原生ip|x0.1",
-    "HY2|美国|原生ip|x0.5",
-    "🇺🇸United States 01",
-    // (c) 仅 IMAP 993 通过（465 被封，Foxmail 发信请用 587/STARTTLS）：一分机场
-    "🇸🇬新加坡专线",
-    "🇸🇬新加坡专线2",
-    "🇸🇬新加坡专线3",
-    "🇭🇰香港HKBN",
-    "🇭🇰香港HKBN2",
-    "🇺🇸美国1号-0.1倍率",
-    "🇺🇸美国2号-0.1倍率",
-    "🇺🇸美国3号-0.1倍率",
-    "🇺🇸美国4号-0.1倍率",
-    "🇺🇸美国5号-0.1倍率",
-    "🇺🇸美国ai解锁",
-    "🇺🇸美国1号-0.01倍率",
-    "🇺🇸美国2号-0.01倍率",
-    "🇯🇵日本1号-0.1倍率",
-    "🇯🇵日本2号-0.1倍率",
-    "🇯🇵日本3号-0.1倍率",
-    "🇯🇵日本4号-0.1倍率",
-    "🇯🇵日本5号-0.1倍率",
-    "🇯🇵日本6号-0.1倍率",
 ]
 // 去掉空白、emoji/国旗、变体选择符后小写，用于宽松比较节点名
 function normNodeName(n) {
@@ -204,11 +191,35 @@ function main(config) {
         }
     }
 
+    // [v7.8] NovixLink 本地 provider（仅当 NOVIXLINK_URL 已在本机填写）
+    const mailProviderOn = typeof NOVIXLINK_URL === "string" && NOVIXLINK_URL.trim() !== ""
+    if (mailProviderOn) {
+        if (!config["proxy-providers"] || typeof config["proxy-providers"] !== "object" || Array.isArray(config["proxy-providers"])) {
+            config["proxy-providers"] = {}
+        }
+        config["proxy-providers"][MAIL_PROVIDER] = {
+            type: "http",
+            url: NOVIXLINK_URL.trim(),
+            interval: 86400,
+            path: "./providers/novixlink-mail.yaml",
+            "health-check": {
+                enable: true,
+                url: "https://www.gstatic.com/generate_204",
+                interval: 300,
+            },
+        }
+    }
+
+    const otherProviders = Object.keys(config["proxy-providers"] || {}).filter(n => n !== MAIL_PROVIDER)
+
     config["proxy-groups"] = [
         {
             name: PROXY,
             type: "select",
-            "include-all": true,
+            // [v7.8] 启用 NovixLink-Mail 时，主组不纳入该 provider（订阅自带的 provider 仍保留）
+            ...(mailProviderOn
+                ? { "include-all-proxies": true, ...(otherProviders.length ? { use: otherProviders } : {}) }
+                : { "include-all": true }),
             "exclude-filter": NODE_FILTER,
         },
         {
@@ -225,12 +236,24 @@ function main(config) {
             // [v7.7] 已验证邮件节点按顺序取第一个可用；当前订阅无此节点时退回主节点
             name: MAIL,
             type: "fallback",
-            proxies: [...mailNodes, PROXY],
+            // [v7.8] 先用当前订阅里的 NovixLink 节点，再用本地 provider，最后兜底主节点
+            // mihomo 中 proxies 排在 use 之前，故 provider 节点包成子组插在兜底之前
+            proxies: [...mailNodes, ...(mailProviderOn ? [MAIL_PROVIDER_GROUP] : []), PROXY],
             url: "https://www.gstatic.com/generate_204",
             interval: 300,
             timeout: 5000,
             lazy: false,
         },
+        // [v7.8] 仅在填写 NOVIXLINK_URL 时出现：NovixLink provider 节点
+        ...(mailProviderOn ? [{
+            name: MAIL_PROVIDER_GROUP,
+            type: "fallback",
+            use: [MAIL_PROVIDER],
+            url: "https://www.gstatic.com/generate_204",
+            interval: 300,
+            timeout: 5000,
+            lazy: false,
+        }] : []),
     ]
 
     // ---- 2. Loyalsoldier 规则集 ----
