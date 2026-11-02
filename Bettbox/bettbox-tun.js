@@ -1,4 +1,10 @@
-// ===== Loyalsoldier 全局覆写脚本 v7.6-tun-webrtc-wa (Bettbox / Mihomo) =====
+// ===== Loyalsoldier 全局覆写脚本 v7.7-tun-webrtc-wa-mail (Bettbox / Mihomo) =====
+// [v7.7] Foxmail 独立组「📧 Foxmail」(fallback)：在每个订阅里按 MAIL_VERIFIED_NODES
+//        优先级挑已验证可通 Gmail 邮件端口的节点（NovixLink → 大航海/SeasLAB → 一分机场
+//        仅收信），挂了才切换；当前订阅没有这些节点时退回「⚡ 节点选择」。
+//        Foxmail.exe 进程及 imap/smtp/pop.gmail.com、googlemail.com 固定走该组；网页版 Gmail 不受影响。
+//        健康检查仍用 generate_204（mihomo 只支持 http(s) 探测，无法直接测 993/465 端口）。
+//        PROCESS-NAME 需要 find-process-mode 不为 off，脚本中自动修正。
 // [v7.6] 合并 WhatsApp 两个组为一个 fallback 组「💬 WhatsApp」，界面只显示一个。
 // [v7.5] WhatsApp 组自动选节点：新增 fallback 组「♻️ WhatsApp 自动」，从当前订阅里
 //        挑名字含 香港/日本/新加坡/台湾(非家宽) 等的机房节点，按顺序选第一个可用的，
@@ -24,6 +30,48 @@
 //       Google/YouTube/Discord 强制代理 + 仅Google QUIC阻断 + fake-ip + system直连DNS
 const PROXY = "⚡ 节点选择"
 const WA = "💬 WhatsApp"
+const MAIL = "📧 Foxmail"
+// [v7.7] 已验证可通 Gmail 邮件端口的节点（只写节点名，不含服务器/密钥），按优先级排序。
+//        fallback 组按此顺序取第一个"可用"节点；在任何订阅里都只会匹配到该订阅实际存在的节点。
+//        匹配时忽略空格、emoji/国旗及大小写，名字略有变化也能命中。可自行增删。
+const MAIL_VERIFIED_NODES = [
+    // (a) NovixLink 自建美国 VPS：IMAP 993 + SMTP 465 均通过
+    "🇺🇸 VM-7CF6BpQtoc ShadowTLS",
+    "🇺🇸 VM-7CF6BpQtoc xtls-reality",
+    "🇺🇸 VM-7CF6BpQtoc anytls",
+    "🇺🇸 VM-7CF6BpQtoc trojan",
+    "🇺🇸 VM-7CF6BpQtoc grpc-reality",
+    "🇺🇸 VM-7CF6BpQtoc shadowsocks",
+    "🇺🇸 VM-7CF6BpQtoc tuic",
+    // (b) IMAP 993 + SMTP 465 均通过：大航海、SeasLAB
+    "HY2|德国|原生ip|x0.1",
+    "HY2|美国|原生ip|x0.5",
+    "🇺🇸United States 01",
+    // (c) 仅 IMAP 993 通过（465 被封，Foxmail 发信请用 587/STARTTLS）：一分机场
+    "🇸🇬新加坡专线",
+    "🇸🇬新加坡专线2",
+    "🇸🇬新加坡专线3",
+    "🇭🇰香港HKBN",
+    "🇭🇰香港HKBN2",
+    "🇺🇸美国1号-0.1倍率",
+    "🇺🇸美国2号-0.1倍率",
+    "🇺🇸美国3号-0.1倍率",
+    "🇺🇸美国4号-0.1倍率",
+    "🇺🇸美国5号-0.1倍率",
+    "🇺🇸美国ai解锁",
+    "🇺🇸美国1号-0.01倍率",
+    "🇺🇸美国2号-0.01倍率",
+    "🇯🇵日本1号-0.1倍率",
+    "🇯🇵日本2号-0.1倍率",
+    "🇯🇵日本3号-0.1倍率",
+    "🇯🇵日本4号-0.1倍率",
+    "🇯🇵日本5号-0.1倍率",
+    "🇯🇵日本6号-0.1倍率",
+]
+// 去掉空白、emoji/国旗、变体选择符后小写，用于宽松比较节点名
+function normNodeName(n) {
+    return String(n).replace(/[\s\u200d\ufe0f]/g, "").replace(/[\u{1F000}-\u{1FAFF}]/gu, "").toLowerCase()
+}
 // WhatsApp 优先地区（按名字匹配），以及要排除的不稳定节点类型
 const WA_PREFER = /(香港|港|HK|Hong ?Kong|日本|JP|Japan|东京|大阪|新加坡|狮城|SG|Singapore|台湾|台|TW|Taiwan)/i
 const WA_AVOID = /(家庭|家宽|住宅|动态|防失联|公益|不计费|免费|测试|Residential|Home|ISP|Free|Test)/i
@@ -48,6 +96,11 @@ const WHATSAPP_DOMAINS = [
     "fbcdn.net",
     "fbsbx.com",
 ]
+
+// [v7.7] Foxmail 进程与 Gmail 收发信服务器，固定走 MAIL 组
+const MAIL_PROCESSES = ["Foxmail.exe"]
+const MAIL_EXACT_DOMAINS = ["imap.gmail.com", "smtp.gmail.com", "pop.gmail.com"]
+const MAIL_SUFFIX_DOMAINS = ["googlemail.com"]
 
 // 公司/内网域名: 一律直连
 const COMPANY_DOMAINS = [
@@ -132,6 +185,10 @@ function main(config) {
     config["keep-alive-interval"] = 15
     config["keep-alive-idle"] = 15
     config["disable-keep-alive"] = false
+    // [v7.7] PROCESS-NAME 规则依赖进程匹配
+    if (!config["find-process-mode"] || config["find-process-mode"] === "off") {
+        config["find-process-mode"] = "strict"
+    }
 
     // ---- 1. 手动选择组 + WhatsApp 组 ----
     const nodeFilterRe = new RegExp(NODE_FILTER.replace('(?i)', ''), 'i')
@@ -139,6 +196,13 @@ function main(config) {
         .map(p => p && p.name)
         .filter(n => typeof n === 'string' && !nodeFilterRe.test(n))
     const waNodes = allNodes.filter(n => WA_PREFER.test(n) && !WA_AVOID.test(n))
+    // [v7.7] 按 MAIL_VERIFIED_NODES 顺序挑当前订阅里存在的已验证邮件节点
+    const mailNodes = []
+    for (const want of MAIL_VERIFIED_NODES.map(normNodeName)) {
+        for (const n of allNodes) {
+            if (normNodeName(n) === want && !mailNodes.includes(n)) mailNodes.push(n)
+        }
+    }
 
     config["proxy-groups"] = [
         {
@@ -152,6 +216,16 @@ function main(config) {
             name: WA,
             type: "fallback",
             proxies: [...waNodes, PROXY],
+            url: "https://www.gstatic.com/generate_204",
+            interval: 300,
+            timeout: 5000,
+            lazy: false,
+        },
+        {
+            // [v7.7] 已验证邮件节点按顺序取第一个可用；当前订阅无此节点时退回主节点
+            name: MAIL,
+            type: "fallback",
+            proxies: [...mailNodes, PROXY],
             url: "https://www.gstatic.com/generate_204",
             interval: 300,
             timeout: 5000,
@@ -201,6 +275,11 @@ function main(config) {
         "IP-CIDR6,::1/128,DIRECT,no-resolve",
         "IP-CIDR6,fc00::/7,DIRECT,no-resolve",
         "IP-CIDR6,fe80::/10,DIRECT,no-resolve",
+
+        // [v7.7] Foxmail 与 Gmail 收发信服务器走 MAIL 组（置于其他规则之前）
+        ...MAIL_PROCESSES.map(p => `PROCESS-NAME,${p},${MAIL}`),
+        ...toExactRules(MAIL_EXACT_DOMAINS, MAIL),
+        ...toSuffixRules(MAIL_SUFFIX_DOMAINS, MAIL),
 
         WEBRTC_STUN_TURN_PORTS + ',' + PROXY,
         WEBRTC_STUN_TURN_PORTS + ',REJECT',
