@@ -1,45 +1,48 @@
-// ===== Loyalsoldier 全局覆写脚本 v7.3-tun-webrtc (Bettbox / Mihomo) =====
+// ===== Loyalsoldier 全局覆写脚本 v7.4-tun-webrtc-wa (Bettbox / Mihomo) =====
+// [v7.4] WhatsApp 掉线修复：新增独立手动组「💬 WhatsApp」，WhatsApp/Meta 域名、
+//        IP-ASN 32934 及 WhatsApp.Root.exe 进程全部固定走该组；开启 TCP 保活
+//        (keep-alive 15s)，防止空闲长连接被节点/TUN 回收导致"计算机未连接至网络"。
 // [tun] 适用于 Windows TUN 模式。请开启 TUN；严格路由若引起变慢或节点超时，请保持关闭。
-// [v7.3] 取消固定绑定 WLAN，改由 Mihomo 自动检测当前默认出口；切换到
-//        以太网、WLAN 或其他正常联网接口时无需修改脚本。
+// [v7.3] 取消固定绑定 WLAN，改由 Mihomo 自动检测当前默认出口。
 // [v7.0] WebRTC/STUN 防泄漏：常见 STUN/TURN 端口先强制走所选节点；
 //        节点不支持 UDP 时立即拒绝同一流量，避免继续匹配到 DIRECT。
-//        Windows 版 Bettbox 须开启 TUN；严格路由并非必要，因为脚本无法拦截
-//        根本没有进入 Mihomo 内核的 UDP 流量。
-// [bettbox] Bettbox 1.19.3 以 main(config) 调用 (QuickJS)，原脚本无需改签名。
+// [bettbox] Bettbox 1.19.3 以 main(config) 调用 (QuickJS)。
 // [bettbox] 使用本脚本时请关闭 Bettbox「覆写 DNS」，否则下方 dns 段会被 GUI DNS 整体替换。
-// [bettbox] 改动: dns.enable 强制 true (避免订阅 enable:false 触发 Bettbox 替换 DNS);
-//           公司域名写入 nameserver-policy=system (替代 GUI 里的 +.huitone.com=system)。
-//           direct-nameserver-follow-policy=false：直连解析使用 system，不受其他 DNS 策略改道。
+// [bettbox] dns.enable 强制 true；公司域名写入 nameserver-policy=system。
+//           direct-nameserver-follow-policy=false：直连解析使用 system。
 // [v6.9] 完整重建 DNS，移除订阅遗留策略/fallback；直连使用当前系统 DNS。
-//        删除 v6.8 无效的 dns.hosts 固定地址补丁，适应公司/家庭网络切换。
-// [v6.8] 918.huinor.com 系统解析失败，直接使用 ping 得到的内网地址。
-// [v6.7] 启用 use-system-hosts，允许读取系统 hosts 文件。
-// [v6.6] 规则集改经节点下载。直连 GitHub / jsDelivr 都会 EOF。
-// [v6.5] 直连、内网和国内域名改用 DHCP DNS（dhcp://），不再依赖 system 解析。
-// [v6.4] 规则集改走 GitHub raw，并强制 DIRECT 下载，避开 jsDelivr 的 EOF / bad record MAC。
-// [v6.3] 规则集 CDN 从 testingcf.jsdelivr.net 改为 cdn.jsdelivr.net，避开 tls: bad record MAC。
-// [v6.2] 增加高优先级 CUSTOM_RULES 区域，集中维护被远程规则集误伤的自定义规则。
-// [v6.1] IPPure 与其出口 IP 探测域名强制走所选节点，避免探测失败后显示占位 IP 8.8.8.8。
-// [v5.9] 精确 Microsoft 登录域 (login.live.com 等 + msauth* 后缀) 强制 DIRECT，修复 0x80190001。
-//        移除宽泛 windows.net 规则。
-// 核心: 单手动节点组 + Loyalsoldier rulesets + 公司/MS-auth/Windows 优先 DIRECT +
+// [v6.7] 启用 use-system-hosts。
+// [v6.6] 规则集改经节点下载。
+// [v6.2] 高优先级 CUSTOM_RULES 区域。
+// [v6.1] IPPure 与其出口 IP 探测域名强制走所选节点。
+// [v5.9] 精确 Microsoft 登录域强制 DIRECT，修复 0x80190001。
+// 核心: 手动节点组 + WhatsApp 独立组 + Loyalsoldier rulesets + 公司/MS-auth/Windows 优先 DIRECT +
 //       Google/YouTube/Discord 强制代理 + 仅Google QUIC阻断 + fake-ip + system直连DNS
-// 备注: Store 问题通常是 UWP loopback，与规则无关 (见 README)。
 const PROXY = "⚡ 节点选择"
+const WA = "💬 WhatsApp"
 
-// jsDelivr（testingcf / cdn）在这台网络上会 tls bad record MAC 或 EOF。GitHub raw 直连更稳。
 const RULE_CDN = "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release"
 
+const NODE_FILTER =
+    "(?i)(到期|剩余|过期|有效期|官网|官方|订阅|套餐|重置|流量|距离|网址|客服|expire|traffic|reset)"
+
 // ---- 自定义高优先级规则 ----
-// 用于修正规则集误判；按 Clash 规则格式逐行添加，越靠前优先级越高。
-// 示例: 'DOMAIN-SUFFIX,example.com,' + PROXY,
-// 示例: 'DOMAIN-SUFFIX,example.cn,DIRECT',
 const CUSTOM_RULES = [
     'DOMAIN-SUFFIX,brightdata.com,' + PROXY,
 ]
 
-// 公司/内网域名: 一律直连，解析交给 DHCP / 系统 DNS。新增直接加到这里。
+// [v7.4] WhatsApp / Meta 域名，固定走 WA 组
+const WHATSAPP_DOMAINS = [
+    "whatsapp.com",
+    "whatsapp.net",
+    "wa.me",
+    "whatsapp.biz",
+    "facebook.com",
+    "fbcdn.net",
+    "fbsbx.com",
+]
+
+// 公司/内网域名: 一律直连
 const COMPANY_DOMAINS = [
     "huinor.com",
     "huitone.com",
@@ -55,14 +58,11 @@ const COMPANY_DOMAINS = [
     "ooioo.work",
 ]
 
-// IPPure 页面及其当前 IP 探测端点必须使用同一代理出口。
-// IPPure 在 icanhazip 请求全部失败时会回退显示占位值 8.8.8.8。
 const IP_CHECK_DOMAINS = [
     'icanhazip.com',
     'ippure.com',
 ]
-// Microsoft 身份认证域名: 保持同一 DIRECT 出口，不扩大到整个微软生态。
-// 必须精确匹配的认证主机
+
 const MICROSOFT_AUTH_DOMAINS = [
     "login.live.com",
     "account.live.com",
@@ -72,7 +72,6 @@ const MICROSOFT_AUTH_DOMAINS = [
     "clientconfig.passport.net",
 ]
 
-// 整个后缀均属于或高度关联 Microsoft 身份认证
 const MICROSOFT_AUTH_SUFFIXES = [
     "msauth.net",
     "msftauth.net",
@@ -88,7 +87,6 @@ function toExactRules(list, policy) {
     return list.map(d => `DOMAIN,${d},${policy}`)
 }
 
-// Google / YouTube / Google AI: 明确走代理，并用于定向阻断 QUIC。
 const GOOGLE_PROXY_DOMAINS = [
     "google.com",
     "googleapis.com",
@@ -104,16 +102,11 @@ const GOOGLE_PROXY_DOMAINS = [
     "googleadservices.com",
 ]
 
-// 标准 STUN/TURN 端口，以及 Google 公共 STUN 测试所用端口范围。
-// PROXY / REJECT 双层规则同时覆盖 UDP 与 TCP，避免这些端口上的
-// TURN-over-TCP/TLS 绕过当前所选出口。
 const WEBRTC_STUN_TURN_PORTS =
     'OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309))'
 
 function main(config) {
     if (!config || typeof config !== 'object') config = {}
-    // 不把出口写死为 WLAN/以太网：清除订阅中可能残留的固定接口绑定，
-    // 再让 TUN 按系统默认路由自动检测当前物理出口。
     delete config['interface-name']
     if (Array.isArray(config.proxies)) {
         for (const proxy of config.proxies) {
@@ -126,18 +119,31 @@ function main(config) {
         config.tun = {}
     }
     config.tun['auto-detect-interface'] = true
-    // ---- 0. 多 IP 并发建连，减少首连卡顿 ----
+
+    // ---- 0. 多 IP 并发建连 + [v7.4] TCP 保活 ----
     config["tcp-concurrent"] = true
-    // ---- 1. 单组手动选择，选定后不自动切换 ----
+    config["keep-alive-interval"] = 15
+    config["keep-alive-idle"] = 15
+    config["disable-keep-alive"] = false
+
+    // ---- 1. 手动选择组 + WhatsApp 独立组 ----
     config["proxy-groups"] = [
         {
             name: PROXY,
             type: "select",
             "include-all": true,
-            "exclude-filter":
-                "(?i)(到期|剩余|过期|有效期|官网|官方|订阅|套餐|重置|流量|距离|网址|客服|expire|traffic|reset)",
+            "exclude-filter": NODE_FILTER,
+        },
+        {
+            // 默认跟随主节点；建议手动固定一个低延迟、支持 UDP 的节点
+            name: WA,
+            type: "select",
+            proxies: [PROXY],
+            "include-all": true,
+            "exclude-filter": NODE_FILTER,
         },
     ]
+
     // ---- 2. Loyalsoldier 规则集 ----
     const rp = (behavior, name) => ({
         type: "http",
@@ -170,7 +176,6 @@ function main(config) {
 
     // ---- 3. 主规则，丢弃订阅自带 rules ----
     config.rules = [
-        // 私网网段置顶直连，防止 ruleset 异步加载期间泄漏。
         "IP-CIDR,127.0.0.0/8,DIRECT,no-resolve",
         "IP-CIDR,10.0.0.0/8,DIRECT,no-resolve",
         "IP-CIDR,172.16.0.0/12,DIRECT,no-resolve",
@@ -181,37 +186,34 @@ function main(config) {
         "IP-CIDR6,::1/128,DIRECT,no-resolve",
         "IP-CIDR6,fc00::/7,DIRECT,no-resolve",
         "IP-CIDR6,fe80::/10,DIRECT,no-resolve",
-        // WebRTC 防泄漏：所选节点不支持 UDP 时，Mihomo 会继续向下匹配；
-        // 紧随其后的同条件 REJECT 将阻止回落 DIRECT 暴露运营商公网 IP。
+
         WEBRTC_STUN_TURN_PORTS + ',' + PROXY,
         WEBRTC_STUN_TURN_PORTS + ',REJECT',
-        // 自定义纠错规则优先于内置域名规则及所有远程规则集。
+
         ...CUSTOM_RULES,
-        // IPPure 页面与 IP 探测端点强制走当前所选节点，优先于所有远程规则集。
+
+        // [v7.4] WhatsApp 全部流量（域名、Meta IP 段、桌面进程）走 WA 组
+        ...toSuffixRules(WHATSAPP_DOMAINS, WA),
+        "PROCESS-NAME,WhatsApp.Root.exe," + WA,
+        "IP-ASN,32934," + WA + ",no-resolve",
+
         ...toSuffixRules(IP_CHECK_DOMAINS, PROXY),
-        // 公司/内网域名直连。
         ...toSuffixRules(COMPANY_DOMAINS, "DIRECT"),
-        // Microsoft 身份认证须位于 proxy / gfw 之前，以保持 DIRECT 出口一致。
         ...microsoftAuthDomainRules,
         ...microsoftAuthSuffixRules,
-        // Windows 基础服务直连；不含范围过大的 windows.net。
+
         "DOMAIN-SUFFIX,windows.com,DIRECT",
         "DOMAIN-SUFFIX,windowsupdate.com,DIRECT",
         "DOMAIN-SUFFIX,msftconnecttest.com,DIRECT",
         "DOMAIN-SUFFIX,msftncsi.com,DIRECT",
         "DOMAIN-SUFFIX,microsoftapp.net,DIRECT",
         "DOMAIN-SUFFIX,s-microsoft.com,DIRECT",
-
-        // Edge 基础服务/CDN 保持直连，以账号稳定性优先。
         "DOMAIN-SUFFIX,msedge.net,DIRECT",
-
-        // Office CDN 保持原 v5.8 行为
         "DOMAIN-SUFFIX,msocdn.com,DIRECT",
-        // 仅阻断 Google/YouTube 的 QUIC，强制回退 TCP；须放在其代理规则之前。
+
         "AND,((NETWORK,udp),(DST-PORT,443),(OR,(" + googleQuicDomainRules + "))),REJECT",
-        // Google / YouTube / Google AI 强制走节点。
         ...googleDomainRules,
-        // Discord 强制走节点，避免被 applications 规则误判直连。
+
         "DOMAIN-SUFFIX,discord.com," + PROXY,
         "DOMAIN-SUFFIX,discordapp.com," + PROXY,
         "DOMAIN-SUFFIX,discordapp.net," + PROXY,
@@ -219,84 +221,50 @@ function main(config) {
         "DOMAIN-SUFFIX,discord.media," + PROXY,
         "DOMAIN-SUFFIX,discordstatus.com," + PROXY,
         "DOMAIN-SUFFIX,discordcdn.com," + PROXY,
-        // Loyalsoldier 标准顺序: direct/cncidr 在 gfw/tld-not-cn 之前。
+
         "RULE-SET,applications,DIRECT",
         "RULE-SET,private,DIRECT",
-
         "RULE-SET,reject,REJECT",
-
         "RULE-SET,icloud,DIRECT",
         "RULE-SET,apple,DIRECT",
-
         "RULE-SET,google," + PROXY,
         "RULE-SET,proxy," + PROXY,
-
         "RULE-SET,direct,DIRECT",
-
         "RULE-SET,lancidr,DIRECT,no-resolve",
         "RULE-SET,cncidr,DIRECT,no-resolve",
-
         "RULE-SET,gfw," + PROXY,
         "RULE-SET,tld-not-cn," + PROXY,
-
         "RULE-SET,telegramcidr," + PROXY + ",no-resolve",
-        // GEOIP / 最终兜底。
+
         "GEOIP,LAN,DIRECT,no-resolve",
-
-        // 不加 no-resolve，使未命中域名规则的请求可按 CN IP 判断。
         "GEOIP,CN,DIRECT",
-
-        // 其余全部走手动选择的节点
         "MATCH," + PROXY,
     ]
+
     // ---- 4. DNS ----
-    // 完整重建 DNS，避免订阅遗留的精确域名策略及 fallback 将内网查询发往公共 DNS。
     const dns = {}
-
-    // [bettbox] 强制启用: Bettbox 在 dns.enable !== true 时会用 GUI DNS 覆盖整个 dns 段。
     dns.enable = true
-
-    if (!dns["enhanced-mode"]) {
-        dns["enhanced-mode"] = "fake-ip"
-    }
-
-    if (!dns["fake-ip-range"]) {
-        dns["fake-ip-range"] = "198.18.0.1/16"
-    }
-    // 境外 DNS 经代理，避免污染和国内直连 Google DNS。
+    dns["enhanced-mode"] = "fake-ip"
+    dns["fake-ip-range"] = "198.18.0.1/16"
     dns.nameserver = ["https://8.8.8.8/dns-query#" + PROXY, "https://8.8.4.4/dns-query#" + PROXY]
-    // 直连使用当前系统配置的 DNS；网卡自动获取 DNS 时包含 DHCP 下发的服务器。
     dns["direct-nameserver"] = ["system"]
-
-    // 不让 nameserver-policy 改写直连出口的 DNS 选择。
     dns["direct-nameserver-follow-policy"] = false
-    // 代理节点域名及 DoH 引导使用国内 DNS，避免循环依赖。
     dns["default-nameserver"] = ["223.5.5.5", "119.29.29.29"]
-
     dns["proxy-server-nameserver"] = ["223.5.5.5", "119.29.29.29"]
-
-    if (!dns["cache-algorithm"]) dns["cache-algorithm"] = "arc"
+    dns["cache-algorithm"] = "arc"
     dns["use-system-hosts"] = true
 
-    // 公司/内网域名排除 fake-ip；微软认证仍由域名规则识别，不扩大排除范围。
-    const filter = dns["fake-ip-filter"] || []
-
+    const filter = []
     for (const d of COMPANY_DOMAINS) {
         const item = "+." + d
-
-        if (!filter.includes(item)) {
-            filter.push(item)
-        }
+        if (!filter.includes(item)) filter.push(item)
     }
-    // 额外常见私有域名（与 private rule-set 互补）
     for (const item of ["+.lan", "localhost", "+.local", "+.home.arpa"]) {
         if (!filter.includes(item)) filter.push(item)
     }
-
     dns["fake-ip-filter"] = filter
 
-    // 内网和国内域名的 DNS 查询使用 system，随当前网络的 DNS 配置变化。
-    const policy = dns["nameserver-policy"] || {}
+    const policy = {}
     const LAN_DNS = "system"
     for (const d of COMPANY_DOMAINS) policy["+." + d] = LAN_DNS
     for (const item of ["+.lan", "+.local", "+.home.arpa", "+.cn"]) policy[item] = LAN_DNS
@@ -304,10 +272,5 @@ function main(config) {
     dns["nameserver-policy"] = policy
 
     config.dns = dns
-    // 不添加旧式 webrtc: false：现代 Mihomo 不支持此字段。
-    // Bettbox 会在脚本执行后应用客户端自身的 TUN 设置。Windows 上须在
-    // 客户端开启 TUN，并保持“自动检测接口”开启；严格路由若导致变慢或
-    // 节点超时，可以保持关闭。
-
     return config
 }
