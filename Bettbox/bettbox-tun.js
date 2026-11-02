@@ -1,4 +1,5 @@
 // ===== Loyalsoldier 全局覆写脚本 v7.8-tun-webrtc-wa-mail (Bettbox / Mihomo) =====
+// [v7.9] 「📧 Foxmail」只显示 NovixLink 节点，去掉中间子组和节点选择兜底。
 // [v7.8] Foxmail 只走 NovixLink：「📧 Foxmail」= 当前订阅内的 NovixLink 节点 + 可选本地
 //        provider「NovixLink-Mail」(在 NOVIXLINK_URL 填订阅链接，仅本机，勿提交)，
 //        都不可用时兜底「⚡ 节点选择」。移除大航海/SeasLAB/一分机场节点。
@@ -233,27 +234,18 @@ function main(config) {
             lazy: false,
         },
         {
-            // [v7.7] 已验证邮件节点按顺序取第一个可用；当前订阅无此节点时退回主节点
+            // [v7.9] 只显示 NovixLink 节点：填了 NOVIXLINK_URL 就直接用订阅里的节点；
+            // 否则用当前订阅里的 NovixLink 节点；都没有时才退回主节点（避免空组报错）
             name: MAIL,
             type: "fallback",
-            // [v7.8] 先用当前订阅里的 NovixLink 节点，再用本地 provider，最后兜底主节点
-            // mihomo 中 proxies 排在 use 之前，故 provider 节点包成子组插在兜底之前
-            proxies: [...mailNodes, ...(mailProviderOn ? [MAIL_PROVIDER_GROUP] : []), PROXY],
+            ...(mailProviderOn
+                ? { use: [MAIL_PROVIDER] }
+                : { proxies: mailNodes.length ? mailNodes : [PROXY] }),
             url: "https://www.gstatic.com/generate_204",
             interval: 300,
             timeout: 5000,
             lazy: false,
         },
-        // [v7.8] 仅在填写 NOVIXLINK_URL 时出现：NovixLink provider 节点
-        ...(mailProviderOn ? [{
-            name: MAIL_PROVIDER_GROUP,
-            type: "fallback",
-            use: [MAIL_PROVIDER],
-            url: "https://www.gstatic.com/generate_204",
-            interval: 300,
-            timeout: 5000,
-            lazy: false,
-        }] : []),
     ]
 
     // ---- 2. Loyalsoldier 规则集 ----
