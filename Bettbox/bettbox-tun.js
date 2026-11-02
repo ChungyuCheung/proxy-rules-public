@@ -1,4 +1,5 @@
-// ===== Loyalsoldier 全局覆写脚本 v7.5-tun-webrtc-wa (Bettbox / Mihomo) =====
+// ===== Loyalsoldier 全局覆写脚本 v7.6-tun-webrtc-wa (Bettbox / Mihomo) =====
+// [v7.6] 合并 WhatsApp 两个组为一个 fallback 组「💬 WhatsApp」，界面只显示一个。
 // [v7.5] WhatsApp 组自动选节点：新增 fallback 组「♻️ WhatsApp 自动」，从当前订阅里
 //        挑名字含 香港/日本/新加坡/台湾(非家宽) 等的机房节点，按顺序选第一个可用的，
 //        节点挂了才切换；换订阅后无需手动重选。匹配不到时自动退回「⚡ 节点选择」。
@@ -23,10 +24,9 @@
 //       Google/YouTube/Discord 强制代理 + 仅Google QUIC阻断 + fake-ip + system直连DNS
 const PROXY = "⚡ 节点选择"
 const WA = "💬 WhatsApp"
-const WA_AUTO = "♻️ WhatsApp 自动"
 // WhatsApp 优先地区（按名字匹配），以及要排除的不稳定节点类型
 const WA_PREFER = /(香港|港|HK|Hong ?Kong|日本|JP|Japan|东京|大阪|新加坡|狮城|SG|Singapore|台湾|台|TW|Taiwan)/i
-const WA_AVOID = /(家庭|家宽|住宅|动态|Residential|Home|ISP)/i
+const WA_AVOID = /(家庭|家宽|住宅|动态|防失联|公益|不计费|免费|测试|Residential|Home|ISP|Free|Test)/i
 
 const RULE_CDN = "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release"
 
@@ -148,14 +148,8 @@ function main(config) {
             "exclude-filter": NODE_FILTER,
         },
         {
-            // 默认用自动组；也可手动改选主节点或任一具体节点
-            name: WA,
-            type: "select",
-            proxies: [WA_AUTO, PROXY, ...allNodes],
-        },
-        {
             // 按顺序取第一个可用节点，不按延迟频繁切换；全部不可用时退回主节点
-            name: WA_AUTO,
+            name: WA,
             type: "fallback",
             proxies: [...waNodes, PROXY],
             url: "https://www.gstatic.com/generate_204",
