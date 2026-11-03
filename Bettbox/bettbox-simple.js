@@ -1,23 +1,31 @@
-// ===== 精简全局覆写脚本 v1.0-simple (Bettbox / Mihomo, Windows TUN) =====
+// ===== 精简全局覆写脚本 v1.1-simple (Bettbox / Mihomo, Windows TUN) =====
 // 基于 bettbox-tun.js v7.9 精简：
 //   1. 公司/内网域名直连，DNS 用 system（当前网络 DHCP 下发的 DNS，公司/家里自动切换，不写死 IP）。
 //      局域网 / 私网 IP 直连。
 //   2. 去掉 WhatsApp 分组与规则。
-//   3. Foxmail 只走自建 VPS（节点名含 VM-7CF6BpQtoc）；当前订阅没有该节点时直接 REJECT，绝不走机场节点。
+//   3. Foxmail 只走自建 VPS：在下方 VPS_URL 填自建 VPS 的订阅链接，脚本据此生成「📧 Foxmail」组；
+//      不填则 Foxmail 流量直接 REJECT，绝不走机场节点。
 //   4. 中国域名 / IP 直连（MetaCubeX geosite/cn、geoip/cn .mrs），其余走「⚡ 节点选择」。
 //   保留 WebRTC/STUN 防泄漏两条规则。
 // Bettbox 设置：开启 TUN；关闭「覆写 DNS」（否则下方 dns 段会被 GUI DNS 替换）。
-// 订阅需为内联节点（proxies）；自建 VPS 节点须在当前订阅中。
+
+// ==================== 仅在本机填写 ====================
+// 把自建 VPS 的订阅链接（Clash/mihomo 格式）粘贴到下面引号里。
+// - Foxmail 只会使用这个订阅里的全部节点（不按名字筛选，VPS 改名、换机器、换地址都不用改脚本）。
+// - 留空：Foxmail 流量直接拒绝（REJECT），不会走机场节点。
+// - 只在本机 Bettbox 的脚本里填写，切勿提交到 GitHub（公开仓库会泄露订阅）！
+//   每次从链接更新本脚本后需要重新粘贴。
+const VPS_URL = ""
+// ======================================================
 
 const PROXY = "⚡ 节点选择"
 const MAIL = "📧 Foxmail"
+const VPS_PROVIDER = "my-vps"
 
 // 机场信息类伪节点（剩余流量/到期等）不进主组
 const NODE_FILTER =
     "(?i)(到期|剩余|过期|有效期|官网|官方|订阅|套餐|重置|流量|距离|网址|客服|expire|traffic|reset)"
 
-// 自建 VPS 节点名关键字（只写名字，不含服务器/密钥）
-const VPS_NODE_RE = /VM-7CF6BpQtoc/i
 
 // Foxmail 进程与 Gmail 收发信服务器
 const MAIL_PROCESSES = ["Foxmail.exe"]
@@ -65,31 +73,49 @@ function main(config) {
     }
 
     // ---- 1. 分组 ----
-    const filterRe = new RegExp(NODE_FILTER.replace("(?i)", ""), "i")
-    const names = (Array.isArray(config.proxies) ? config.proxies : [])
-        .map((p) => p && p.name)
-        .filter((n) => typeof n === "string" && !filterRe.test(n))
-    const vpsNodes = names.filter((n) => VPS_NODE_RE.test(n))
+    const vpsOn = typeof VPS_URL === "string" && VPS_URL.trim() !== ""
+    if (vpsOn) {
+        const pp = config["proxy-providers"]
+        if (!pp || typeof pp !== "object" || Array.isArray(pp)) config["proxy-providers"] = {}
+        config["proxy-providers"][VPS_PROVIDER] = {
+            type: "http",
+            url: VPS_URL.trim(),
+            path: "./providers/my-vps.yaml",
+            interval: 86400,
+            "health-check": {
+                enable: true,
+                url: "https://www.gstatic.com/generate_204",
+                interval: 300,
+                timeout: 5000,
+            },
+        }
+    }
+    // 主组：机场节点；启用 my-vps 时不把 VPS 节点放进主组（订阅自带的其他 provider 仍保留）
+    const otherProviders = Object.keys(config["proxy-providers"] || {}).filter((n) => n !== VPS_PROVIDER)
+    const mainGroup = vpsOn
+        ? {
+              name: PROXY,
+              type: "select",
+              "include-all-proxies": true,
+              ...(otherProviders.length ? { use: otherProviders } : {}),
+              "exclude-filter": NODE_FILTER,
+          }
+        : { name: PROXY, type: "select", "include-all": true, "exclude-filter": NODE_FILTER }
 
     config["proxy-groups"] = [
-        {
-            name: PROXY,
-            type: "select",
-            "include-all": true,
-            "exclude-filter": NODE_FILTER,
-        },
-        vpsNodes.length
+        mainGroup,
+        vpsOn
             ? {
-                  // 只含自建 VPS 节点，按顺序取第一个可用的
+                  // 只用 my-vps 订阅里的节点，按顺序取第一个可用的
                   name: MAIL,
                   type: "fallback",
-                  proxies: vpsNodes,
+                  use: [VPS_PROVIDER],
                   url: "https://www.gstatic.com/generate_204",
                   interval: 300,
                   timeout: 5000,
               }
             : {
-                  // 当前订阅没有自建 VPS 节点：Foxmail 流量直接拒绝，不走机场
+                  // 未填 VPS_URL：Foxmail 流量直接拒绝，不走机场
                   name: MAIL,
                   type: "select",
                   proxies: ["REJECT"],
