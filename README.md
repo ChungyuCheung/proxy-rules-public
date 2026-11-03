@@ -14,7 +14,7 @@
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy-simple.conf
 
-- **Shadowrocket/cy.conf** — Shadowrocket 主配置（分流规则 + DNS），在 Shadowrocket「配置」里用此链接下载
+- **Shadowrocket/cy.conf** — Shadowrocket 完整版（Loyalsoldier L大 规则集远程拉取 + 自定义分流 + DNS），在 Shadowrocket「配置」里用此链接下载
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy.conf
 
@@ -29,10 +29,6 @@
 - **Clash/APP/cy-rules.js** — iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（与 Shadowrocket cy.conf 同分流，固定链接）
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Clash/APP/cy-rules.js
-
-- **Clash/全局扩展覆写配置/20260611-Loyalsoldier项目-Merge.yaml** — Clash Verge Rev 全局扩展覆写配置（Merge YAML，Loyalsoldier 规则集；不含 Foxmail 规则）
-
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Clash/%E5%85%A8%E5%B1%80%E6%89%A9%E5%B1%95%E8%A6%86%E5%86%99%E9%85%8D%E7%BD%AE/20260611-Loyalsoldier%E9%A1%B9%E7%9B%AE-Merge.yaml
 
 ## v2RayN
 
@@ -50,6 +46,6 @@
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-simple.js
 
-- **Bettbox/bettbox-system-proxy.js** — Bettbox 系统代理模式脚本（不开 TUN 时用；WebRTC 防泄漏需 TUN，固定链接）
+- **Bettbox/bettbox-tun.js** — Bettbox / Clash Verge Rev / FlClash 完整版覆写脚本（TUN，Loyalsoldier L大 规则集，Foxmail 只走自建 VPS：本机在 VPS_URL 填订阅，固定链接）
 
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-system-proxy.js
+  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-tun.js
