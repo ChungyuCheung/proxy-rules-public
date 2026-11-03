@@ -1,31 +1,37 @@
-// ===== bettbox-system-proxy.js v8.1 系统代理版（Loyalsoldier 规则）| Bettbox / Clash Verge Rev / FlClash（mihomo 覆写脚本，Windows 系统代理，不开 TUN）=====
-// 用途：与 bettbox-tun.js 同一套分流（Loyalsoldier clash-rules）；Foxmail 只走自建 VPS；VPS 216.36.82.250 直连；DNS 防泄漏。
-// WebRTC：STUN 端口走代理/否则 REJECT 只对进入代理的 UDP 生效；系统代理接管不了浏览器 UDP，浏览器需另装 WebRTC 防泄漏扩展，或改用 bettbox-tun.js。
-// 用法：「覆写/脚本」里用 raw 链接导入并挂到每个订阅；开启系统代理；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
-// 需要填写：下方 VPS_URL（仅本机填写，留空则 Foxmail 被拦截）；公司域名在 COMPANY_DOMAINS。
-// 最新改动 2026-11-03：v7.1→v8.1，与 tun/mrs v8.1 统一（VPS IP 直连置顶、DNS 统一、Foxmail 只走 VPS_URL、无 WhatsApp）。历史见私有仓库。
+// ===== mihomo/sysproxy-metacubex.js v8.2 | 系统代理模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本）=====
+// 用途：同 tun-metacubex.js 的分流，但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
+// 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
+// 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
+// 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 被拦截）；公司域名改 COMPANY_DOMAINS。
+// 2026-11-03：新增；由 tun-metacubex.js 去掉 TUN 相关设置生成。
 const PROXY = "⚡ 节点选择"
-
-// ==================== [2026-11-03] Foxmail 自建 VPS（仅在本机填写）====================
-// 在下方引号内粘贴自建 VPS 的订阅链接（Clash/mihomo 格式）。Foxmail 只走这里的节点，
-// 不写死节点名/服务器地址：机器改名、换 VPS、换地址，只改这个链接即可。
-// 只在本机脚本副本里填写，切勿提交到仓库（会泄露订阅）！留空则 Foxmail 流量被拦截（REJECT）。
+const MAIL = "📧 Foxmail"
+// ==================== [v8.0] 仅在本机填写 ====================
+// 在下方引号内粘贴你自建 VPS 的订阅链接（Clash/mihomo 格式）。Foxmail 只会走这里的节点。
+// 不写死节点名/服务器地址：机器改名、换 VPS、换地址，只要改这个链接即可。
+// 只在本地 Bettbox / Clash Verge Rev / FlClash 的脚本副本里填写，切勿提交到仓库（会泄露订阅）！
+// 每次从仓库更新本脚本后需要重新粘贴。留空则 Foxmail 流量被拦截（REJECT）。
 const VPS_URL = ""
-// =====================================================================================
+const VPS_PROVIDER = "my-vps"
+// ============================================================
 
-
-// jsDelivr（testingcf / cdn）在这台网络上会 tls bad record MAC 或 EOF。GitHub raw 直连更稳。
 const RULE_CDN = "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release"
+const MRS_BASE = "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo"
+
+const NODE_FILTER =
+    "(?i)(到期|剩余|过期|有效期|官网|官方|订阅|套餐|重置|流量|距离|网址|客服|expire|traffic|reset)"
 
 // ---- 自定义高优先级规则 ----
-// 用于修正规则集误判；按 Clash 规则格式逐行添加，越靠前优先级越高。
-// 示例: 'DOMAIN-SUFFIX,example.com,' + PROXY,
-// 示例: 'DOMAIN-SUFFIX,example.cn,DIRECT',
 const CUSTOM_RULES = [
     'DOMAIN-SUFFIX,brightdata.com,' + PROXY,
 ]
 
-// 公司/内网域名: 一律直连，解析交给 DHCP / 系统 DNS。新增直接加到这里。
+// [v7.7] Foxmail 进程与 Gmail 收发信服务器，固定走 MAIL 组
+const MAIL_PROCESSES = ["Foxmail.exe"]
+const MAIL_EXACT_DOMAINS = ["imap.gmail.com", "smtp.gmail.com", "pop.gmail.com"]
+const MAIL_SUFFIX_DOMAINS = ["googlemail.com"]
+
+// 公司/内网域名: 一律直连
 const COMPANY_DOMAINS = [
     "huinor.com",
     "huitone.com",
@@ -41,14 +47,11 @@ const COMPANY_DOMAINS = [
     "ooioo.work",
 ]
 
-// IPPure 页面及其当前 IP 探测端点必须使用同一代理出口。
-// IPPure 在 icanhazip 请求全部失败时会回退显示占位值 8.8.8.8。
 const IP_CHECK_DOMAINS = [
     'icanhazip.com',
     'ippure.com',
 ]
-// Microsoft 身份认证域名: 保持同一 DIRECT 出口，不扩大到整个微软生态。
-// 必须精确匹配的认证主机
+
 const MICROSOFT_AUTH_DOMAINS = [
     "login.live.com",
     "account.live.com",
@@ -58,7 +61,6 @@ const MICROSOFT_AUTH_DOMAINS = [
     "clientconfig.passport.net",
 ]
 
-// 整个后缀均属于或高度关联 Microsoft 身份认证
 const MICROSOFT_AUTH_SUFFIXES = [
     "msauth.net",
     "msftauth.net",
@@ -74,7 +76,6 @@ function toExactRules(list, policy) {
     return list.map(d => `DOMAIN,${d},${policy}`)
 }
 
-// Google / YouTube / Google AI: 明确走代理，并用于定向阻断 QUIC。
 const GOOGLE_PROXY_DOMAINS = [
     "google.com",
     "googleapis.com",
@@ -90,44 +91,105 @@ const GOOGLE_PROXY_DOMAINS = [
     "googleadservices.com",
 ]
 
+const WEBRTC_STUN_TURN_PORTS =
+    'OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309))'
+
 function main(config) {
-    if (!config || typeof config !== "object") config = {}
-    // ---- 0. 多 IP 并发建连，减少首连卡顿 ----
+    if (!config || typeof config !== 'object') config = {}
+    // 系统代理版：不改 tun / interface-name 设置（保持客户端默认，不强开 TUN）
+
+    // ---- 0. 多 IP 并发建连 + [v7.4] TCP 保活 ----
     config["tcp-concurrent"] = true
-    // ---- 1. 单组手动选择，选定后不自动切换 ----
+    config["keep-alive-interval"] = 15
+    config["keep-alive-idle"] = 15
+    config["disable-keep-alive"] = false
+    // [v7.7] PROCESS-NAME 规则依赖进程匹配
+    if (!config["find-process-mode"] || config["find-process-mode"] === "off") {
+        config["find-process-mode"] = "strict"
+    }
+
+    // ---- 1. 手动选择组 + Foxmail 组 ----
+    // [v8.0] 自建 VPS provider（仅当 VPS_URL 已在本机填写）
+    const vpsOn = typeof VPS_URL === "string" && VPS_URL.trim() !== ""
+    if (vpsOn) {
+        if (!config["proxy-providers"] || typeof config["proxy-providers"] !== "object" || Array.isArray(config["proxy-providers"])) {
+            config["proxy-providers"] = {}
+        }
+        config["proxy-providers"][VPS_PROVIDER] = {
+            type: "http",
+            url: VPS_URL.trim(),
+            interval: 86400,
+            path: "./providers/my-vps.yaml",
+            "health-check": {
+                enable: true,
+                url: "https://www.gstatic.com/generate_204",
+                interval: 300,
+            },
+        }
+    }
+
+    const otherProviders = Object.keys(config["proxy-providers"] || {}).filter(n => n !== VPS_PROVIDER)
+
     config["proxy-groups"] = [
         {
             name: PROXY,
             type: "select",
-            "include-all": true,
-            "exclude-filter":
-                "(?i)(到期|剩余|过期|有效期|官网|官方|订阅|套餐|重置|流量|距离|网址|客服|expire|traffic|reset)",
+            // [v8.0] 启用 my-vps 时，主组不纳入该 provider（订阅自带的 provider 仍保留）
+            ...(vpsOn
+                ? { "include-all-proxies": true, ...(otherProviders.length ? { use: otherProviders } : {}) }
+                : { "include-all": true }),
+            "exclude-filter": NODE_FILTER,
         },
+        // [v8.0] Foxmail 只走自建 VPS：填了 VPS_URL 就只用 my-vps provider（不做名字过滤）；
+        //        留空则 REJECT，绝不退回机场节点
+        vpsOn
+            ? {
+                name: MAIL,
+                type: "fallback",
+                use: [VPS_PROVIDER],
+                url: "https://www.gstatic.com/generate_204",
+                interval: 300,
+                timeout: 5000,
+                lazy: false,
+            }
+            : { name: MAIL, type: "select", proxies: ["REJECT"] },
     ]
-    // ---- 2. Loyalsoldier 规则集 ----
-    const rp = (behavior, name) => ({
+
+    // ---- 2. MetaCubeX meta-rules-dat (.mrs) 规则集 ----
+    // Loyalsoldier → MetaCubeX 对应关系与 Loyalsoldier README 中的 geosite/geoip 一致。
+    const mrs = (behavior, kind, name, key) => ({
         type: "http",
         behavior,
-        url: RULE_CDN + "/" + name + ".txt",
-        path: "./ruleset/loyalsoldier/" + name + ".yaml",
+        format: "mrs",
+        url: MRS_BASE + "/" + kind + "/" + name + ".mrs",
+        path: "./ruleset/meta/" + kind + "-" + key + ".mrs",
         interval: 86400,
         proxy: PROXY,
     })
 
     config["rule-providers"] = {
-        reject: rp("domain", "reject"),
-        icloud: rp("domain", "icloud"),
-        apple: rp("domain", "apple"),
-        google: rp("domain", "google"),
-        proxy: rp("domain", "proxy"),
-        direct: rp("domain", "direct"),
-        private: rp("domain", "private"),
-        gfw: rp("domain", "gfw"),
-        "tld-not-cn": rp("domain", "tld-not-cn"),
-        telegramcidr: rp("ipcidr", "telegramcidr"),
-        cncidr: rp("ipcidr", "cncidr"),
-        lancidr: rp("ipcidr", "lancidr"),
-        applications: rp("classical", "applications"),
+        reject: mrs("domain", "geosite", "category-ads-all", "reject"),
+        icloud: mrs("domain", "geosite", "icloud@cn", "icloud"),
+        apple: mrs("domain", "geosite", "apple@cn", "apple"),
+        google: mrs("domain", "geosite", "google@cn", "google"),
+        proxy: mrs("domain", "geosite", "geolocation-!cn", "proxy"),
+        direct: mrs("domain", "geosite", "cn", "direct"),
+        private: mrs("domain", "geosite", "private", "private"),
+        gfw: mrs("domain", "geosite", "gfw", "gfw"),
+        "tld-not-cn": mrs("domain", "geosite", "tld-!cn", "tld-not-cn"),
+        telegramcidr: mrs("ipcidr", "geoip", "telegram", "telegramcidr"),
+        cncidr: mrs("ipcidr", "geoip", "cn", "cncidr"),
+        lancidr: mrs("ipcidr", "geoip", "private", "lancidr"),
+        // 进程名规则 (PROCESS-NAME)，MetaCubeX 无 mrs 等价（mrs 只支持 domain/ipcidr），保留 Loyalsoldier。
+        applications: {
+            type: "http",
+            behavior: "classical",
+            format: "yaml",
+            url: RULE_CDN + "/applications.txt",
+            path: "./ruleset/loyalsoldier/applications.yaml",
+            interval: 86400,
+            proxy: PROXY,
+        },
     }
     const googleDomainRules = toSuffixRules(GOOGLE_PROXY_DOMAINS, PROXY)
     const googleQuicDomainRules = GOOGLE_PROXY_DOMAINS.map((d) => `(DOMAIN-SUFFIX,${d})`).join(",")
@@ -136,7 +198,6 @@ function main(config) {
 
     // ---- 3. 主规则，丢弃订阅自带 rules ----
     config.rules = [
-        // 私网网段置顶直连，防止 ruleset 异步加载期间泄漏。
         "IP-CIDR,127.0.0.0/8,DIRECT,no-resolve",
         "IP-CIDR,10.0.0.0/8,DIRECT,no-resolve",
         "IP-CIDR,172.16.0.0/12,DIRECT,no-resolve",
@@ -147,33 +208,34 @@ function main(config) {
         "IP-CIDR6,::1/128,DIRECT,no-resolve",
         "IP-CIDR6,fc00::/7,DIRECT,no-resolve",
         "IP-CIDR6,fe80::/10,DIRECT,no-resolve",
-        // 自定义纠错规则优先于内置域名规则及所有远程规则集。
+
+        // [v7.7] Foxmail 与 Gmail 收发信服务器走 MAIL 组（置于其他规则之前）
+        ...MAIL_PROCESSES.map(p => `PROCESS-NAME,${p},${MAIL}`),
+        ...toExactRules(MAIL_EXACT_DOMAINS, MAIL),
+        ...toSuffixRules(MAIL_SUFFIX_DOMAINS, MAIL),
+
+        WEBRTC_STUN_TURN_PORTS + ',' + PROXY,
+        WEBRTC_STUN_TURN_PORTS + ',REJECT',
+
         ...CUSTOM_RULES,
-        // IPPure 页面与 IP 探测端点强制走当前所选节点，优先于所有远程规则集。
+
         ...toSuffixRules(IP_CHECK_DOMAINS, PROXY),
-        // 公司/内网域名直连。
         ...toSuffixRules(COMPANY_DOMAINS, "DIRECT"),
-        // Microsoft 身份认证须位于 proxy / gfw 之前，以保持 DIRECT 出口一致。
         ...microsoftAuthDomainRules,
         ...microsoftAuthSuffixRules,
-        // Windows 基础服务直连；不含范围过大的 windows.net。
+
         "DOMAIN-SUFFIX,windows.com,DIRECT",
         "DOMAIN-SUFFIX,windowsupdate.com,DIRECT",
         "DOMAIN-SUFFIX,msftconnecttest.com,DIRECT",
         "DOMAIN-SUFFIX,msftncsi.com,DIRECT",
         "DOMAIN-SUFFIX,microsoftapp.net,DIRECT",
         "DOMAIN-SUFFIX,s-microsoft.com,DIRECT",
-
-        // Edge 基础服务/CDN 保持直连，以账号稳定性优先。
         "DOMAIN-SUFFIX,msedge.net,DIRECT",
-
-        // Office CDN 保持原 v5.8 行为
         "DOMAIN-SUFFIX,msocdn.com,DIRECT",
-        // 仅阻断 Google/YouTube 的 QUIC，强制回退 TCP；须放在其代理规则之前。
+
         "AND,((NETWORK,udp),(DST-PORT,443),(OR,(" + googleQuicDomainRules + "))),REJECT",
-        // Google / YouTube / Google AI 强制走节点。
         ...googleDomainRules,
-        // Discord 强制走节点，避免被 applications 规则误判直连。
+
         "DOMAIN-SUFFIX,discord.com," + PROXY,
         "DOMAIN-SUFFIX,discordapp.com," + PROXY,
         "DOMAIN-SUFFIX,discordapp.net," + PROXY,
@@ -181,84 +243,50 @@ function main(config) {
         "DOMAIN-SUFFIX,discord.media," + PROXY,
         "DOMAIN-SUFFIX,discordstatus.com," + PROXY,
         "DOMAIN-SUFFIX,discordcdn.com," + PROXY,
-        // Loyalsoldier 标准顺序: direct/cncidr 在 gfw/tld-not-cn 之前。
+
         "RULE-SET,applications,DIRECT",
         "RULE-SET,private,DIRECT",
-
         "RULE-SET,reject,REJECT",
-
         "RULE-SET,icloud,DIRECT",
         "RULE-SET,apple,DIRECT",
-
         "RULE-SET,google," + PROXY,
         "RULE-SET,proxy," + PROXY,
-
         "RULE-SET,direct,DIRECT",
-
         "RULE-SET,lancidr,DIRECT,no-resolve",
         "RULE-SET,cncidr,DIRECT,no-resolve",
-
         "RULE-SET,gfw," + PROXY,
         "RULE-SET,tld-not-cn," + PROXY,
-
         "RULE-SET,telegramcidr," + PROXY + ",no-resolve",
-        // GEOIP / 最终兜底。
+
         "GEOIP,LAN,DIRECT,no-resolve",
-
-        // 不加 no-resolve，使未命中域名规则的请求可按 CN IP 判断。
         "GEOIP,CN,DIRECT",
-
-        // 其余全部走手动选择的节点
         "MATCH," + PROXY,
     ]
+
     // ---- 4. DNS ----
-    // 完整重建 DNS，避免订阅遗留的精确域名策略及 fallback 将内网查询发往公共 DNS。
     const dns = {}
-
-    // [bettbox] 强制启用: Bettbox 在 dns.enable !== true 时会用 GUI DNS 覆盖整个 dns 段。
     dns.enable = true
-
-    if (!dns["enhanced-mode"]) {
-        dns["enhanced-mode"] = "fake-ip"
-    }
-
-    if (!dns["fake-ip-range"]) {
-        dns["fake-ip-range"] = "198.18.0.1/16"
-    }
-    // 境外 DNS 经代理，避免污染和国内直连 Google DNS。
+    dns["enhanced-mode"] = "fake-ip"
+    dns["fake-ip-range"] = "198.18.0.1/16"
     dns.nameserver = ["https://8.8.8.8/dns-query#" + PROXY, "https://8.8.4.4/dns-query#" + PROXY]
-    // 直连使用当前系统配置的 DNS；网卡自动获取 DNS 时包含 DHCP 下发的服务器。
     dns["direct-nameserver"] = ["system"]
-
-    // 不让 nameserver-policy 改写直连出口的 DNS 选择。
     dns["direct-nameserver-follow-policy"] = false
-    // 代理节点域名及 DoH 引导使用国内 DNS，避免循环依赖。
     dns["default-nameserver"] = ["223.5.5.5", "119.29.29.29"]
-
     dns["proxy-server-nameserver"] = ["223.5.5.5", "119.29.29.29"]
-
-    if (!dns["cache-algorithm"]) dns["cache-algorithm"] = "arc"
+    dns["cache-algorithm"] = "arc"
     dns["use-system-hosts"] = true
 
-    // 公司/内网域名排除 fake-ip；微软认证仍由域名规则识别，不扩大排除范围。
-    const filter = dns["fake-ip-filter"] || []
-
+    const filter = []
     for (const d of COMPANY_DOMAINS) {
         const item = "+." + d
-
-        if (!filter.includes(item)) {
-            filter.push(item)
-        }
+        if (!filter.includes(item)) filter.push(item)
     }
-    // 额外常见私有域名（与 private rule-set 互补）
     for (const item of ["+.lan", "localhost", "+.local", "+.home.arpa"]) {
         if (!filter.includes(item)) filter.push(item)
     }
-
     dns["fake-ip-filter"] = filter
 
-    // 内网和国内域名的 DNS 查询使用 system，随当前网络的 DNS 配置变化。
-    const policy = dns["nameserver-policy"] || {}
+    const policy = {}
     const LAN_DNS = "system"
     for (const d of COMPANY_DOMAINS) policy["+." + d] = LAN_DNS
     for (const item of ["+.lan", "+.local", "+.home.arpa", "+.cn"]) policy[item] = LAN_DNS
@@ -266,8 +294,6 @@ function main(config) {
     dns["nameserver-policy"] = policy
 
     config.dns = dns
-    // webrtc: false  -- legacy (pre-mihomo); modern leak prevention via tun/client/browser. Removed to avoid unknown key.
-
     return cyHarden20261103(config)
 }
 

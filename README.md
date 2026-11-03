@@ -13,28 +13,31 @@
 - **cy-simple.conf** — 简约版：内网直连、中国直连、其余代理
   `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy-simple.conf`
 
-## Bettbox / Clash Verge Rev / FlClash（Windows / macOS / Android）
+## mihomo 覆写脚本：Bettbox / Clash Verge Rev / FlClash（Windows / macOS / Android）
 
-这几个 `.js` 是 mihomo 覆写脚本，三个客户端通用，选一个即可：
+同为 mihomo 内核，三个客户端通用，直接用 raw 链接导入。文件名 = 代理模式-规则集，选一个即可：
 
-- **bettbox-tun.js** — 完整版（L大 规则），TUN 模式
-  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-tun.js`
-- **bettbox-system-proxy.js** — 完整版（L大 规则），系统代理模式（不开 TUN；浏览器 WebRTC 需另装防泄漏扩展）
-  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-system-proxy.js`
-- **bettbox-mrs.js** — 完整版（MetaCubeX .mrs 规则），TUN 模式，推荐
-  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-mrs.js`
-- **bettbox-simple.js** — 简约版：内网直连、中国直连、其余代理
-  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-simple.js`
+- **tun-metacubex.js** — TUN 模式 + MetaCubeX .mrs 规则（推荐）
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/tun-metacubex.js`
+- **tun-loyalsoldier.js** — TUN 模式 + Loyalsoldier（L大）规则
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/tun-loyalsoldier.js`
+- **sysproxy-metacubex.js** — 系统代理模式 + MetaCubeX .mrs 规则（不开 TUN；浏览器 WebRTC 需另装防泄漏扩展）
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/sysproxy-metacubex.js`
+- **sysproxy-loyalsoldier.js** — 系统代理模式 + Loyalsoldier（L大）规则（不开 TUN；浏览器 WebRTC 需另装防泄漏扩展）
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/sysproxy-loyalsoldier.js`
+- **lite-metacubex.js** — 简约版：内网直连、中国直连、其余代理（TUN / 系统代理均可）
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/lite-metacubex.js`
 
 用法：
 - **Bettbox**：订阅卡片「⋮」→ 覆写 / 脚本 → 用链接添加，挂到每个订阅；关闭「覆写 DNS」。不要用「配置 → 从 URL 导入」（那里只认 YAML）。
 - **Clash Verge Rev**：订阅右键「编辑扩展脚本」或「全局扩展脚本」，粘贴脚本内容保存。
-- **FlClash**：也用上面的 `.js` 脚本 —— 「工具 → 覆写 / 脚本」添加并在订阅上启用；关闭「覆写 DNS」和「追加系统 DNS」。
+- **FlClash**：同样用上面 `mihomo/` 里的 `.js` 脚本 ——「工具 → 覆写 / 脚本」添加并在订阅上启用；关闭「覆写 DNS」和「追加系统 DNS」。
 - 需要本机填写（不要提交）：脚本开头的 `VPS_URL`（自建 VPS 订阅，Foxmail 只走它，留空则拦截）；公司域名改 `COMPANY_DOMAINS`。
+- 旧链接 `Bettbox/bettbox-*.js` 已停用，请改用上面 `mihomo/` 的新地址重新导入（tun→tun-loyalsoldier，mrs→tun-metacubex，system-proxy→sysproxy-loyalsoldier，simple→lite-metacubex）。
 
 ## Clash Verge Rev（其他）
 
-- **cy-rules.js** — Clash Verge Rev 订阅覆写脚本（旧版通用脚本，新装建议用上面的 Bettbox 脚本）
+- **cy-rules.js** — Clash Verge Rev 订阅覆写脚本（旧版通用脚本，新装建议用上面的 mihomo 脚本）
   `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Clash/APP/cy-rules.js`
 
 ## iPhone「Clash」App（mihomo 内核）

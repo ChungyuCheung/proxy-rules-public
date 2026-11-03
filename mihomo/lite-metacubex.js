@@ -1,9 +1,9 @@
-// ===== bettbox-simple.js v1.3 精简版 | Bettbox / Clash Verge Rev / FlClash（mihomo 覆写脚本）=====
-// 用途：内网/公司域名直连 + 系统 DNS；中国域名/IP 直连；其余走「⚡ 节点选择」；Foxmail 只走自建 VPS；
-//       自建 VPS 216.36.82.250 直连；DNS / WebRTC 防泄漏（外网 DoH 经代理，STUN 不回落直连）。
-// 用法：在客户端「覆写/脚本」里用 raw 链接导入并挂到每个订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
-// 需要填写：下方 VPS_URL（自建 VPS 订阅，仅本机填写）；CUSTOM_DIRECT_DOMAINS（自己的内网域名）。
-// 最新改动 2026-11-03：VPS IP 直连置顶、DNS 统一（中国+内网=system，外网=DoH 经代理）。历史版本见私有仓库 git 记录。
+// ===== mihomo/lite-metacubex.js v1.4 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// 用途：内网/公司直连 + 系统 DNS；中国直连；其余走「⚡ 节点选择」；Foxmail 只走自建 VPS。
+// 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
+// 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
+// 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 被拦截）；CUSTOM_DIRECT_DOMAINS（自己的内网域名）。
+// 2026-11-03：原 Bettbox/bettbox-simple.js 改名；历史见私有仓库。
 
 // ==================== 仅在本机填写 ====================
 // 把自建 VPS 的订阅链接（Clash/mihomo 格式）粘贴到下面引号里。
