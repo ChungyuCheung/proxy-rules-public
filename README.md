@@ -50,6 +50,10 @@
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-script.js
 
+- **Bettbox/bettbox-simple.js** — Bettbox 精简覆写脚本：内网域名直连+系统 DNS、Foxmail 只走自建 VPS、中国直连其余代理（.mrs 规则集，固定链接）
+
+  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-simple.js
+
 - **Bettbox/bettbox-system-proxy.js** — Bettbox 系统代理模式脚本（固定链接）
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-system-proxy.js
