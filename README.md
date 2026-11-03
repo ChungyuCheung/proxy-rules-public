@@ -6,6 +6,10 @@
 
 ## Shadowrocket
 
+- **Shadowrocket/cy-simple.conf** — Shadowrocket 精简配置：局域网/内网域名直连+系统 DNS、中国直连、其余代理（与 bettbox-simple.js 同逻辑，不含 Foxmail）
+
+  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy-simple.conf
+
 - **Shadowrocket/cy.conf** — Shadowrocket 主配置（分流规则 + DNS），在 Shadowrocket「配置」里用此链接下载
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy.conf

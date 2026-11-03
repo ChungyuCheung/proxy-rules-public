@@ -1,4 +1,4 @@
-// ===== 精简全局覆写脚本 v1.1-simple (Bettbox / Mihomo, Windows TUN) =====
+// ===== 精简全局覆写脚本 v1.2-simple (Bettbox / Mihomo, Windows TUN) =====
 // 基于 bettbox-tun.js v7.9 精简：
 //   1. 公司/内网域名直连，DNS 用 system（当前网络 DHCP 下发的 DNS，公司/家里自动切换，不写死 IP）。
 //      局域网 / 私网 IP 直连。
@@ -17,6 +17,14 @@
 //   每次从链接更新本脚本后需要重新粘贴。
 const VPS_URL = ""
 // ======================================================
+
+// ==================== 自定义内网域名（可自行添加）====================
+// 在下面数组里加入你自己的内网/公司域名后缀（不要写 http:// 和路径），例如：
+//   const CUSTOM_DIRECT_DOMAINS = ["mycorp.com", "intranet.example.cn", "corp"]
+// 写 "mycorp.com" 会同时匹配 mycorp.com 和所有 *.mycorp.com。
+// 加入后自动：直连 DIRECT + 用系统 DNS 解析（公司/家里自动切换）+ 不分配 fake-ip（返回真实地址）。
+const CUSTOM_DIRECT_DOMAINS = []
+// =================================================================
 
 const PROXY = "⚡ 节点选择"
 const MAIL = "📧 Foxmail"
@@ -46,6 +54,11 @@ const COMPANY_DOMAINS = [
     "jiandui.online",
     "ooioo.work",
 ]
+// 默认公司域名 + 自定义内网域名（去重）
+const INTRANET_DOMAINS = [...new Set([...COMPANY_DOMAINS, ...CUSTOM_DIRECT_DOMAINS]
+    .map((d) => String(d).trim().replace(/^\+?\.|^\*\./, "").toLowerCase())
+    .filter(Boolean))]
+
 // 直连但走普通 DNS（Synology DDNS 是公网域名）
 const DIRECT_PUBLIC_DNS_DOMAINS = ["synology.me"]
 
@@ -149,7 +162,7 @@ function main(config) {
         ...MAIL_EXACT_DOMAINS.map((d) => "DOMAIN," + d + "," + MAIL),
         ...MAIL_SUFFIX_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + "," + MAIL),
         // 公司/内网域名直连
-        ...COMPANY_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT"),
+        ...INTRANET_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT"),
         ...DIRECT_PUBLIC_DNS_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT"),
         // 中国域名 / IP 直连
         "RULE-SET,cn,DIRECT",
@@ -161,7 +174,7 @@ function main(config) {
     // ---- 4. DNS ----
     const lanDomains = ["+.lan", "+.local", "+.home.arpa"]
     const policy = {}
-    for (const d of COMPANY_DOMAINS) policy["+." + d] = "system"
+    for (const d of INTRANET_DOMAINS) policy["+." + d] = "system"
     for (const d of lanDomains) policy[d] = "system"
     policy["rule-set:cn"] = "system"
 
@@ -170,7 +183,7 @@ function main(config) {
         ipv6: false,
         "enhanced-mode": "fake-ip",
         "fake-ip-range": "198.18.0.1/16",
-        "fake-ip-filter": [...COMPANY_DOMAINS.map((d) => "+." + d), ...lanDomains, "localhost"],
+        "fake-ip-filter": [...INTRANET_DOMAINS.map((d) => "+." + d), ...lanDomains, "localhost"],
         "default-nameserver": ["223.5.5.5", "119.29.29.29"],
         nameserver: ["https://8.8.8.8/dns-query#" + PROXY, "https://8.8.4.4/dns-query#" + PROXY],
         "proxy-server-nameserver": ["223.5.5.5", "119.29.29.29"],
