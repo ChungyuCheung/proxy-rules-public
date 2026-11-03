@@ -38,6 +38,10 @@
 
 ## Bettbox
 
+- **Bettbox/bettbox-mrs.js** — Bettbox TUN 覆写脚本 v7.9 的 MetaCubeX .mrs 规则集版（规则与分组同 bettbox-tun.js，固定链接）
+
+  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-mrs.js
+
 - **Bettbox/bettbox-script-v7.0-webrtc.js** — Bettbox 覆写脚本最新版（含 WebRTC/STUN 防泄漏，文件名随版本更新）
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-script-v7.0-webrtc.js
