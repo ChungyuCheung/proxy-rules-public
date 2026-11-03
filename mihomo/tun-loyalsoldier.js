@@ -1,16 +1,16 @@
-// ===== mihomo/tun-loyalsoldier.js v8.3 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
-// 用途：完整分流（公司/微软认证直连、Google/AI 代理、广告拦截、Apple 直连等）；Foxmail 只走自建 VPS。需开启 TUN。
+// ===== mihomo/tun-loyalsoldier.js v8.4 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
+// 用途：完整分流（公司/微软认证直连、Google/AI 代理、广告拦截、Apple 直连等）；Foxmail 走自建 VPS（未填则走节点选择）。需开启 TUN。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
-// 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 被拦截）；公司域名改 COMPANY_DOMAINS。
-// 2026-11-04：my-vps 订阅改经「⚡ 节点选择」下载（防国内直连 EOF）；历史见私有仓库。
+// 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 走「⚡ 节点选择」）；公司域名改 COMPANY_DOMAINS。
+// 2026-11-04：my-vps 订阅经「⚡ 节点选择」下载；VPS_URL 留空时 Foxmail 跟随「⚡ 节点选择」。
 const PROXY = "⚡ 节点选择"
 const MAIL = "📧 Foxmail"
 // ==================== [v8.0] 仅在本机填写 ====================
 // 在下方引号内粘贴你自建 VPS 的订阅链接（Clash/mihomo 格式）。Foxmail 只会走这里的节点。
 // 不写死节点名/服务器地址：机器改名、换 VPS、换地址，只要改这个链接即可。
 // 只在本地 Bettbox / Clash Verge Rev / FlClash 的脚本副本里填写，切勿提交到仓库（会泄露订阅）！
-// 每次从仓库更新本脚本后需要重新粘贴。留空则 Foxmail 流量被拦截（REJECT）。
+// 每次从仓库更新本脚本后需要重新粘贴。留空则 Foxmail 跟随「⚡ 节点选择」。
 const VPS_URL = ""
 const VPS_PROVIDER = "my-vps"
 // ============================================================
@@ -153,7 +153,7 @@ function main(config) {
             "exclude-filter": NODE_FILTER,
         },
         // [v8.0] Foxmail 只走自建 VPS：填了 VPS_URL 就只用 my-vps provider（不做名字过滤）；
-        //        留空则 REJECT，绝不退回机场节点
+        //        [2026-11-04] 留空则跟随「⚡ 节点选择」
         vpsOn
             ? {
                 name: MAIL,
@@ -164,7 +164,7 @@ function main(config) {
                 timeout: 5000,
                 lazy: false,
             }
-            : { name: MAIL, type: "select", proxies: ["REJECT"] },
+            : { name: MAIL, type: "select", proxies: [PROXY] },
     ]
 
     // ---- 2. Loyalsoldier 规则集（GitHub raw release 分支，每日更新，经节点下载）----
@@ -309,7 +309,7 @@ function main(config) {
 //      - 其余外网域名、以及 IP 规则需要的解析 → 外网加密 DoH（Google 8.8.8.8 / Cloudflare 1.1.1.1），经代理发出
 //      - 删除 fallback（避免回落到明文/国内 DNS），fake-ip 模式，关闭 IPv6 解析
 //      - 机场节点域名用加密 DoH（阿里 / 腾讯，按 IP 写），节点必须直连才能解析，所以不走代理
-//   4) Foxmail（仅桌面脚本，脚本顶部有 VPS_URL 时生效）：只走 VPS_URL 里的自建 VPS 节点；VPS_URL 留空则 REJECT。
+//   4) Foxmail（仅桌面脚本，脚本顶部有 VPS_URL 时生效）：只走 VPS_URL 里的自建 VPS 节点；VPS_URL 留空则跟随主选择组。
 // =====================================================================
 const CY_VPS_IP_RULE = "IP-CIDR,216.36.82.250/32,DIRECT,no-resolve"
 const CY_STUN_PORTS = "OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309))"
@@ -346,7 +346,7 @@ function cyHarden20261103(config) {
             }
             groups.push({ name: CY_MAIL, type: "fallback", use: ["my-vps"], url: "https://www.gstatic.com/generate_204", interval: 300, timeout: 5000 })
         } else {
-            groups.push({ name: CY_MAIL, type: "select", proxies: ["REJECT"] })
+            groups.push({ name: CY_MAIL, type: "select", proxies: [proxy && proxy !== "REJECT" ? proxy : "DIRECT"] })
         }
         config["proxy-groups"] = groups
         rules = rules.filter((r) => !(typeof r === "string" && /(Foxmail\.exe|imap\.gmail\.com|smtp\.gmail\.com|pop\.gmail\.com|googlemail\.com)/.test(r)))
