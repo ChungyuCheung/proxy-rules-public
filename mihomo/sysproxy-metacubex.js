@@ -1,9 +1,9 @@
-// ===== mihomo/sysproxy-metacubex.js v8.2 | 系统代理模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本）=====
+// ===== mihomo/sysproxy-metacubex.js v8.3 | 系统代理模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本）=====
 // 用途：同 tun-metacubex.js 的分流，但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 被拦截）；公司域名改 COMPANY_DOMAINS。
-// 2026-11-03：新增；由 tun-metacubex.js 去掉 TUN 相关设置生成。
+// 2026-11-04：my-vps 订阅改经「⚡ 节点选择」下载（防国内直连 EOF）；历史见私有仓库。
 const PROXY = "⚡ 节点选择"
 const MAIL = "📧 Foxmail"
 // ==================== [v8.0] 仅在本机填写 ====================
@@ -118,6 +118,8 @@ function main(config) {
         config["proxy-providers"][VPS_PROVIDER] = {
             type: "http",
             url: VPS_URL.trim(),
+            // [2026-11-04] 订阅经「⚡ 节点选择」（机场节点）下载：国内直连海外 VPS 的明文 http 常被重置（EOF）
+            proxy: PROXY,
             interval: 86400,
             path: "./providers/my-vps.yaml",
             "health-check": {
@@ -337,6 +339,8 @@ function cyHarden20261103(config) {
             config["proxy-providers"]["my-vps"] = {
                 type: "http",
                 url: VPS_URL.trim(),
+                // [2026-11-04] 订阅经主选择组（机场节点）下载，防国内直连 VPS 时 EOF
+                ...(proxy && proxy !== "DIRECT" && proxy !== "REJECT" ? { proxy } : {}),
                 interval: 86400,
                 path: "./providers/my-vps.yaml",
                 "health-check": { enable: true, url: "https://www.gstatic.com/generate_204", interval: 300 },

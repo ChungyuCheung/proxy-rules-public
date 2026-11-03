@@ -1,8 +1,8 @@
-// ===== cy-rules.js v2.7 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
+// ===== cy-rules.js v2.8 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
 // 用途：与 Shadowrocket cy.conf 同一套分流（国内直连、海外代理、AI/交易所分地区），自建 VPS 216.36.82.250 直连；
 //       DNS / WebRTC 防泄漏（中国+内网=system，外网=DoH 经代理；STUN 不回落直连）。手机用 Gmail App，无 Foxmail 规则。
 // 用法：配置详情 → 覆写脚本 → 用 raw 链接导入，保存并选中；每个订阅都选上。公司域名在 COMPANY_DOMAINS。
-// 最新改动 2026-11-03：规则集改 MetaCubeX（旧链接 404）、DNS 由脚本接管。历史版本见私有仓库 git 记录。
+// 最新改动 2026-11-04：my-vps 订阅经代理组下载（防 EOF）。历史版本见私有仓库 git 记录。
 const INFO_FILTER = "(?i)(剩余|剩餘|流量|到期|官网|官網|套餐|重置|公告|客服|traffic|expire|remaining|reset)";
 const TEST_URL = "https://www.gstatic.com/generate_204";
 
@@ -441,6 +441,8 @@ function cyHarden20261103(config) {
             config["proxy-providers"]["my-vps"] = {
                 type: "http",
                 url: VPS_URL.trim(),
+                // [2026-11-04] 订阅经主选择组（机场节点）下载，防国内直连 VPS 时 EOF
+                ...(proxy && proxy !== "DIRECT" && proxy !== "REJECT" ? { proxy } : {}),
                 interval: 86400,
                 path: "./providers/my-vps.yaml",
                 "health-check": { enable: true, url: "https://www.gstatic.com/generate_204", interval: 300 },

@@ -1,9 +1,9 @@
-// ===== mihomo/lite-metacubex.js v1.4 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// ===== mihomo/lite-metacubex.js v1.5 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
 // 用途：内网/公司直连 + 系统 DNS；中国直连；其余走「⚡ 节点选择」；Foxmail 只走自建 VPS。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 被拦截）；CUSTOM_DIRECT_DOMAINS（自己的内网域名）。
-// 2026-11-03：原 Bettbox/bettbox-simple.js 改名；历史见私有仓库。
+// 2026-11-04：my-vps 订阅改经「⚡ 节点选择」下载（防国内直连 EOF）；历史见私有仓库。
 
 // ==================== 仅在本机填写 ====================
 // 把自建 VPS 的订阅链接（Clash/mihomo 格式）粘贴到下面引号里。
@@ -89,6 +89,8 @@ function main(config) {
         config["proxy-providers"][VPS_PROVIDER] = {
             type: "http",
             url: VPS_URL.trim(),
+            // [2026-11-04] 订阅经「⚡ 节点选择」（机场节点）下载：国内直连海外 VPS 的明文 http 常被重置（EOF）
+            proxy: PROXY,
             path: "./providers/my-vps.yaml",
             interval: 86400,
             "health-check": {
@@ -231,6 +233,8 @@ function cyHarden20261103(config) {
             config["proxy-providers"]["my-vps"] = {
                 type: "http",
                 url: VPS_URL.trim(),
+                // [2026-11-04] 订阅经主选择组（机场节点）下载，防国内直连 VPS 时 EOF
+                ...(proxy && proxy !== "DIRECT" && proxy !== "REJECT" ? { proxy } : {}),
                 interval: 86400,
                 path: "./providers/my-vps.yaml",
                 "health-check": { enable: true, url: "https://www.gstatic.com/generate_204", interval: 300 },
