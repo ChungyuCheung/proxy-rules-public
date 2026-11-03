@@ -1,13 +1,8 @@
-// CY 分流脚本 v2.7 | Author: ChungyuCheung | 2026-11-03
-// [2026-11-03] 统一加固（见文件末尾 cyHarden20261103）：216.36.82.250 自建 VPS 直连置顶(no-resolve)；
-//        WebRTC/STUN 先代理后 REJECT；DNS：中国+内网=system，外网=Google/Cloudflare DoH 经代理，删除 fallback，
-//        节点域名改用加密 DoH；脚本会接管订阅里的 dns 段。
-// 依据 https://clash.md/zh/guide/config/best-practice
-// 沿用当前配置的节点、节点来源、TUN；无需再填写订阅。[2026-11-03] 起 DNS 由本脚本统一接管（防泄漏）。
-// 用法：配置详情 → 覆写脚本 → 用 raw URL 导入，保存并选中。
-//
-// v2.6 中国域名、国内 App 提前直连，不走代理。
-// v2.5 微信直连；v2.4 取消全局 QUIC 拦截。
+// ===== cy-rules.js v2.7 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
+// 用途：与 Shadowrocket cy.conf 同一套分流（国内直连、海外代理、AI/交易所分地区），自建 VPS 216.36.82.250 直连；
+//       DNS / WebRTC 防泄漏（中国+内网=system，外网=DoH 经代理；STUN 不回落直连）。手机用 Gmail App，无 Foxmail 规则。
+// 用法：配置详情 → 覆写脚本 → 用 raw 链接导入，保存并选中；每个订阅都选上。公司域名在 COMPANY_DOMAINS。
+// 最新改动 2026-11-03：规则集改 MetaCubeX（旧链接 404）、DNS 由脚本接管。历史版本见私有仓库 git 记录。
 const INFO_FILTER = "(?i)(剩余|剩餘|流量|到期|官网|官網|套餐|重置|公告|客服|traffic|expire|remaining|reset)";
 const TEST_URL = "https://www.gstatic.com/generate_204";
 

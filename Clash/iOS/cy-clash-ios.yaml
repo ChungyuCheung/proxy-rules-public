@@ -1,19 +1,11 @@
 # =====================================================================
-#  cy-clash-ios.yaml — mihomo (Clash Meta) 配置，iOS「Clash」App 用
-#  由 Shadowrocket/cy.conf (CN Fast + Global Proxy + AI v5.3.1) 转换
-#  规则顺序、策略组与 cy.conf 一致。
-#
-#  >>> 使用前必须修改：把下面 proxy-providers 里 airport1~3 的 url 换成你自己的机场订阅链接 <<<
-#
-#  [2026-11-03] v1.1 统一加固：
-#   - 216.36.82.250（自建 VPS）直连放在第 1 条规则（no-resolve），用机场订阅时也能直连 VPS
-#   - WebRTC/STUN 端口（3478-3481/5349/19302-19309）先走 PROXY，节点不支持 UDP 时 REJECT，不回落 DIRECT
-#   - DNS：中国 + 内网/公司域名 → system；外网域名 → Google/Cloudflare DoH 经 PROXY；不再用明文国内 DNS 解析外网
-#   - 机场节点域名改用加密 DoH（阿里/腾讯）；规则集与 GeoIP 数据库改为 GitHub raw 拉取（jsDelivr 缓存停更）
-#   - 手机用 Gmail App，不设 Foxmail 规则（与 Shadowrocket 一致）
-#  未转换 / 不支持（Shadowrocket 专有）：[MITM]、hijack-dns、stun-response-ip、
-#  udp-policy-not-supported-behaviour、block-quic、bypass-system、bypass-tun、tun-excluded-routes。
+#  cy-clash-ios.yaml v1.1 | iPhone「Clash」App（mihomo）完整配置，由 Shadowrocket cy.conf 转换
+#  用途：国内直连 / 海外代理；自建 VPS 216.36.82.250 直连；DNS 防泄漏（中国+内网=system，外网=DoH 经 PROXY）；
+#        WebRTC/STUN 不回落直连。手机用 Gmail App，无 Foxmail 规则。
+#  >>> 使用前：把下面 proxy-providers 里 airport1~3 的 url 换成自己的机场订阅链接（不用的删掉）<<<
+#  最新改动 2026-11-03：VPS IP 直连置顶、外网 DoH、规则集改 GitHub raw。历史版本见私有仓库 git 记录。
 # =====================================================================
+
 
 mixed-port: 7890
 allow-lan: false
