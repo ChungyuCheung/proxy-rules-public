@@ -46,6 +46,10 @@
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-simple.js
 
+- **Bettbox/bettbox-system-proxy.js** — Bettbox / Clash Verge Rev / FlClash 完整版覆写脚本（系统代理模式，不开 TUN，Loyalsoldier L大 规则集，Foxmail 只走自建 VPS：本机在 VPS_URL 填订阅，固定链接）
+
+  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-system-proxy.js
+
 - **Bettbox/bettbox-tun.js** — Bettbox / Clash Verge Rev / FlClash 完整版覆写脚本（TUN，Loyalsoldier L大 规则集，Foxmail 只走自建 VPS：本机在 VPS_URL 填订阅，固定链接）
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-tun.js
