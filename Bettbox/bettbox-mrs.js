@@ -1,24 +1,14 @@
-// ===== 全局覆写脚本 v7.9-tun-webrtc-wa-mail-mrs (Bettbox / Mihomo) =====
-// [mrs] 基于 bettbox-tun.js v7.9：分组、DNS、TUN、WebRTC 防泄漏、WhatsApp/Foxmail 与自定义规则不变；
+// ===== 全局覆写脚本 v8.0-tun-webrtc-mail-mrs (Bettbox / Mihomo) =====
+// [mrs] 基于 bettbox-tun.js v7.9：分组、DNS、TUN、WebRTC 防泄漏与自定义规则不变；
 //       远程规则集由 Loyalsoldier .txt 改为 MetaCubeX meta-rules-dat .mrs（format: mrs），
 //       规则顺序与目标策略保持一致。applications（进程名 classical 规则）无 mrs 等价，仍用 Loyalsoldier。
-// [v7.9] 「📧 Foxmail」只显示 NovixLink 节点，去掉中间子组和节点选择兜底。
-// [v7.8] Foxmail 只走 NovixLink：「📧 Foxmail」= 当前订阅内的 NovixLink 节点 + 可选本地
-//        provider「NovixLink-Mail」(在 NOVIXLINK_URL 填订阅链接，仅本机，勿提交)，
-//        都不可用时兜底「⚡ 节点选择」。移除大航海/SeasLAB/一分机场节点。
-// [v7.7] Foxmail 独立组「📧 Foxmail」(fallback)：在每个订阅里按 MAIL_VERIFIED_NODES
-//        优先级挑已验证可通 Gmail 邮件端口的节点（v7.8 起仅 NovixLink；原含大航海/SeasLAB/一分机场
-//        仅收信），挂了才切换；当前订阅没有这些节点时退回「⚡ 节点选择」。
-//        Foxmail.exe 进程及 imap/smtp/pop.gmail.com、googlemail.com 固定走该组；网页版 Gmail 不受影响。
-//        健康检查仍用 generate_204（mihomo 只支持 http(s) 探测，无法直接测 993/465 端口）。
-//        PROCESS-NAME 需要 find-process-mode 不为 off，脚本中自动修正。
-// [v7.6] 合并 WhatsApp 两个组为一个 fallback 组「💬 WhatsApp」，界面只显示一个。
-// [v7.5] WhatsApp 组自动选节点：新增 fallback 组「♻️ WhatsApp 自动」，从当前订阅里
-//        挑名字含 香港/日本/新加坡/台湾(非家宽) 等的机房节点，按顺序选第一个可用的，
-//        节点挂了才切换；换订阅后无需手动重选。匹配不到时自动退回「⚡ 节点选择」。
-// [v7.4] WhatsApp 掉线修复：新增独立手动组「💬 WhatsApp」，WhatsApp/Meta 域名、
-//        IP-ASN 32934 及 WhatsApp.Root.exe 进程全部固定走该组；开启 TCP 保活
-//        (keep-alive 15s)，防止空闲长连接被节点/TUN 回收导致"计算机未连接至网络"。
+// [v8.0 2026-11-03] 1) 删除即时通讯独立分组及其全部规则/IP-ASN/进程规则，相关流量改走默认「⚡ 节点选择」。
+//        2) Foxmail 不再写死任何节点名/服务器地址（移除旧的节点名列表与机场 provider 配置）：
+//           只在本机把自建 VPS 的订阅链接填到 VPS_URL，「📧 Foxmail」只使用该 provider「my-vps」；
+//           VPS_URL 留空时 Foxmail 流量被 REJECT（宁可不通也不走机场节点）。
+//        3) 内网/公司域名仍用系统 DNS（system），不写死内网 DNS IP，公司/家里都可用。
+// [v7.4-v7.9] 旧版即时通讯分组、按节点名挑选 Foxmail 节点等逻辑已在 v8.0 移除，详见私有仓库历史版本。
+//        Foxmail.exe 进程及 imap/smtp/pop.gmail.com、googlemail.com 固定走「📧 Foxmail」；PROCESS-NAME 需要 find-process-mode 不为 off，脚本中自动修正。
 // [tun] 适用于 Windows TUN 模式。请开启 TUN；严格路由若引起变慢或节点超时，请保持关闭。
 // [v7.3] 取消固定绑定 WLAN，改由 Mihomo 自动检测当前默认出口。
 // [v7.0] WebRTC/STUN 防泄漏：常见 STUN/TURN 端口先强制走所选节点；
@@ -33,39 +23,18 @@
 // [v6.2] 高优先级 CUSTOM_RULES 区域。
 // [v6.1] IPPure 与其出口 IP 探测域名强制走所选节点。
 // [v5.9] 精确 Microsoft 登录域强制 DIRECT，修复 0x80190001。
-// 核心: 手动节点组 + WhatsApp 独立组 + Loyalsoldier rulesets + 公司/MS-auth/Windows 优先 DIRECT +
+// 核心: 手动节点组 + Foxmail(自建VPS)组 + Loyalsoldier rulesets + 公司/MS-auth/Windows 优先 DIRECT +
 //       Google/YouTube/Discord 强制代理 + 仅Google QUIC阻断 + fake-ip + system直连DNS
 const PROXY = "⚡ 节点选择"
-const WA = "💬 WhatsApp"
 const MAIL = "📧 Foxmail"
-// ==================== [v7.8] 仅在本机填写 ====================
-// 在下方引号内粘贴 NovixLink 订阅链接，使任何订阅下 Foxmail 都能走 NovixLink 节点。
-// 只在本地 Bettbox 的脚本里填写，切勿提交到仓库（公开仓库会泄露订阅）！
-// 每次从仓库更新本脚本后，需要重新粘贴。留空则只使用当前订阅里的 NovixLink 节点。
-const NOVIXLINK_URL = ""
-const MAIL_PROVIDER = "NovixLink-Mail"
-const MAIL_PROVIDER_GROUP = "📧 NovixLink 订阅"
+// ==================== [v8.0] 仅在本机填写 ====================
+// 在下方引号内粘贴你自建 VPS 的订阅链接（Clash/mihomo 格式）。Foxmail 只会走这里的节点。
+// 不写死节点名/服务器地址：机器改名、换 VPS、换地址，只要改这个链接即可。
+// 只在本地 Bettbox / Clash Verge Rev / FlClash 的脚本副本里填写，切勿提交到仓库（会泄露订阅）！
+// 每次从仓库更新本脚本后需要重新粘贴。留空则 Foxmail 流量被拦截（REJECT）。
+const VPS_URL = ""
+const VPS_PROVIDER = "my-vps"
 // ============================================================
-// [v7.8] 仅 NovixLink 节点（已验证可通 Gmail 邮件端口；只写节点名，不含服务器/密钥），按优先级排序。
-//        fallback 组按此顺序取第一个"可用"节点；只会匹配到当前订阅实际存在的节点。
-//        匹配时忽略空格、emoji/国旗及大小写，名字略有变化也能命中。可自行增删。
-const MAIL_VERIFIED_NODES = [
-    // (a) NovixLink 自建美国 VPS：IMAP 993 + SMTP 465 均通过
-    "🇺🇸 VM-7CF6BpQtoc ShadowTLS",
-    "🇺🇸 VM-7CF6BpQtoc xtls-reality",
-    "🇺🇸 VM-7CF6BpQtoc anytls",
-    "🇺🇸 VM-7CF6BpQtoc trojan",
-    "🇺🇸 VM-7CF6BpQtoc grpc-reality",
-    "🇺🇸 VM-7CF6BpQtoc shadowsocks",
-    "🇺🇸 VM-7CF6BpQtoc tuic",
-]
-// 去掉空白、emoji/国旗、变体选择符后小写，用于宽松比较节点名
-function normNodeName(n) {
-    return String(n).replace(/[\s\u200d\ufe0f]/g, "").replace(/[\u{1F000}-\u{1FAFF}]/gu, "").toLowerCase()
-}
-// WhatsApp 优先地区（按名字匹配），以及要排除的不稳定节点类型
-const WA_PREFER = /(香港|港|HK|Hong ?Kong|日本|JP|Japan|东京|大阪|新加坡|狮城|SG|Singapore|台湾|台|TW|Taiwan)/i
-const WA_AVOID = /(家庭|家宽|住宅|动态|防失联|公益|不计费|免费|测试|Residential|Home|ISP|Free|Test)/i
 
 const RULE_CDN = "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release"
 const MRS_BASE = "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo"
@@ -76,17 +45,6 @@ const NODE_FILTER =
 // ---- 自定义高优先级规则 ----
 const CUSTOM_RULES = [
     'DOMAIN-SUFFIX,brightdata.com,' + PROXY,
-]
-
-// [v7.4] WhatsApp / Meta 域名，固定走 WA 组
-const WHATSAPP_DOMAINS = [
-    "whatsapp.com",
-    "whatsapp.net",
-    "wa.me",
-    "whatsapp.biz",
-    "facebook.com",
-    "fbcdn.net",
-    "fbsbx.com",
 ]
 
 // [v7.7] Foxmail 进程与 Gmail 收发信服务器，固定走 MAIL 组
@@ -182,31 +140,18 @@ function main(config) {
         config["find-process-mode"] = "strict"
     }
 
-    // ---- 1. 手动选择组 + WhatsApp 组 ----
-    const nodeFilterRe = new RegExp(NODE_FILTER.replace('(?i)', ''), 'i')
-    const allNodes = (Array.isArray(config.proxies) ? config.proxies : [])
-        .map(p => p && p.name)
-        .filter(n => typeof n === 'string' && !nodeFilterRe.test(n))
-    const waNodes = allNodes.filter(n => WA_PREFER.test(n) && !WA_AVOID.test(n))
-    // [v7.7] 按 MAIL_VERIFIED_NODES 顺序挑当前订阅里存在的已验证邮件节点
-    const mailNodes = []
-    for (const want of MAIL_VERIFIED_NODES.map(normNodeName)) {
-        for (const n of allNodes) {
-            if (normNodeName(n) === want && !mailNodes.includes(n)) mailNodes.push(n)
-        }
-    }
-
-    // [v7.8] NovixLink 本地 provider（仅当 NOVIXLINK_URL 已在本机填写）
-    const mailProviderOn = typeof NOVIXLINK_URL === "string" && NOVIXLINK_URL.trim() !== ""
-    if (mailProviderOn) {
+    // ---- 1. 手动选择组 + Foxmail 组 ----
+    // [v8.0] 自建 VPS provider（仅当 VPS_URL 已在本机填写）
+    const vpsOn = typeof VPS_URL === "string" && VPS_URL.trim() !== ""
+    if (vpsOn) {
         if (!config["proxy-providers"] || typeof config["proxy-providers"] !== "object" || Array.isArray(config["proxy-providers"])) {
             config["proxy-providers"] = {}
         }
-        config["proxy-providers"][MAIL_PROVIDER] = {
+        config["proxy-providers"][VPS_PROVIDER] = {
             type: "http",
-            url: NOVIXLINK_URL.trim(),
+            url: VPS_URL.trim(),
             interval: 86400,
-            path: "./providers/novixlink-mail.yaml",
+            path: "./providers/my-vps.yaml",
             "health-check": {
                 enable: true,
                 url: "https://www.gstatic.com/generate_204",
@@ -215,41 +160,31 @@ function main(config) {
         }
     }
 
-    const otherProviders = Object.keys(config["proxy-providers"] || {}).filter(n => n !== MAIL_PROVIDER)
+    const otherProviders = Object.keys(config["proxy-providers"] || {}).filter(n => n !== VPS_PROVIDER)
 
     config["proxy-groups"] = [
         {
             name: PROXY,
             type: "select",
-            // [v7.8] 启用 NovixLink-Mail 时，主组不纳入该 provider（订阅自带的 provider 仍保留）
-            ...(mailProviderOn
+            // [v8.0] 启用 my-vps 时，主组不纳入该 provider（订阅自带的 provider 仍保留）
+            ...(vpsOn
                 ? { "include-all-proxies": true, ...(otherProviders.length ? { use: otherProviders } : {}) }
                 : { "include-all": true }),
             "exclude-filter": NODE_FILTER,
         },
-        {
-            // 按顺序取第一个可用节点，不按延迟频繁切换；全部不可用时退回主节点
-            name: WA,
-            type: "fallback",
-            proxies: [...waNodes, PROXY],
-            url: "https://www.gstatic.com/generate_204",
-            interval: 300,
-            timeout: 5000,
-            lazy: false,
-        },
-        {
-            // [v7.9] 只显示 NovixLink 节点：填了 NOVIXLINK_URL 就直接用订阅里的节点；
-            // 否则用当前订阅里的 NovixLink 节点；都没有时才退回主节点（避免空组报错）
-            name: MAIL,
-            type: "fallback",
-            ...(mailProviderOn
-                ? { use: [MAIL_PROVIDER] }
-                : { proxies: mailNodes.length ? mailNodes : [PROXY] }),
-            url: "https://www.gstatic.com/generate_204",
-            interval: 300,
-            timeout: 5000,
-            lazy: false,
-        },
+        // [v8.0] Foxmail 只走自建 VPS：填了 VPS_URL 就只用 my-vps provider（不做名字过滤）；
+        //        留空则 REJECT，绝不退回机场节点
+        vpsOn
+            ? {
+                name: MAIL,
+                type: "fallback",
+                use: [VPS_PROVIDER],
+                url: "https://www.gstatic.com/generate_204",
+                interval: 300,
+                timeout: 5000,
+                lazy: false,
+            }
+            : { name: MAIL, type: "select", proxies: ["REJECT"] },
     ]
 
     // ---- 2. MetaCubeX meta-rules-dat (.mrs) 规则集 ----
@@ -315,11 +250,6 @@ function main(config) {
         WEBRTC_STUN_TURN_PORTS + ',REJECT',
 
         ...CUSTOM_RULES,
-
-        // [v7.4] WhatsApp 全部流量（域名、Meta IP 段、桌面进程）走 WA 组
-        ...toSuffixRules(WHATSAPP_DOMAINS, WA),
-        "PROCESS-NAME,WhatsApp.Root.exe," + WA,
-        "IP-ASN,32934," + WA + ",no-resolve",
 
         ...toSuffixRules(IP_CHECK_DOMAINS, PROXY),
         ...toSuffixRules(COMPANY_DOMAINS, "DIRECT"),
