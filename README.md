@@ -1,55 +1,48 @@
 # proxy-rules-public
 
-代理工具规则 / 配置文件的公开镜像，由私有仓库自动同步，请勿直接修改本仓库。
+代理规则 / 配置的公开镜像，由私有仓库自动同步（只放去敏后的最新版），请勿直接修改。下面都是 raw 直链，可直接填进客户端。
 
-下载链接均为 raw 直链，可直接填入对应客户端。
+通用：中国和内网域名走系统 DNS，外网用加密 DNS；已做 DNS / WebRTC 防泄漏；规则集在线更新。
 
-所有文件统一：自建 VPS 216.36.82.250 直连；中国+内网域名用系统 DNS，外网用 DoH（mihomo 经代理）；WebRTC/STUN 不回落直连。
+## Shadowrocket（iPhone）
 
-含 VPS_URL / 订阅占位的文件只在本机填写，切勿提交。
+「配置」→ 右上角 + → 粘贴链接下载，然后选用。
 
-## Shadowrocket
+- **cy.conf** — 完整版（L大 规则，在线更新）
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy.conf`
+- **cy-simple.conf** — 简约版：内网直连、中国直连、其余代理
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy-simple.conf`
 
-- **Shadowrocket/cy-simple.conf** — Shadowrocket 精简配置：局域网/内网域名直连+系统 DNS、中国直连、其余代理（与 bettbox-simple.js 同逻辑，不含 Foxmail）
+## Bettbox / Clash Verge Rev / FlClash（Windows / macOS / Android）
 
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy-simple.conf
+这几个 `.js` 是 mihomo 覆写脚本，三个客户端通用，选一个即可：
 
-- **Shadowrocket/cy.conf** — Shadowrocket 完整版（Loyalsoldier L大 规则集远程拉取 + 自定义分流 + DNS），在 Shadowrocket「配置」里用此链接下载
+- **bettbox-tun.js** — 完整版（L大 规则），TUN 模式
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-tun.js`
+- **bettbox-system-proxy.js** — 完整版（L大 规则），系统代理模式（不开 TUN；浏览器 WebRTC 需另装防泄漏扩展）
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-system-proxy.js`
+- **bettbox-mrs.js** — 完整版（MetaCubeX .mrs 规则），TUN 模式，推荐
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-mrs.js`
+- **bettbox-simple.js** — 简约版：内网直连、中国直连、其余代理
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-simple.js`
 
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy.conf
+用法：
+- **Bettbox**：订阅卡片「⋮」→ 覆写 / 脚本 → 用链接添加，挂到每个订阅；关闭「覆写 DNS」。不要用「配置 → 从 URL 导入」（那里只认 YAML）。
+- **Clash Verge Rev**：订阅右键「编辑扩展脚本」或「全局扩展脚本」，粘贴脚本内容保存。
+- **FlClash**：也用上面的 `.js` 脚本 —— 「工具 → 覆写 / 脚本」添加并在订阅上启用；关闭「覆写 DNS」和「追加系统 DNS」。
+- 需要本机填写（不要提交）：脚本开头的 `VPS_URL`（自建 VPS 订阅，Foxmail 只走它，留空则拦截）；公司域名改 `COMPANY_DOMAINS`。
 
-## Clash iOS (mihomo)
+## Clash Verge Rev（其他）
 
-- **Clash/iOS/cy-clash-ios.yaml** — iPhone「Clash」App（mihomo 内核）完整配置，支持多个机场订阅（airport1~3），使用前把 https://your-subscription-url-1/2/3 换成自己的订阅链接，不用的删掉（固定链接）
+- **cy-rules.js** — Clash Verge Rev 订阅覆写脚本（旧版通用脚本，新装建议用上面的 Bettbox 脚本）
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Clash/APP/cy-rules.js`
 
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Clash/iOS/cy-clash-ios.yaml
+## iPhone「Clash」App（mihomo 内核）
 
-## Clash Verge 覆写 / 脚本
-
-- **Clash/APP/cy-rules.js** — iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（与 Shadowrocket cy.conf 同分流，固定链接）
-
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Clash/APP/cy-rules.js
+- **cy-clash-ios.yaml** — 完整配置，把 `https://your-subscription-url-1/2/3` 换成自己的订阅，用不到的删掉
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Clash/iOS/cy-clash-ios.yaml`
 
 ## v2RayN
 
-- **v2RayN/v6.2-20260901-v2rayN-Mixin.yaml** — v2RayN（mihomo 内核）Mixin 配置（最新版本，文件名随版本更新）
-
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/v2RayN/v6.2-20260901-v2rayN-Mixin.yaml
-
-## Bettbox
-
-- **Bettbox/bettbox-mrs.js** — Bettbox / Clash Verge Rev / FlClash 完整版覆写脚本（TUN，MetaCubeX .mrs 规则集，Foxmail 只走自建 VPS：本机在 VPS_URL 填订阅，固定链接，推荐）
-
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-mrs.js
-
-- **Bettbox/bettbox-simple.js** — Bettbox 精简覆写脚本：内网域名直连+系统 DNS、Foxmail 只走自建 VPS（本机在 VPS_URL 填订阅）、中国直连其余代理（.mrs 规则集，固定链接）
-
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-simple.js
-
-- **Bettbox/bettbox-system-proxy.js** — Bettbox / Clash Verge Rev / FlClash 完整版覆写脚本（系统代理模式，不开 TUN，Loyalsoldier L大 规则集，Foxmail 只走自建 VPS：本机在 VPS_URL 填订阅，固定链接）
-
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-system-proxy.js
-
-- **Bettbox/bettbox-tun.js** — Bettbox / Clash Verge Rev / FlClash 完整版覆写脚本（TUN，Loyalsoldier L大 规则集，Foxmail 只走自建 VPS：本机在 VPS_URL 填订阅，固定链接）
-
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-tun.js
+- **v6.2-20260901-v2rayN-Mixin.yaml** — v2RayN（mihomo 内核）Mixin 配置，文件名随版本更新
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/v2RayN/v6.2-20260901-v2rayN-Mixin.yaml`
