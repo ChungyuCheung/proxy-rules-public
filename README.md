@@ -4,6 +4,10 @@
 
 下载链接均为 raw 直链，可直接填入对应客户端。
 
+所有文件统一：自建 VPS 216.36.82.250 直连；中国+内网域名用系统 DNS，外网用 DoH（mihomo 经代理）；WebRTC/STUN 不回落直连。
+
+含 VPS_URL / 订阅占位的文件只在本机填写，切勿提交。
+
 ## Shadowrocket
 
 - **Shadowrocket/cy-simple.conf** — Shadowrocket 精简配置：局域网/内网域名直连+系统 DNS、中国直连、其余代理（与 bettbox-simple.js 同逻辑，不含 Foxmail）
@@ -22,15 +26,11 @@
 
 ## Clash Verge 覆写 / 脚本
 
-- **Clash/APP/cy-rules.js** — Clash Verge 订阅覆写脚本（固定链接，推荐使用）
+- **Clash/APP/cy-rules.js** — iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（与 Shadowrocket cy.conf 同分流，固定链接）
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Clash/APP/cy-rules.js
 
-- **Clash/全局扩展脚本/v6.2-20260901-Script.js** — Clash Verge 全局扩展脚本（最新版本，文件名随版本更新）
-
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Clash/%E5%85%A8%E5%B1%80%E6%89%A9%E5%B1%95%E8%84%9A%E6%9C%AC/v6.2-20260901-Script.js
-
-- **Clash/全局扩展覆写配置/20260611-Loyalsoldier项目-Merge.yaml** — Clash Verge 全局扩展覆写配置（Merge YAML，Loyalsoldier 规则集）
+- **Clash/全局扩展覆写配置/20260611-Loyalsoldier项目-Merge.yaml** — Clash Verge Rev 全局扩展覆写配置（Merge YAML，Loyalsoldier 规则集；不含 Foxmail 规则）
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Clash/%E5%85%A8%E5%B1%80%E6%89%A9%E5%B1%95%E8%A6%86%E5%86%99%E9%85%8D%E7%BD%AE/20260611-Loyalsoldier%E9%A1%B9%E7%9B%AE-Merge.yaml
 
@@ -42,26 +42,14 @@
 
 ## Bettbox
 
-- **Bettbox/bettbox-mrs.js** — Bettbox TUN 覆写脚本 v7.9 的 MetaCubeX .mrs 规则集版（规则与分组同 bettbox-tun.js，固定链接）
+- **Bettbox/bettbox-mrs.js** — Bettbox / Clash Verge Rev / FlClash 完整版覆写脚本（TUN，MetaCubeX .mrs 规则集，Foxmail 只走自建 VPS：本机在 VPS_URL 填订阅，固定链接，推荐）
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-mrs.js
-
-- **Bettbox/bettbox-script-v7.0-webrtc.js** — Bettbox 覆写脚本最新版（含 WebRTC/STUN 防泄漏，文件名随版本更新）
-
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-script-v7.0-webrtc.js
-
-- **Bettbox/bettbox-script.js** — Bettbox 覆写脚本（固定链接）
-
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-script.js
 
 - **Bettbox/bettbox-simple.js** — Bettbox 精简覆写脚本：内网域名直连+系统 DNS、Foxmail 只走自建 VPS（本机在 VPS_URL 填订阅）、中国直连其余代理（.mrs 规则集，固定链接）
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-simple.js
 
-- **Bettbox/bettbox-system-proxy.js** — Bettbox 系统代理模式脚本（固定链接）
+- **Bettbox/bettbox-system-proxy.js** — Bettbox 系统代理模式脚本（不开 TUN 时用；WebRTC 防泄漏需 TUN，固定链接）
 
   https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-system-proxy.js
-
-- **Bettbox/bettbox-tun.js** — Bettbox TUN 模式脚本（固定链接）
-
-  https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Bettbox/bettbox-tun.js

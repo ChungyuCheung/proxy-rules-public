@@ -1,33 +1,9 @@
-// ===== 全局覆写脚本 v8.1-tun-webrtc-mail-mrs (Bettbox / Mihomo) =====
-// [2026-11-03] 统一加固（见文件末尾 cyHarden20261103）：216.36.82.250 自建 VPS 直连置顶(no-resolve)；
-//        WebRTC/STUN 先代理后 REJECT；DNS：中国+内网=system，外网=Google/Cloudflare DoH 经代理，删除 fallback，
-//        节点域名改用加密 DoH；脚本会接管订阅里的 dns 段。
-// [mrs] 基于 bettbox-tun.js v7.9：分组、DNS、TUN、WebRTC 防泄漏与自定义规则不变；
-//       远程规则集由 Loyalsoldier .txt 改为 MetaCubeX meta-rules-dat .mrs（format: mrs），
-//       规则顺序与目标策略保持一致。applications（进程名 classical 规则）无 mrs 等价，仍用 Loyalsoldier。
-// [v8.0 2026-11-03] 1) 删除即时通讯独立分组及其全部规则/IP-ASN/进程规则，相关流量改走默认「⚡ 节点选择」。
-//        2) Foxmail 不再写死任何节点名/服务器地址（移除旧的节点名列表与机场 provider 配置）：
-//           只在本机把自建 VPS 的订阅链接填到 VPS_URL，「📧 Foxmail」只使用该 provider「my-vps」；
-//           VPS_URL 留空时 Foxmail 流量被 REJECT（宁可不通也不走机场节点）。
-//        3) 内网/公司域名仍用系统 DNS（system），不写死内网 DNS IP，公司/家里都可用。
-// [v7.4-v7.9] 旧版即时通讯分组、按节点名挑选 Foxmail 节点等逻辑已在 v8.0 移除，详见私有仓库历史版本。
-//        Foxmail.exe 进程及 imap/smtp/pop.gmail.com、googlemail.com 固定走「📧 Foxmail」；PROCESS-NAME 需要 find-process-mode 不为 off，脚本中自动修正。
-// [tun] 适用于 Windows TUN 模式。请开启 TUN；严格路由若引起变慢或节点超时，请保持关闭。
-// [v7.3] 取消固定绑定 WLAN，改由 Mihomo 自动检测当前默认出口。
-// [v7.0] WebRTC/STUN 防泄漏：常见 STUN/TURN 端口先强制走所选节点；
-//        节点不支持 UDP 时立即拒绝同一流量，避免继续匹配到 DIRECT。
-// [bettbox] Bettbox 1.19.3 以 main(config) 调用 (QuickJS)。
-// [bettbox] 使用本脚本时请关闭 Bettbox「覆写 DNS」，否则下方 dns 段会被 GUI DNS 整体替换。
-// [bettbox] dns.enable 强制 true；公司域名写入 nameserver-policy=system。
-//           direct-nameserver-follow-policy=false：直连解析使用 system。
-// [v6.9] 完整重建 DNS，移除订阅遗留策略/fallback；直连使用当前系统 DNS。
-// [v6.7] 启用 use-system-hosts。
-// [v6.6] 规则集改经节点下载。
-// [v6.2] 高优先级 CUSTOM_RULES 区域。
-// [v6.1] IPPure 与其出口 IP 探测域名强制走所选节点。
-// [v5.9] 精确 Microsoft 登录域强制 DIRECT，修复 0x80190001。
-// 核心: 手动节点组 + Foxmail(自建VPS)组 + Loyalsoldier rulesets + 公司/MS-auth/Windows 优先 DIRECT +
-//       Google/YouTube/Discord 强制代理 + 仅Google QUIC阻断 + fake-ip + system直连DNS
+// ===== bettbox-mrs.js v8.1 完整版 | Bettbox / Clash Verge Rev / FlClash（mihomo 覆写脚本，Windows TUN）=====
+// 用途：完整分流（公司/微软认证直连、Google/Discord/AI 代理、广告拦截、Apple/iCloud 直连等），MetaCubeX .mrs 规则集；
+//       Foxmail 只走自建 VPS；自建 VPS 216.36.82.250 直连；DNS / WebRTC 防泄漏。
+// 用法：在客户端「覆写/脚本」里用 raw 链接导入并挂到每个订阅；开启 TUN；关闭「覆写 DNS」。
+// 需要填写：下方 VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 被拦截）；公司域名在 COMPANY_DOMAINS。
+// 最新改动 2026-11-03：VPS IP 直连置顶、DNS 统一（中国+内网=system，外网=DoH 经代理）。历史版本见私有仓库 git 记录。
 const PROXY = "⚡ 节点选择"
 const MAIL = "📧 Foxmail"
 // ==================== [v8.0] 仅在本机填写 ====================

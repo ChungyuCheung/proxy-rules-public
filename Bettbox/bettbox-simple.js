@@ -1,16 +1,9 @@
-// ===== 精简全局覆写脚本 v1.3-simple (Bettbox / Mihomo, Windows TUN) =====
-// [2026-11-03] 统一加固（见文件末尾 cyHarden20261103）：216.36.82.250 自建 VPS 直连置顶(no-resolve)；
-//        WebRTC/STUN 先代理后 REJECT；DNS：中国+内网=system，外网=Google/Cloudflare DoH 经代理，删除 fallback，
-//        节点域名改用加密 DoH；脚本会接管订阅里的 dns 段。
-// 基于 bettbox-tun.js v7.9 精简：
-//   1. 公司/内网域名直连，DNS 用 system（当前网络 DHCP 下发的 DNS，公司/家里自动切换，不写死 IP）。
-//      局域网 / 私网 IP 直连。
-//   2. 去掉 WhatsApp 分组与规则。
-//   3. Foxmail 只走自建 VPS：在下方 VPS_URL 填自建 VPS 的订阅链接，脚本据此生成「📧 Foxmail」组；
-//      不填则 Foxmail 流量直接 REJECT，绝不走机场节点。
-//   4. 中国域名 / IP 直连（MetaCubeX geosite/cn、geoip/cn .mrs），其余走「⚡ 节点选择」。
-//   保留 WebRTC/STUN 防泄漏两条规则。
-// Bettbox 设置：开启 TUN；关闭「覆写 DNS」（否则下方 dns 段会被 GUI DNS 替换）。
+// ===== bettbox-simple.js v1.3 精简版 | Bettbox / Clash Verge Rev / FlClash（mihomo 覆写脚本）=====
+// 用途：内网/公司域名直连 + 系统 DNS；中国域名/IP 直连；其余走「⚡ 节点选择」；Foxmail 只走自建 VPS；
+//       自建 VPS 216.36.82.250 直连；DNS / WebRTC 防泄漏（外网 DoH 经代理，STUN 不回落直连）。
+// 用法：在客户端「覆写/脚本」里用 raw 链接导入并挂到每个订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
+// 需要填写：下方 VPS_URL（自建 VPS 订阅，仅本机填写）；CUSTOM_DIRECT_DOMAINS（自己的内网域名）。
+// 最新改动 2026-11-03：VPS IP 直连置顶、DNS 统一（中国+内网=system，外网=DoH 经代理）。历史版本见私有仓库 git 记录。
 
 // ==================== 仅在本机填写 ====================
 // 把自建 VPS 的订阅链接（Clash/mihomo 格式）粘贴到下面引号里。

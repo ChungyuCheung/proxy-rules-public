@@ -1,30 +1,9 @@
-// ===== Loyalsoldier 全局覆写脚本 v7.1-system-proxy (Bettbox / Mihomo) =====
-// [2026-11-03] 统一加固（见文件末尾 cyHarden20261103）：216.36.82.250 自建 VPS 直连置顶；
-//        WebRTC/STUN 先代理后 REJECT；DNS：中国+内网=system，外网=Google/Cloudflare DoH 经代理，删除 fallback；
-//        新增 VPS_URL：Foxmail 只走自建 VPS，留空则 REJECT；规则集改 GitHub raw 拉取。
-// [system-proxy] 适用于 Windows 系统代理模式，核心规则与 DNS 沿用 v6.9。
-// 重要：系统代理无法接管浏览器原生 UDP/WebRTC；本版不能消除公网 IP 泄漏。
-// 如需 WebRTC 防泄漏，请改用 bettbox-tun.js 并在 Bettbox 开启 TUN 与严格路由。
-// [bettbox] Bettbox 1.19.3 以 main(config) 调用 (QuickJS)，原脚本无需改签名。
-// [bettbox] 使用本脚本时请关闭 Bettbox「覆写 DNS」，否则下方 dns 段会被 GUI DNS 整体替换。
-// [bettbox] 改动: dns.enable 强制 true (避免订阅 enable:false 触发 Bettbox 替换 DNS);
-//           公司域名写入 nameserver-policy=system (替代 GUI 里的 +.huitone.com=system)。
-//           direct-nameserver-follow-policy=false：直连解析使用 system，不受其他 DNS 策略改道。
-// [v6.9] 完整重建 DNS，移除订阅遗留策略/fallback；直连使用当前系统 DNS。
-//        删除 v6.8 无效的 dns.hosts 固定地址补丁，适应公司/家庭网络切换。
-// [v6.8] 918.huinor.com 系统解析失败，直接使用 ping 得到的内网地址。
-// [v6.7] 启用 use-system-hosts，允许读取系统 hosts 文件。
-// [v6.6] 规则集改经节点下载。直连 GitHub / jsDelivr 都会 EOF。
-// [v6.5] 直连、内网和国内域名改用 DHCP DNS（dhcp://），不再依赖 system 解析。
-// [v6.4] 规则集改走 GitHub raw，并强制 DIRECT 下载，避开 jsDelivr 的 EOF / bad record MAC。
-// [v6.3] 规则集 CDN 从 testingcf.jsdelivr.net 改为 cdn.jsdelivr.net，避开 tls: bad record MAC。
-// [v6.2] 增加高优先级 CUSTOM_RULES 区域，集中维护被远程规则集误伤的自定义规则。
-// [v6.1] IPPure 与其出口 IP 探测域名强制走所选节点，避免探测失败后显示占位 IP 8.8.8.8。
-// [v5.9] 精确 Microsoft 登录域 (login.live.com 等 + msauth* 后缀) 强制 DIRECT，修复 0x80190001。
-//        移除宽泛 windows.net 规则。
-// 核心: 单手动节点组 + Loyalsoldier rulesets + 公司/MS-auth/Windows 优先 DIRECT +
-//       Google/YouTube/Discord 强制代理 + 仅Google QUIC阻断 + fake-ip + system直连DNS
-// 备注: Store 问题通常是 UWP loopback，与规则无关 (见 README)。
+// ===== bettbox-system-proxy.js v7.1 | Bettbox（mihomo 覆写脚本，Windows 系统代理模式）=====
+// 用途：与 bettbox-mrs.js 相同思路的分流（Loyalsoldier 规则集），给不开 TUN、只用系统代理的场景。
+//       注意：系统代理接管不了浏览器 UDP/WebRTC，要彻底防 WebRTC 泄漏请用 bettbox-mrs.js + TUN。
+// 用法：在 Bettbox「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」。
+// 需要填写：下方 VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 被拦截）；公司域名在 COMPANY_DOMAINS。
+// 最新改动 2026-11-03：VPS IP 直连置顶、DNS 统一、Foxmail 只走 VPS。历史版本见私有仓库 git 记录。
 const PROXY = "⚡ 节点选择"
 
 // ==================== [2026-11-03] Foxmail 自建 VPS（仅在本机填写）====================
