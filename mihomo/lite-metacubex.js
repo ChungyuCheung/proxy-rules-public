@@ -1,14 +1,14 @@
-// ===== mihomo/lite-metacubex.js v1.5 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
-// 用途：内网/公司直连 + 系统 DNS；中国直连；其余走「⚡ 节点选择」；Foxmail 只走自建 VPS。
+// ===== mihomo/lite-metacubex.js v1.6 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// 用途：内网/公司直连 + 系统 DNS；中国直连；其余走「⚡ 节点选择」；Foxmail 走自建 VPS（未填则走节点选择）。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
-// 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 被拦截）；CUSTOM_DIRECT_DOMAINS（自己的内网域名）。
-// 2026-11-04：my-vps 订阅改经「⚡ 节点选择」下载（防国内直连 EOF）；历史见私有仓库。
+// 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 走「⚡ 节点选择」）；CUSTOM_DIRECT_DOMAINS（自己的内网域名）。
+// 2026-11-04：my-vps 订阅经「⚡ 节点选择」下载；VPS_URL 留空时 Foxmail 跟随「⚡ 节点选择」。
 
 // ==================== 仅在本机填写 ====================
 // 把自建 VPS 的订阅链接（Clash/mihomo 格式）粘贴到下面引号里。
 // - Foxmail 只会使用这个订阅里的全部节点（不按名字筛选，VPS 改名、换机器、换地址都不用改脚本）。
-// - 留空：Foxmail 流量直接拒绝（REJECT），不会走机场节点。
+// - 留空：Foxmail 跟随「⚡ 节点选择」（机场节点）。
 // - 只在本机 Bettbox 的脚本里填写，切勿提交到 GitHub（公开仓库会泄露订阅）！
 //   每次从链接更新本脚本后需要重新粘贴。
 const VPS_URL = ""
@@ -126,10 +126,10 @@ function main(config) {
                   timeout: 5000,
               }
             : {
-                  // 未填 VPS_URL：Foxmail 流量直接拒绝，不走机场
+                  // 未填 VPS_URL：Foxmail 跟随「⚡ 节点选择」
                   name: MAIL,
                   type: "select",
-                  proxies: ["REJECT"],
+                  proxies: [PROXY],
               },
     ]
 
@@ -204,7 +204,7 @@ function main(config) {
 //      - 其余外网域名、以及 IP 规则需要的解析 → 外网加密 DoH（Google 8.8.8.8 / Cloudflare 1.1.1.1），经代理发出
 //      - 删除 fallback（避免回落到明文/国内 DNS），fake-ip 模式，关闭 IPv6 解析
 //      - 机场节点域名用加密 DoH（阿里 / 腾讯，按 IP 写），节点必须直连才能解析，所以不走代理
-//   4) Foxmail（仅桌面脚本，脚本顶部有 VPS_URL 时生效）：只走 VPS_URL 里的自建 VPS 节点；VPS_URL 留空则 REJECT。
+//   4) Foxmail（仅桌面脚本，脚本顶部有 VPS_URL 时生效）：只走 VPS_URL 里的自建 VPS 节点；VPS_URL 留空则跟随主选择组。
 // =====================================================================
 const CY_VPS_IP_RULE = "IP-CIDR,216.36.82.250/32,DIRECT,no-resolve"
 const CY_STUN_PORTS = "OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309))"
@@ -241,7 +241,7 @@ function cyHarden20261103(config) {
             }
             groups.push({ name: CY_MAIL, type: "fallback", use: ["my-vps"], url: "https://www.gstatic.com/generate_204", interval: 300, timeout: 5000 })
         } else {
-            groups.push({ name: CY_MAIL, type: "select", proxies: ["REJECT"] })
+            groups.push({ name: CY_MAIL, type: "select", proxies: [proxy && proxy !== "REJECT" ? proxy : "DIRECT"] })
         }
         config["proxy-groups"] = groups
         rules = rules.filter((r) => !(typeof r === "string" && /(Foxmail\.exe|imap\.gmail\.com|smtp\.gmail\.com|pop\.gmail\.com|googlemail\.com)/.test(r)))
