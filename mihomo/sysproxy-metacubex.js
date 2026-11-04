@@ -1,9 +1,10 @@
-// ===== mihomo/sysproxy-metacubex.js v8.9 | 系统代理模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本）=====
-// 最后更新：2026-11-04 22:05 UTC+8
+// ===== mihomo/sysproxy-metacubex.js v9.0 | 系统代理模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-04 22:54 UTC+8
 // 用途：同 tun-metacubex.js 的分流，但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 走「⚡ 节点选择」）；公司域名改 COMPANY_DOMAINS。
+// 2026-11-04 v9.0：Foxmail 进程规则改为 AND,((PROCESS-NAME,Foxmail.exe),(NOT,((GEOIP,CN,no-resolve)))) ：只有目标非中国 IP 才走「📧 Foxmail」，中国 IP 落到后面的 cncidr/GEOIP,CN 直连。
 // 2026-11-04 v8.9：公司域名直连与国内邮箱直连合并为一块，置于 Foxmail 规则之前（原则：中国/公司流量永远优先直连，Foxmail 只接海外邮件）。
 // 2026-11-04：my-vps 订阅经「⚡ 节点选择」下载；VPS_URL 留空时 Foxmail 跟随「⚡ 节点选择」；国内邮箱（88.com/qq/163 等）直连，置于 Foxmail 规则前。
 // 2026-11-04：大航海机场订阅 IP 直连（面板拒绝代理连接），紧随 VPS 规则。
@@ -217,7 +218,7 @@ function main(config) {
         "IP-CIDR6,fe80::/10,DIRECT,no-resolve",
 
         // [v7.7] Foxmail 与 Gmail 收发信服务器走 MAIL 组（置于其他规则之前）
-        ...MAIL_PROCESSES.map(p => `PROCESS-NAME,${p},${MAIL}`),
+        ...MAIL_PROCESSES.map(p => `AND,((PROCESS-NAME,${p}),(NOT,((GEOIP,CN,no-resolve)))),${MAIL}`),
         ...toExactRules(MAIL_EXACT_DOMAINS, MAIL),
         ...toSuffixRules(MAIL_SUFFIX_DOMAINS, MAIL),
 
@@ -363,7 +364,7 @@ function cyHarden20261103(config) {
         config["proxy-groups"] = groups
         rules = rules.filter((r) => !(typeof r === "string" && /(Foxmail\.exe|imap\.gmail\.com|smtp\.gmail\.com|pop\.gmail\.com|googlemail\.com)/.test(r)))
         head.push(
-            "PROCESS-NAME,Foxmail.exe," + CY_MAIL,
+            "AND,((PROCESS-NAME,Foxmail.exe),(NOT,((GEOIP,CN,no-resolve))))," + CY_MAIL,
             "DOMAIN,imap.gmail.com," + CY_MAIL,
             "DOMAIN,smtp.gmail.com," + CY_MAIL,
             "DOMAIN,pop.gmail.com," + CY_MAIL,
@@ -391,7 +392,7 @@ function cyHarden20261103(config) {
                 if (x && cyCo.indexOf(x) < 0) cyCo.push(x)
             }
         }
-        const hasFox = head.concat(rules).some((r) => typeof r === "string" && /^PROCESS-NAME,Foxmail\.exe,/.test(r))
+        const hasFox = head.concat(rules).some((r) => typeof r === "string" && /PROCESS-NAME,Foxmail\.exe/.test(r))
         const block = [...cyCo, ...(hasFox ? CY_CN_MAIL_DOMAINS : [])].map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT")
         const uniq = block.filter((r, i) => block.indexOf(r) === i)
         rules = rules.filter((r) => uniq.indexOf(r) < 0)
