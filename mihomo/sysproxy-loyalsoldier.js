@@ -1,4 +1,5 @@
-// ===== mihomo/sysproxy-loyalsoldier.js v8.7 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
+// ===== mihomo/sysproxy-loyalsoldier.js v8.8 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-04 15:56 UTC+8
 // 用途：同 tun-loyalsoldier.js 的分流，但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
@@ -6,6 +7,7 @@
 // 2026-11-04：my-vps 订阅经「⚡ 节点选择」下载；VPS_URL 留空时 Foxmail 跟随「⚡ 节点选择」；国内邮箱（88.com/qq/163 等）直连，置于 Foxmail 规则前。
 // 2026-11-04：大航海机场订阅 IP 直连（面板拒绝代理连接），紧随 VPS 规则。
 // 2026-11-04：VPS 的 SSH（22 端口）走节点选择（国内直连被阻断），VPS 其余流量仍直连。
+// 2026-11-04：统一 no-resolve（GEOIP,CN 及含 IP 的规则集全部加 no-resolve，不再为判断 IP 而解析域名）；头部加最后更新时间。
 const PROXY = "⚡ 节点选择"
 
 // ==================== [2026-11-03] Foxmail 自建 VPS（仅在本机填写）====================
@@ -184,7 +186,7 @@ function main(config) {
         "DOMAIN-SUFFIX,discordstatus.com," + PROXY,
         "DOMAIN-SUFFIX,discordcdn.com," + PROXY,
         // Loyalsoldier 标准顺序: direct/cncidr 在 gfw/tld-not-cn 之前。
-        "RULE-SET,applications,DIRECT",
+        "RULE-SET,applications,DIRECT,no-resolve",
         "RULE-SET,private,DIRECT",
 
         "RULE-SET,reject,REJECT",
@@ -207,8 +209,8 @@ function main(config) {
         // GEOIP / 最终兜底。
         "GEOIP,LAN,DIRECT,no-resolve",
 
-        // 不加 no-resolve，使未命中域名规则的请求可按 CN IP 判断。
-        "GEOIP,CN,DIRECT",
+        // [2026-11-04] 加 no-resolve：只按已知 IP 判断，不为匹配而解析域名（未命中域名规则的走 MATCH）。
+        "GEOIP,CN,DIRECT,no-resolve",
 
         // 其余全部走手动选择的节点
         "MATCH," + PROXY,
