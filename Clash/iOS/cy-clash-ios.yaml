@@ -1,9 +1,11 @@
 # =====================================================================
-#  cy-clash-ios.yaml v1.3 | iPhone「Clash」App（mihomo）完整配置，由 Shadowrocket cy.conf 转换
+#  cy-clash-ios.yaml v1.4 | iPhone「Clash」App（mihomo）完整配置，由 Shadowrocket cy.conf 转换
+#  最后更新：2026-11-04 15:56 UTC+8
 #  用途：国内直连 / 海外代理；自建 VPS 216.36.82.250 直连；DNS 防泄漏（中国+内网=system，外网=DoH 经 PROXY）；
 #        WebRTC/STUN 不回落直连。手机用 Gmail App，无 Foxmail 规则。
 #  >>> 使用前：把下面 proxy-providers 里 airport1~3 的 url 换成自己的机场订阅链接（不用的删掉）<<<
-#  最新改动 2026-11-04 v1.3：VPS 的 SSH（22 端口）走 PROXY，其余仍直连。
+#  最新改动 2026-11-04 v1.4：GEOIP,CN 与 Apple/ChinaMax/Global 规则集加 no-resolve；头部加最后更新时间。
+#  2026-11-04 v1.3：VPS 的 SSH（22 端口）走 PROXY，其余仍直连。
 #  2026-11-04 v1.2：大航海机场订阅 IP 直连。
 #  2026-11-03：VPS IP 直连置顶、外网 DoH、规则集改 GitHub raw。历史版本见私有仓库 git 记录。
 # =====================================================================
@@ -539,11 +541,11 @@ rules:
   - IP-CIDR6,fc00::/7,DIRECT,no-resolve
   - IP-CIDR6,fe80::/10,DIRECT,no-resolve
   # 7) Apple 服务直连规则集
-  - RULE-SET,Apple,DIRECT
+  - RULE-SET,Apple,DIRECT,no-resolve
   # 8) 中国大陆域名直连
-  - RULE-SET,ChinaMax,DIRECT
+  - RULE-SET,ChinaMax,DIRECT,no-resolve
   # 9) 常见海外服务代理
-  - RULE-SET,Global,PROXY
+  - RULE-SET,Global,PROXY,no-resolve
   # 10) 中国大陆 IP 直连，其余流量代理
-  - GEOIP,CN,DIRECT
+  - GEOIP,CN,DIRECT,no-resolve
   - MATCH,PROXY

@@ -1,10 +1,12 @@
-// ===== cy-rules.js v2.11 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
+// ===== cy-rules.js v2.12 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
+// 最后更新：2026-11-04 15:56 UTC+8
 // 用途：与 Shadowrocket cy.conf 同一套分流（国内直连、海外代理、AI/交易所分地区），自建 VPS 216.36.82.250 直连；
 //       DNS / WebRTC 防泄漏（中国+内网=system，外网=DoH 经代理；STUN 不回落直连）。手机用 Gmail App，无 Foxmail 规则。
 // 用法：配置详情 → 覆写脚本 → 用 raw 链接导入，保存并选中；每个订阅都选上。公司域名在 COMPANY_DOMAINS。
 // 最新改动 2026-11-04：my-vps 订阅经代理组下载；VPS_URL 留空时 Foxmail 跟随主组。历史版本见私有仓库 git 记录。
 // 2026-11-04：大航海机场订阅 IP 直连（面板拒绝代理连接），紧随 VPS 规则。
 // 2026-11-04：VPS 的 SSH（22 端口）走节点选择（国内直连被阻断），VPS 其余流量仍直连。
+// 2026-11-04：统一 no-resolve（GEOIP,CN 及含 IP 的规则集全部加 no-resolve，不再为判断 IP 而解析域名）；头部加最后更新时间。
 const INFO_FILTER = "(?i)(剩余|剩餘|流量|到期|官网|官網|套餐|重置|公告|客服|traffic|expire|remaining|reset)";
 const TEST_URL = "https://www.gstatic.com/generate_204";
 
@@ -346,7 +348,7 @@ function main(config) {
       "IP-CIDR,192.168.0.0/16,DIRECT,no-resolve",
       "IP-CIDR,198.51.100.0/24,DIRECT,no-resolve",
       "IP-CIDR,203.0.113.0/24,DIRECT,no-resolve",
-      "IP-CIDR,216.36.82.250/32,DIRECT",
+      "IP-CIDR,216.36.82.250/32,DIRECT,no-resolve",
       "IP-CIDR,224.0.0.0/4,DIRECT,no-resolve",
       "IP-CIDR,255.255.255.255/32,DIRECT,no-resolve",
       "IP-CIDR6,::1/128,DIRECT,no-resolve",
@@ -359,24 +361,24 @@ function main(config) {
       "DOMAIN-KEYWORD,smp-device,DIRECT",
       "DOMAIN-KEYWORD,testflight,DIRECT",
       "DOMAIN-KEYWORD,icloud.com.akadns.net,DIRECT",
-      "IP-CIDR,139.178.128.0/18,DIRECT",
-      "IP-CIDR,144.178.0.0/19,DIRECT",
-      "IP-CIDR,144.178.36.0/22,DIRECT",
-      "IP-CIDR,144.178.48.0/20,DIRECT",
-      "IP-CIDR,17.0.0.0/8,DIRECT",
-      "IP-CIDR,192.35.50.0/24,DIRECT",
-      "IP-CIDR,198.183.17.0/24,DIRECT",
-      "IP-CIDR,205.180.175.0/24,DIRECT",
-      "IP-CIDR,63.92.224.0/19,DIRECT",
-      "IP-CIDR,65.199.22.0/23,DIRECT",
-      "IP-CIDR6,2403:300::/32,DIRECT",
-      "IP-CIDR6,2620:149::/32,DIRECT",
-      "IP-CIDR6,2a01:b740::/32,DIRECT",
+      "IP-CIDR,139.178.128.0/18,DIRECT,no-resolve",
+      "IP-CIDR,144.178.0.0/19,DIRECT,no-resolve",
+      "IP-CIDR,144.178.36.0/22,DIRECT,no-resolve",
+      "IP-CIDR,144.178.48.0/20,DIRECT,no-resolve",
+      "IP-CIDR,17.0.0.0/8,DIRECT,no-resolve",
+      "IP-CIDR,192.35.50.0/24,DIRECT,no-resolve",
+      "IP-CIDR,198.183.17.0/24,DIRECT,no-resolve",
+      "IP-CIDR,205.180.175.0/24,DIRECT,no-resolve",
+      "IP-CIDR,63.92.224.0/19,DIRECT,no-resolve",
+      "IP-CIDR,65.199.22.0/23,DIRECT,no-resolve",
+      "IP-CIDR6,2403:300::/32,DIRECT,no-resolve",
+      "IP-CIDR6,2620:149::/32,DIRECT,no-resolve",
+      "IP-CIDR6,2a01:b740::/32,DIRECT,no-resolve",
       "RULE-SET,CY-Apple_Domain,DIRECT",
       "DOMAIN-KEYWORD,stripe,DIRECT",
       "RULE-SET,CY-ChinaMax_Domain,DIRECT",
-      "RULE-SET,CY-ChinaMax_IP,DIRECT",
-      "GEOIP,CN,DIRECT",
+      "RULE-SET,CY-ChinaMax_IP,DIRECT,no-resolve",
+      "GEOIP,CN,DIRECT,no-resolve",
       "AND,((NETWORK,udp),(DST-PORT,443),(OR,(" + googleQuicOr + "))),REJECT",
       "MATCH," + G_STABLE
     ]

@@ -1,4 +1,5 @@
-// ===== mihomo/lite-metacubex.js v1.9 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// ===== mihomo/lite-metacubex.js v1.10 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// 最后更新：2026-11-04 15:56 UTC+8
 // 用途：内网/公司直连 + 系统 DNS；中国直连；其余走「⚡ 节点选择」；Foxmail 走自建 VPS（未填则走节点选择）。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
@@ -6,6 +7,7 @@
 // 2026-11-04：my-vps 订阅经「⚡ 节点选择」下载；VPS_URL 留空时 Foxmail 跟随「⚡ 节点选择」；国内邮箱（88.com/qq/163 等）直连，置于 Foxmail 规则前。
 // 2026-11-04：大航海机场订阅 IP 直连（面板拒绝代理连接），紧随 VPS 规则。
 // 2026-11-04：VPS 的 SSH（22 端口）走节点选择（国内直连被阻断），VPS 其余流量仍直连。
+// 2026-11-04：统一 no-resolve（GEOIP,CN 及含 IP 的规则集全部加 no-resolve，不再为判断 IP 而解析域名）；头部加最后更新时间。
 
 // ==================== 仅在本机填写 ====================
 // 把自建 VPS 的订阅链接（Clash/mihomo 格式）粘贴到下面引号里。
@@ -166,7 +168,7 @@ function main(config) {
         ...DIRECT_PUBLIC_DNS_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT"),
         // 中国域名 / IP 直连
         "RULE-SET,cn,DIRECT",
-        "RULE-SET,cncidr,DIRECT",
+        "RULE-SET,cncidr,DIRECT,no-resolve",
         // 其余全部走代理
         "MATCH," + PROXY,
     ]
