@@ -1,9 +1,10 @@
-// ===== mihomo/sysproxy-loyalsoldier.js v8.8 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
-// 最后更新：2026-11-04 15:56 UTC+8
+// ===== mihomo/sysproxy-loyalsoldier.js v8.9 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-04 22:05 UTC+8
 // 用途：同 tun-loyalsoldier.js 的分流，但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 走「⚡ 节点选择」）；公司域名改 COMPANY_DOMAINS。
+// 2026-11-04 v8.9：公司域名直连与国内邮箱直连合并为一块，置于 Foxmail 规则之前（原则：中国/公司流量永远优先直连，Foxmail 只接海外邮件）。
 // 2026-11-04：my-vps 订阅经「⚡ 节点选择」下载；VPS_URL 留空时 Foxmail 跟随「⚡ 节点选择」；国内邮箱（88.com/qq/163 等）直连，置于 Foxmail 规则前。
 // 2026-11-04：大航海机场订阅 IP 直连（面板拒绝代理连接），紧随 VPS 规则。
 // 2026-11-04：VPS 的 SSH（22 端口）走节点选择（国内直连被阻断），VPS 其余流量仍直连。
@@ -347,11 +348,26 @@ function cyHarden20261103(config) {
     if (!rules.some((r) => typeof r === "string" && r.indexOf("3478") >= 0)) {
         head.push(CY_STUN_PORTS + "," + proxy, CY_STUN_PORTS + ",REJECT")
     }
-    // ---- 国内邮箱直连：仅当存在 Foxmail 进程规则时，插在 VPS IP 之后、Foxmail 规则之前 ----
-    if (head.concat(rules).some((r) => typeof r === "string" && /^PROCESS-NAME,Foxmail\.exe,/.test(r))) {
-        const cnMail = CY_CN_MAIL_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT")
-        rules = rules.filter((r) => cnMail.indexOf(r) < 0)
-        head.splice(head.indexOf(CY_VPS_IP_RULE) + 1 + CY_AIRPORT_IP_RULES.length, 0, ...cnMail)
+    // ---- [2026-11-04] 原则：中国/公司流量永远优先直连；Foxmail 组只接剩下的海外邮件 ----
+    // 公司域名（COMPANY_DOMAINS/INTRANET_DOMAINS/CUSTOM_DIRECT_DOMAINS）+ 国内邮箱合并为一个 DIRECT 区块，
+    // 固定插在 SSH 例外、VPS IP、大航海 IP 之后，Foxmail/Gmail 规则之前；后面的重复规则删除。
+    {
+        const cyCo = []
+        for (const list of [
+            typeof COMPANY_DOMAINS !== "undefined" ? COMPANY_DOMAINS : [],
+            typeof INTRANET_DOMAINS !== "undefined" ? INTRANET_DOMAINS : [],
+            typeof CUSTOM_DIRECT_DOMAINS !== "undefined" ? CUSTOM_DIRECT_DOMAINS : [],
+        ]) {
+            if (Array.isArray(list)) for (const d of list) {
+                const x = String(d).trim().replace(/^\+?\.|^\*\./, "").toLowerCase()
+                if (x && cyCo.indexOf(x) < 0) cyCo.push(x)
+            }
+        }
+        const hasFox = head.concat(rules).some((r) => typeof r === "string" && /^PROCESS-NAME,Foxmail\.exe,/.test(r))
+        const block = [...cyCo, ...(hasFox ? CY_CN_MAIL_DOMAINS : [])].map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT")
+        const uniq = block.filter((r, i) => block.indexOf(r) === i)
+        rules = rules.filter((r) => uniq.indexOf(r) < 0)
+        head.splice(head.indexOf(CY_VPS_IP_RULE) + 1 + CY_AIRPORT_IP_RULES.length, 0, ...uniq)
     }
     config.rules = head.concat(rules)
 
