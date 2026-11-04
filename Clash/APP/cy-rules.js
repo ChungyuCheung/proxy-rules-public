@@ -1,9 +1,9 @@
-// ===== cy-rules.js v2.13 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
-// 最后更新：2026-11-04 22:05 UTC+8
+// ===== cy-rules.js v2.14 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
+// 最后更新：2026-11-04 22:54 UTC+8
 // 用途：与 Shadowrocket cy.conf 同一套分流（国内直连、海外代理、AI/交易所分地区），自建 VPS 216.36.82.250 直连；
 //       DNS / WebRTC 防泄漏（中国+内网=system，外网=DoH 经代理；STUN 不回落直连）。手机用 Gmail App，无 Foxmail 规则。
 // 用法：配置详情 → 覆写脚本 → 用 raw 链接导入，保存并选中；每个订阅都选上。公司域名在 COMPANY_DOMAINS。
-// 最新改动 2026-11-04：公司域名直连与国内邮箱直连合并为一块，置于 Foxmail 规则之前（原则：中国/公司流量永远优先直连，Foxmail 只接海外邮件）。历史版本见私有仓库 git 记录。
+// 最新改动 2026-11-04 v2.14：Foxmail 进程规则改为 AND,((PROCESS-NAME,Foxmail.exe),(NOT,((GEOIP,CN,no-resolve)))) ：只有目标非中国 IP 才走「📧 Foxmail」，中国 IP 落到后面的 GEOIP,CN 直连。（iPhone 无 Foxmail 进程，主要影响 Clash Verge Rev 桌面端）历史版本见私有仓库 git 记录。
 // 2026-11-04：大航海机场订阅 IP 直连（面板拒绝代理连接），紧随 VPS 规则。
 // 2026-11-04：VPS 的 SSH（22 端口）走节点选择（国内直连被阻断），VPS 其余流量仍直连。
 // 2026-11-04：统一 no-resolve（GEOIP,CN 及含 IP 的规则集全部加 no-resolve，不再为判断 IP 而解析域名）；头部加最后更新时间。
@@ -464,7 +464,7 @@ function cyHarden20261103(config) {
         config["proxy-groups"] = groups
         rules = rules.filter((r) => !(typeof r === "string" && /(Foxmail\.exe|imap\.gmail\.com|smtp\.gmail\.com|pop\.gmail\.com|googlemail\.com)/.test(r)))
         head.push(
-            "PROCESS-NAME,Foxmail.exe," + CY_MAIL,
+            "AND,((PROCESS-NAME,Foxmail.exe),(NOT,((GEOIP,CN,no-resolve))))," + CY_MAIL,
             "DOMAIN,imap.gmail.com," + CY_MAIL,
             "DOMAIN,smtp.gmail.com," + CY_MAIL,
             "DOMAIN,pop.gmail.com," + CY_MAIL,
@@ -492,7 +492,7 @@ function cyHarden20261103(config) {
                 if (x && cyCo.indexOf(x) < 0) cyCo.push(x)
             }
         }
-        const hasFox = head.concat(rules).some((r) => typeof r === "string" && /^PROCESS-NAME,Foxmail\.exe,/.test(r))
+        const hasFox = head.concat(rules).some((r) => typeof r === "string" && /PROCESS-NAME,Foxmail\.exe/.test(r))
         const block = [...cyCo, ...(hasFox ? CY_CN_MAIL_DOMAINS : [])].map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT")
         const uniq = block.filter((r, i) => block.indexOf(r) === i)
         rules = rules.filter((r) => uniq.indexOf(r) < 0)
