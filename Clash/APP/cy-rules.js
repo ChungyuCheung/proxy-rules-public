@@ -1,9 +1,10 @@
-// ===== cy-rules.js v2.10 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
+// ===== cy-rules.js v2.11 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
 // 用途：与 Shadowrocket cy.conf 同一套分流（国内直连、海外代理、AI/交易所分地区），自建 VPS 216.36.82.250 直连；
 //       DNS / WebRTC 防泄漏（中国+内网=system，外网=DoH 经代理；STUN 不回落直连）。手机用 Gmail App，无 Foxmail 规则。
 // 用法：配置详情 → 覆写脚本 → 用 raw 链接导入，保存并选中；每个订阅都选上。公司域名在 COMPANY_DOMAINS。
 // 最新改动 2026-11-04：my-vps 订阅经代理组下载；VPS_URL 留空时 Foxmail 跟随主组。历史版本见私有仓库 git 记录。
 // 2026-11-04：大航海机场订阅 IP 直连（面板拒绝代理连接），紧随 VPS 规则。
+// 2026-11-04：VPS 的 SSH（22 端口）走节点选择（国内直连被阻断），VPS 其余流量仍直连。
 const INFO_FILTER = "(?i)(剩余|剩餘|流量|到期|官网|官網|套餐|重置|公告|客服|traffic|expire|remaining|reset)";
 const TEST_URL = "https://www.gstatic.com/generate_204";
 
@@ -417,6 +418,8 @@ function main(config) {
 // =====================================================================
 const CY_VPS_IP_RULE = "IP-CIDR,216.36.82.250/32,DIRECT,no-resolve"
 // [2026-11-04] 大航海机场订阅面板 IP 直连（拒绝代理连接），紧随 VPS 规则
+// [2026-11-04] VPS SSH(22) 例外：走主选择组，置于 VPS 直连规则之前
+const CY_VPS_SSH_MATCH = "AND,((IP-CIDR,216.36.82.250/32,no-resolve),(DST-PORT,22))"
 const CY_AIRPORT_IP_RULES = ["IP-CIDR,47.242.128.61/32,DIRECT,no-resolve"]
 const CY_STUN_PORTS = "OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309))"
 const CY_FOREIGN_DOH = ["https://8.8.8.8/dns-query", "https://1.1.1.1/dns-query"]
@@ -426,13 +429,13 @@ const CY_MAIL = "📧 Foxmail"
 function cyHarden20261103(config) {
     let rules = Array.isArray(config.rules) ? config.rules.slice() : []
     // 去掉旧的 VPS IP 规则（可能没有 no-resolve 或位置靠后）
-    rules = rules.filter((r) => !(typeof r === "string" && /^IP-CIDR,(216\.36\.82\.250|47\.242\.128\.61)\/32,/.test(r)))
+    rules = rules.filter((r) => !(typeof r === "string" && (/^IP-CIDR,(216\.36\.82\.250|47\.242\.128\.61)\/32,/.test(r) || /^AND,\(\(IP-CIDR,216\.36\.82\.250\//.test(r))))
     const matchRule = rules.find((r) => typeof r === "string" && /^MATCH,/.test(r))
     const groups = Array.isArray(config["proxy-groups"]) ? config["proxy-groups"] : []
     let proxy = matchRule ? matchRule.split(",")[1].trim() : ""
     if (!proxy || proxy === "DIRECT" || proxy === "REJECT") proxy = groups.length ? groups[0].name : "DIRECT"
 
-    const head = [CY_VPS_IP_RULE, ...CY_AIRPORT_IP_RULES]
+    const head = [...(proxy && proxy !== "DIRECT" ? [CY_VPS_SSH_MATCH + "," + (groups.some((g) => g && g.name === G_SELECT) ? G_SELECT : proxy)] : []), CY_VPS_IP_RULE, ...CY_AIRPORT_IP_RULES]
 
     // ---- Foxmail 只走自建 VPS（仅当脚本定义了 VPS_URL 且还没有 Foxmail 组时由这里补上）----
     if (typeof VPS_URL !== "undefined" && !groups.some((g) => g && g.name === CY_MAIL)) {
