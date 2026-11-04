@@ -1,9 +1,9 @@
-// ===== mihomo/tun-loyalsoldier.js v8.4 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
+// ===== mihomo/tun-loyalsoldier.js v8.5 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
 // 用途：完整分流（公司/微软认证直连、Google/AI 代理、广告拦截、Apple 直连等）；Foxmail 走自建 VPS（未填则走节点选择）。需开启 TUN。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 走「⚡ 节点选择」）；公司域名改 COMPANY_DOMAINS。
-// 2026-11-04：my-vps 订阅经「⚡ 节点选择」下载；VPS_URL 留空时 Foxmail 跟随「⚡ 节点选择」。
+// 2026-11-04：my-vps 订阅经「⚡ 节点选择」下载；VPS_URL 留空时 Foxmail 跟随「⚡ 节点选择」；国内邮箱（88.com/qq/163 等）直连，置于 Foxmail 规则前。
 const PROXY = "⚡ 节点选择"
 const MAIL = "📧 Foxmail"
 // ==================== [v8.0] 仅在本机填写 ====================
@@ -316,6 +316,8 @@ const CY_STUN_PORTS = "OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-
 const CY_FOREIGN_DOH = ["https://8.8.8.8/dns-query", "https://1.1.1.1/dns-query"]
 const CY_NODE_DOH = ["https://223.5.5.5/dns-query", "https://1.12.12.12/dns-query"]
 const CY_MAIL = "📧 Foxmail"
+// [2026-11-04] 国内邮箱服务器直连（置于 Foxmail 进程规则之前，修 88.com 等国内邮箱添加失败）；Gmail 仍走 Foxmail 组
+const CY_CN_MAIL_DOMAINS = ["88.com", "email.cn", "qq.com", "foxmail.com", "exmail.qq.com", "163.com", "126.com", "yeah.net", "188.com", "netease.com", "qiye.163.com", "sina.com", "sina.cn", "sohu.com", "139.com", "189.cn", "wo.cn", "aliyun.com", "mxhichina.com", "qiye.aliyun.com", "263.net", "21cn.com", "tom.com"]
 
 function cyHarden20261103(config) {
     let rules = Array.isArray(config.rules) ? config.rules.slice() : []
@@ -364,6 +366,12 @@ function cyHarden20261103(config) {
     if (!rules.some((r) => typeof r === "string" && r.indexOf("3478") >= 0)) {
         head.push(CY_STUN_PORTS + "," + proxy, CY_STUN_PORTS + ",REJECT")
     }
+    // ---- 国内邮箱直连：仅当存在 Foxmail 进程规则时，插在 VPS IP 之后、Foxmail 规则之前 ----
+    if (head.concat(rules).some((r) => typeof r === "string" && /^PROCESS-NAME,Foxmail\.exe,/.test(r))) {
+        const cnMail = CY_CN_MAIL_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT")
+        rules = rules.filter((r) => cnMail.indexOf(r) < 0)
+        head.splice(1, 0, ...cnMail)
+    }
     config.rules = head.concat(rules)
 
     // ---- DNS ----
@@ -400,6 +408,7 @@ function cyHarden20261103(config) {
     const cnSet = ["cn", "direct", "CY-ChinaMax_Domain", "ChinaMax"].find((k) => providers[k] && providers[k].behavior !== "ipcidr")
     if (cnSet) policy["rule-set:" + cnSet] = "system"
     else policy["geosite:cn"] = "system"
+    for (const d of CY_CN_MAIL_DOMAINS) policy["+." + d] = "system"
     dns["nameserver-policy"] = policy
 
     const filter = Array.isArray(dns["fake-ip-filter"]) ? dns["fake-ip-filter"].slice() : []
