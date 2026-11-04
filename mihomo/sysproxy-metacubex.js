@@ -1,9 +1,10 @@
-// ===== mihomo/sysproxy-metacubex.js v8.5 | 系统代理模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本）=====
+// ===== mihomo/sysproxy-metacubex.js v8.6 | 系统代理模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本）=====
 // 用途：同 tun-metacubex.js 的分流，但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 走「⚡ 节点选择」）；公司域名改 COMPANY_DOMAINS。
 // 2026-11-04：my-vps 订阅经「⚡ 节点选择」下载；VPS_URL 留空时 Foxmail 跟随「⚡ 节点选择」；国内邮箱（88.com/qq/163 等）直连，置于 Foxmail 规则前。
+// 2026-11-04：大航海机场订阅 IP 直连（面板拒绝代理连接），紧随 VPS 规则。
 const PROXY = "⚡ 节点选择"
 const MAIL = "📧 Foxmail"
 // ==================== [v8.0] 仅在本机填写 ====================
@@ -313,6 +314,8 @@ function main(config) {
 //   4) Foxmail（仅桌面脚本，脚本顶部有 VPS_URL 时生效）：只走 VPS_URL 里的自建 VPS 节点；VPS_URL 留空则跟随主选择组。
 // =====================================================================
 const CY_VPS_IP_RULE = "IP-CIDR,216.36.82.250/32,DIRECT,no-resolve"
+// [2026-11-04] 大航海机场订阅面板 IP 直连（拒绝代理连接），紧随 VPS 规则
+const CY_AIRPORT_IP_RULES = ["IP-CIDR,47.242.128.61/32,DIRECT,no-resolve"]
 const CY_STUN_PORTS = "OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309))"
 const CY_FOREIGN_DOH = ["https://8.8.8.8/dns-query", "https://1.1.1.1/dns-query"]
 const CY_NODE_DOH = ["https://223.5.5.5/dns-query", "https://1.12.12.12/dns-query"]
@@ -323,13 +326,13 @@ const CY_CN_MAIL_DOMAINS = ["88.com", "email.cn", "qq.com", "foxmail.com", "exma
 function cyHarden20261103(config) {
     let rules = Array.isArray(config.rules) ? config.rules.slice() : []
     // 去掉旧的 VPS IP 规则（可能没有 no-resolve 或位置靠后）
-    rules = rules.filter((r) => !(typeof r === "string" && /^IP-CIDR,216\.36\.82\.250\/32,/.test(r)))
+    rules = rules.filter((r) => !(typeof r === "string" && /^IP-CIDR,(216\.36\.82\.250|47\.242\.128\.61)\/32,/.test(r)))
     const matchRule = rules.find((r) => typeof r === "string" && /^MATCH,/.test(r))
     const groups = Array.isArray(config["proxy-groups"]) ? config["proxy-groups"] : []
     let proxy = matchRule ? matchRule.split(",")[1].trim() : ""
     if (!proxy || proxy === "DIRECT" || proxy === "REJECT") proxy = groups.length ? groups[0].name : "DIRECT"
 
-    const head = [CY_VPS_IP_RULE]
+    const head = [CY_VPS_IP_RULE, ...CY_AIRPORT_IP_RULES]
 
     // ---- Foxmail 只走自建 VPS（仅当脚本定义了 VPS_URL 且还没有 Foxmail 组时由这里补上）----
     if (typeof VPS_URL !== "undefined" && !groups.some((g) => g && g.name === CY_MAIL)) {
@@ -371,7 +374,7 @@ function cyHarden20261103(config) {
     if (head.concat(rules).some((r) => typeof r === "string" && /^PROCESS-NAME,Foxmail\.exe,/.test(r))) {
         const cnMail = CY_CN_MAIL_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT")
         rules = rules.filter((r) => cnMail.indexOf(r) < 0)
-        head.splice(1, 0, ...cnMail)
+        head.splice(1 + CY_AIRPORT_IP_RULES.length, 0, ...cnMail)
     }
     config.rules = head.concat(rules)
 
