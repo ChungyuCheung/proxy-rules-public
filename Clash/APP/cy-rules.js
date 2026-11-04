@@ -1,9 +1,9 @@
-// ===== cy-rules.js v2.12 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
-// 最后更新：2026-11-04 15:56 UTC+8
+// ===== cy-rules.js v2.13 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
+// 最后更新：2026-11-04 22:05 UTC+8
 // 用途：与 Shadowrocket cy.conf 同一套分流（国内直连、海外代理、AI/交易所分地区），自建 VPS 216.36.82.250 直连；
 //       DNS / WebRTC 防泄漏（中国+内网=system，外网=DoH 经代理；STUN 不回落直连）。手机用 Gmail App，无 Foxmail 规则。
 // 用法：配置详情 → 覆写脚本 → 用 raw 链接导入，保存并选中；每个订阅都选上。公司域名在 COMPANY_DOMAINS。
-// 最新改动 2026-11-04：my-vps 订阅经代理组下载；VPS_URL 留空时 Foxmail 跟随主组。历史版本见私有仓库 git 记录。
+// 最新改动 2026-11-04：公司域名直连与国内邮箱直连合并为一块，置于 Foxmail 规则之前（原则：中国/公司流量永远优先直连，Foxmail 只接海外邮件）。历史版本见私有仓库 git 记录。
 // 2026-11-04：大航海机场订阅 IP 直连（面板拒绝代理连接），紧随 VPS 规则。
 // 2026-11-04：VPS 的 SSH（22 端口）走节点选择（国内直连被阻断），VPS 其余流量仍直连。
 // 2026-11-04：统一 no-resolve（GEOIP,CN 及含 IP 的规则集全部加 no-resolve，不再为判断 IP 而解析域名）；头部加最后更新时间。
@@ -428,6 +428,8 @@ const CY_FOREIGN_DOH = ["https://8.8.8.8/dns-query", "https://1.1.1.1/dns-query"
 const CY_NODE_DOH = ["https://223.5.5.5/dns-query", "https://1.12.12.12/dns-query"]
 const CY_MAIL = "📧 Foxmail"
 
+const CY_CN_MAIL_DOMAINS = ["88.com", "email.cn", "qq.com", "foxmail.com", "exmail.qq.com", "163.com", "126.com", "yeah.net", "188.com", "netease.com", "qiye.163.com", "sina.com", "sina.cn", "sohu.com", "139.com", "189.cn", "wo.cn", "aliyun.com", "mxhichina.com", "qiye.aliyun.com", "263.net", "21cn.com", "tom.com"]
+
 function cyHarden20261103(config) {
     let rules = Array.isArray(config.rules) ? config.rules.slice() : []
     // 去掉旧的 VPS IP 规则（可能没有 no-resolve 或位置靠后）
@@ -474,6 +476,27 @@ function cyHarden20261103(config) {
     // ---- WebRTC/STUN（已有则不重复添加）----
     if (!rules.some((r) => typeof r === "string" && r.indexOf("3478") >= 0)) {
         head.push(CY_STUN_PORTS + "," + proxy, CY_STUN_PORTS + ",REJECT")
+    }
+    // ---- [2026-11-04] 原则：中国/公司流量永远优先直连；Foxmail 组只接剩下的海外邮件 ----
+    // 公司域名（COMPANY_DOMAINS/INTRANET_DOMAINS/CUSTOM_DIRECT_DOMAINS）+ 国内邮箱合并为一个 DIRECT 区块，
+    // 固定插在 SSH 例外、VPS IP、大航海 IP 之后，Foxmail/Gmail 规则之前；后面的重复规则删除。
+    {
+        const cyCo = []
+        for (const list of [
+            typeof COMPANY_DOMAINS !== "undefined" ? COMPANY_DOMAINS : [],
+            typeof INTRANET_DOMAINS !== "undefined" ? INTRANET_DOMAINS : [],
+            typeof CUSTOM_DIRECT_DOMAINS !== "undefined" ? CUSTOM_DIRECT_DOMAINS : [],
+        ]) {
+            if (Array.isArray(list)) for (const d of list) {
+                const x = String(d).trim().replace(/^\+?\.|^\*\./, "").toLowerCase()
+                if (x && cyCo.indexOf(x) < 0) cyCo.push(x)
+            }
+        }
+        const hasFox = head.concat(rules).some((r) => typeof r === "string" && /^PROCESS-NAME,Foxmail\.exe,/.test(r))
+        const block = [...cyCo, ...(hasFox ? CY_CN_MAIL_DOMAINS : [])].map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT")
+        const uniq = block.filter((r, i) => block.indexOf(r) === i)
+        rules = rules.filter((r) => uniq.indexOf(r) < 0)
+        head.splice(head.indexOf(CY_VPS_IP_RULE) + 1 + CY_AIRPORT_IP_RULES.length, 0, ...uniq)
     }
     config.rules = head.concat(rules)
 
