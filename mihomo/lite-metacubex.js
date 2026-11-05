@@ -1,9 +1,10 @@
-// ===== mihomo/lite-metacubex.js v1.15 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
-// 最后更新：2026-11-05 18:11 UTC+8
+// ===== mihomo/lite-metacubex.js v1.16 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// 最后更新：2026-11-05 19:52 UTC+8
 // 用途：内网/公司直连 + 系统 DNS；中国直连；Foxmail 与 AI 服务走自建 VPS（未填则走节点选择）；其余走「⚡ 节点选择」。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail / AI 走「⚡ 节点选择」）；CUSTOM_DIRECT_DOMAINS（自己的内网域名）。
+// 2026-11-05 v1.16: Route accounts.google.com to the AI group.
 // 2026-11-05 v1.15: AI desktop process rules use the AI group before generic routing.
 // 2026-11-05 v1.14：新增「🤖 AI」组（与 Foxmail 同样绑定 my-vps 订阅，留空跟随「⚡ 节点选择」）；引入 MetaCubeX 每日更新的 category-ai-!cn.mrs 规则集 + 高频 AI 静态域名。
 // 2026-11-04 v1.13：Foxmail 进程规则改为 AND,((PROCESS-NAME,Foxmail.exe),(NOT,((GEOIP,CN,no-resolve)))) ：只有目标非中国 IP 才走「📧 Foxmail」，中国 IP 落到后面的 cncidr/GEOIP,CN 直连。
@@ -59,6 +60,7 @@ const AI_PROCESSES = [
 
 // [v1.14] 海外 AI 高频静态域名兜底（配合每日自动更新的 MetaCubeX category-ai-!cn.mrs 规则集，固定走 AI 组）
 const AI_EXACT_DOMAINS = [
+    "accounts.google.com",
     "copilot.microsoft.com",
     "copilot-proxy.githubusercontent.com",
     "ai.google.dev",
