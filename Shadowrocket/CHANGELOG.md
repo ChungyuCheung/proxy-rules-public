@@ -1,0 +1,89 @@
+# Shadowrocket 更新日志
+
+本文件记录本目录配置的历史变更，按来源文件分节。历史记录描述当时的修改，当前行为以对应配置为准。后续更新在这里补充，不再累积到配置注释中。
+
+## 2026-11-05 日志整理
+
+- 将三份配置中的头部历史及行内版本、日期记录迁移到本文件；保留用途、使用方法和当前逻辑说明。
+- 本次只整理注释，配置内容和功能版本号保持不变。
+
+## cy.conf
+
+### 原头部更新记录
+
+- 最新改动 2026-11-05 v5.23：邮件与 AI 改为自动测速组，只纳入名称含 NovixLink 的自建 VPS 节点（排除信息节点），每 300 秒测试并选择延迟最低的节点。
+- 2026-11-05 v5.22：Google 账号登录域名 accounts.google.com 精确匹配并走 AI 组。
+- 2026-11-05 v5.21：新增手选组「🤖 AI」（与「📧 邮件」一致，排除信息节点，手动选自建 VPS 节点）；# 4) AI 服务静态域名改走「🤖 AI」，并挂载 MetaCubeX 每日自动更新的 category-ai-!cn.list 纯域名规则集（无 IP 规则，不触发本地 DNS）。
+- 2026-11-05 v5.20：新增手选组「📧 邮件」（排除信息节点，手动选自建 VPS 节点）；imap / smtp / pop.gmail.com → 📧 邮件，放在 VPS / 腾讯 ASN 规则之后、其余规则之前。
+- 2026-11-05 v5.19：删除交易所专用手选组；MEXC / Bybit / PayPal 共 49 条规则改走 PROXY（跟随首页手选节点）。
+- 2026-11-05 v5.18：交易所专用组的信息节点排除再加 更新|提醒|订阅|訂閱。
+- 2026-11-05 v5.17：精简——删除 99 条与 Loyalsoldier direct.txt 重复的国内直连域名（保留微信/支付宝/淘宝等后备）；MEXC/Bybit/PayPal 改走新的交易所专用手选组（排除中国与美国节点），删除菲律宾/欧盟/台湾/英国/Bybit 旧组；[Host] 补微信/支付宝/淘宝系统 DNS。
+- 2026-11-05 v5.16：GEOIP,CN 去掉 no-resolve→`GEOIP,CN,DIRECT`（v5.15 用 no-resolve 实测仍让微信纯 IP 连接落 FINAL；去掉后直连，实测无 DNS / WebRTC 泄漏）；IP-ASN 不变。
+- 2026-11-04 v5.15：微信慢修复——加腾讯 IP-ASN 45090/132203 直连（no-resolve），FINAL 前加回 GEOIP,CN,DIRECT,no-resolve（只对纯 IP 连接生效，不触发 DNS）。
+- 2026-11-04 v5.14：修正过时注释（DNS 说明、仓库地址）；头部加最后更新时间。规则不变。
+- 2026-11-04 v5.13：DNS 防泄漏——删除 GEOIP,CN（会触发本地解析）；DoH 列表去空格按文档写法。
+- 2026-11-04 v5.12：DNS 防泄漏——删除 IP 列表规则集（cncidr/telegramcidr），避免规则匹配时本地解析域名；中国 IP 仍由 GEOIP,CN 直连。
+- 2026-11-04 v5.11：DNS 防泄漏——bypass-tun/规则去掉 198.18.0.0/15（Fake-IP 与 TUN DNS 网段），dns-direct-system 关闭。
+- 2026-11-04 v5.10：DNS 防泄漏——海外 DoH 经代理(#proxy)查询，备用也经代理，禁止回退系统 DNS。
+- 2026-11-04 v5.9：DNS 防泄漏——IP 规则全加 no-resolve，外网 DoH 改 1.1.1.1/8.8.8.8，去掉国内 DoH。
+- 2026-11-04 v5.8：VPS 的 SSH（22 端口）走 PROXY，其余仍直连。
+- 2026-11-04 v5.7：大航海机场订阅 IP 直连。
+- 2026-11-03 v5.6：DNS 恢复 system 优先，修复节点全部超时；规则集改 Loyalsoldier、VPS IP 直连置顶、外网 DoH。历史版本见私有仓库 git 记录。
+
+### 原行内版本与日期说明
+
+- [v5.23] 只按节点名称中的 NovixLink 筛选自建 VPS（忽略大小写），并排除信息节点；节点须已导入 Shadowrocket 首页。
+- [2026-11-03] 自建 VPS IP 直连（必须放在第 1 条，no-resolve），使用任何机场订阅时都能直连 VPS
+- [2026-11-04] VPS SSH(22) 例外：国内直连被阻断，走 PROXY（须在 VPS 直连之前）
+- [2026-11-04] 大航海机场订阅面板 IP 直连（拒绝代理连接）
+- [2026-11-04] 腾讯（微信）IP 直连：微信常用 IP 直连（无域名），否则落 FINAL 走代理导致「收取中」慢；no-resolve，域名请求跳过、不触发 DNS
+- [v5.20] Gmail 收发信服务器 → 📧 邮件（部分机场节点封邮件端口）；须在 google / proxy 规则集之前
+- [v5.21] MetaCubeX 每日自动更新的海外 AI 域名规则集（纯域名 classical 列表，无 IP 规则，不触发本地 DNS 解析）
+- [2026-11-03] 改用 Loyalsoldier（L大）surge-rules，GitHub raw release 分支，每日自动更新
+- [2026-11-03] 替换原 blackmatrix7 Apple/ChinaMax/Global 列表，顺序同 Loyalsoldier README 白名单模式。
+- [2026-11-03] 中国 .cn 域名用系统 DNS
+- [v5.17] 国内常用 App 后备域名：系统 DNS（与 [Rule] 后备直连一致）
+
+## cy-simple.conf
+
+### 原头部更新记录
+
+- 最新改动 2026-11-05 v1.18：Google 账号登录域名 accounts.google.com 精确匹配并走 AI 组。
+- 2026-11-05 v1.17：新增手选组「🤖 AI」（与 cy.conf v5.21 相同）；挂载 MetaCubeX 每日更新的 category-ai-!cn.list 规则集走「🤖 AI」。
+- 2026-11-05 v1.16：新增手选组「📧 邮件」（与 cy.conf v5.20 相同）；imap / smtp / pop.gmail.com → 📧 邮件，放在 VPS / 腾讯 ASN 规则之后、其余规则之前。
+- 2026-11-05 v1.15：加微信/支付宝/淘宝等后备直连域名与对应 [Host] 系统 DNS（与 cy.conf v5.17 一致）；其余不变。
+- 2026-11-05 v1.14：GEOIP,CN 去掉 no-resolve→`GEOIP,CN,DIRECT`（v5.15 用 no-resolve 实测仍让微信纯 IP 连接落 FINAL；去掉后直连，实测无 DNS / WebRTC 泄漏）；IP-ASN 不变。
+- 2026-11-04 v1.13：微信慢修复——加腾讯 IP-ASN 45090/132203 直连（no-resolve），FINAL 前加回 GEOIP,CN,DIRECT,no-resolve（只对纯 IP 连接生效，不触发 DNS）。
+- 2026-11-04 v1.12：修正过时注释（DNS 说明、仓库地址）；头部加最后更新时间。规则不变。
+- 2026-11-04 v1.11：DNS 防泄漏——删除 GEOIP,CN（会触发本地解析）；DoH 列表去空格按文档写法。
+- 2026-11-04 v1.10：DNS 防泄漏——删除 IP 列表规则集（cncidr），避免规则匹配时本地解析域名；中国 IP 仍由 GEOIP,CN 直连。
+- 2026-11-04 v1.9：DNS 防泄漏——dns-direct-system 关闭。
+- 2026-11-04 v1.8：DNS 防泄漏——海外 DoH 经代理(#proxy)查询，备用也经代理，禁止回退系统 DNS。
+- 2026-11-04 v1.7：DNS 防泄漏——IP 规则全加 no-resolve，外网 DoH 改 1.1.1.1/8.8.8.8，去掉国内 DoH。
+- 2026-11-04 v1.6：VPS 的 SSH（22 端口）走 PROXY，其余仍直连。
+- 2026-11-04 v1.5：大航海机场订阅 IP 直连。
+- 2026-11-03 v1.4：DNS 恢复 system 优先，修复节点全部超时；VPS IP 直连置顶、外网 DoH、block-quic。历史版本见私有仓库 git 记录。
+
+### 原行内版本与日期说明
+
+- [2026-11-03] 走代理的连接屏蔽 QUIC（UDP 443），强制回落 TCP，防止 UDP 绕行
+- [v1.16] 邮件专用手选组：订阅全部节点（排除信息节点），在 App 里手动选一次自建 VPS 节点；iPhone 邮件 App 收 Gmail 用
+- [v1.17] AI 专用手选组：订阅全部节点（排除信息节点），在 App 里手动选一次自建 VPS 节点；海外 AI 服务专用
+- [2026-11-03] 自建 VPS IP 直连（必须放在第 1 条，no-resolve），使用任何机场订阅时都能直连 VPS
+- [2026-11-04] VPS SSH(22) 例外：国内直连被阻断，走 PROXY（须在 VPS 直连之前）
+- [2026-11-04] 大航海机场订阅面板 IP 直连（拒绝代理连接）
+- [2026-11-04] 腾讯（微信）IP 直连：微信常用 IP 直连（无域名），否则落 FINAL 走代理导致「收取中」慢；no-resolve，域名请求跳过、不触发 DNS
+- [v1.16] Gmail 收发信服务器 → 📧 邮件（部分机场节点封邮件端口）；须在其余规则之前
+- [v1.15] 国内常用 App 后备直连（direct.txt 下载失败时仍直连；与 cy.conf v5.17 一致）
+- 2.5) [v1.17] 海外 AI 服务 → 🤖 AI（MetaCubeX 每日自动更新纯域名规则集，不触发本地 DNS）
+- [2026-11-03] 改为 GitHub raw（release 分支）拉取：不再用 jsDelivr @release 缓存，避免规则停更
+- [2026-11-03] 中国 .cn 域名用系统 DNS
+- [v1.15] 国内常用 App 后备域名：系统 DNS
+
+## cy.conf.bak-20261014-udp
+
+### 原头部更新记录
+
+- v5.3.1: 直连 DNS 和备用 DNS 都锁定 system，避免直连域名回落到公网 DNS 并发。
+- v5.3: 公司域名由 [Host] 锁定系统 DNS，允许私网地址，解析失败不回落代理 DNS。
+- v5.2: Bybit 欧盟拆开，国内 App 提前直连，地区组回落 PROXY，UDP 不支持改直连。

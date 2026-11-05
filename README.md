@@ -49,3 +49,13 @@
 
 - **v6.2-20260901-v2rayN-Mixin.yaml** — v2RayN（mihomo 内核）Mixin 配置，文件名随版本更新
   `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/v2RayN/v6.2-20260901-v2rayN-Mixin.yaml`
+
+## 更新日志
+
+历史更新记录集中在各目录的 CHANGELOG.md，脚本中只保留当前说明。
+
+- [Shadowrocket 更新日志](Shadowrocket/CHANGELOG.md)
+- [mihomo 更新日志](mihomo/CHANGELOG.md)
+- [Clash App 更新日志](Clash/APP/CHANGELOG.md)
+- [Clash iOS 更新日志](Clash/iOS/CHANGELOG.md)
+- [v2RayN 更新日志](v2RayN/CHANGELOG.md)

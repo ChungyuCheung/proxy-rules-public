@@ -3,7 +3,7 @@
 # 用途：Loyalsoldier 分流；自建 VPS 216.36.82.250 直连；DNS（中国+内网=system，外网=DoH 经代理）/WebRTC 防泄漏。
 # Foxmail：静态文件不能填 VPS_URL，「📧 Foxmail」默认 REJECT。要走自建 VPS，只在本机加 "proxy-providers": {"my-vps": {"type":"http","url":"你的VPS订阅","path":"./providers/my-vps.yaml","interval":86400}}，
 #   并把该组改成 {"name":"📧 Foxmail","type":"fallback","use":["my-vps"],"url":"https://www.gstatic.com/generate_204","interval":300}。
-# 最新改动 2026-11-03。历史版本见私有仓库 git 记录。
+# 更新日志：CHANGELOG.md
 {
     "tcp-concurrent": true,
     "proxy-groups": [

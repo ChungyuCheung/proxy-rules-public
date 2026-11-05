@@ -3,10 +3,8 @@
 // 用途：与 Shadowrocket cy.conf 同一套分流（国内直连、海外代理、AI/交易所分地区），自建 VPS 216.36.82.250 直连；
 //       DNS / WebRTC 防泄漏（中国+内网=system，外网=DoH 经代理；STUN 不回落直连）。手机用 Gmail App，无 Foxmail 规则。
 // 用法：配置详情 → 覆写脚本 → 用 raw 链接导入，保存并选中；每个订阅都选上。公司域名在 COMPANY_DOMAINS。
-// 最新改动 2026-11-04 v2.14：Foxmail 进程规则改为 AND,((PROCESS-NAME,Foxmail.exe),(NOT,((GEOIP,CN,no-resolve)))) ：只有目标非中国 IP 才走「📧 Foxmail」，中国 IP 落到后面的 GEOIP,CN 直连。（iPhone 无 Foxmail 进程，主要影响 Clash Verge Rev 桌面端）历史版本见私有仓库 git 记录。
-// 2026-11-04：大航海机场订阅 IP 直连（面板拒绝代理连接），紧随 VPS 规则。
-// 2026-11-04：VPS 的 SSH（22 端口）走节点选择（国内直连被阻断），VPS 其余流量仍直连。
-// 2026-11-04：统一 no-resolve（GEOIP,CN 及含 IP 的规则集全部加 no-resolve，不再为判断 IP 而解析域名）；头部加最后更新时间。
+// 更新日志：CHANGELOG.md
+
 const INFO_FILTER = "(?i)(剩余|剩餘|流量|到期|官网|官網|套餐|重置|公告|客服|traffic|expire|remaining|reset)";
 const TEST_URL = "https://www.gstatic.com/generate_204";
 
@@ -264,7 +262,7 @@ function main(config) {
     proxies: bybitProxies
   });
 
-  // [2026-11-03] 原 Sydney-Moses/Network-Profiles 的 .mrs 链接已 404，改用 MetaCubeX meta-rules-dat（GitHub raw，每日更新），
+  // MetaCubeX meta-rules-dat 提供 .mrs 规则集（GitHub raw，每日更新），
   //              并经 PROXY 组下载（国内直连 raw.githubusercontent.com 常失败）。规则集名称不变。
   const providers = {
     "CY-Apple_Domain": {
@@ -406,7 +404,7 @@ function main(config) {
 }
 
 // =====================================================================
-// [2026-11-03] 统一加固（所有 mihomo 脚本共用同一段，放在 main() 最后执行，覆盖前面的设置）
+// 统一加固（所有 mihomo 脚本共用同一段，放在 main() 最后执行，覆盖前面的设置）
 //   1) 自建 VPS IP 直连：IP-CIDR,216.36.82.250/32,DIRECT,no-resolve 放在第 1 条规则，
 //      使用任何机场订阅时都能直接访问自己的 VPS（不经机场节点）。
 //   2) WebRTC 防泄漏：STUN/TURN 端口（3478-3481、5349、19302-19309）先走代理，
@@ -414,13 +412,13 @@ function main(config) {
 //   3) DNS 防泄漏，统一规则：
 //      - 中国域名 + 公司/内网域名 + .lan/.local → system（当前网络的系统 DNS，公司/家里自动切换，不写死 IP）
 //      - 其余外网域名、以及 IP 规则需要的解析 → 外网加密 DoH（Google 8.8.8.8 / Cloudflare 1.1.1.1），经代理发出
-//      - 删除 fallback（避免回落到明文/国内 DNS），fake-ip 模式，关闭 IPv6 解析
+//      - 禁用 fallback（避免回落到明文/国内 DNS），fake-ip 模式，关闭 IPv6 解析
 //      - 机场节点域名用加密 DoH（阿里 / 腾讯，按 IP 写），节点必须直连才能解析，所以不走代理
 //   4) Foxmail（仅桌面脚本，脚本顶部有 VPS_URL 时生效）：只走 VPS_URL 里的自建 VPS 节点；VPS_URL 留空则跟随主选择组。
 // =====================================================================
 const CY_VPS_IP_RULE = "IP-CIDR,216.36.82.250/32,DIRECT,no-resolve"
-// [2026-11-04] 大航海机场订阅面板 IP 直连（拒绝代理连接），紧随 VPS 规则
-// [2026-11-04] VPS SSH(22) 例外：走主选择组，置于 VPS 直连规则之前
+// 大航海机场订阅面板 IP 直连（拒绝代理连接），紧随 VPS 规则
+// VPS SSH(22) 例外：走主选择组，置于 VPS 直连规则之前
 const CY_VPS_SSH_MATCH = "AND,((IP-CIDR,216.36.82.250/32,no-resolve),(DST-PORT,22))"
 const CY_AIRPORT_IP_RULES = ["IP-CIDR,47.242.128.61/32,DIRECT,no-resolve"]
 const CY_STUN_PORTS = "OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309))"
@@ -451,7 +449,7 @@ function cyHarden20261103(config) {
             config["proxy-providers"]["my-vps"] = {
                 type: "http",
                 url: VPS_URL.trim(),
-                // [2026-11-04] 订阅经主选择组（机场节点）下载，防国内直连 VPS 时 EOF
+                // 订阅经主选择组（机场节点）下载，防国内直连 VPS 时 EOF
                 ...(proxy && proxy !== "DIRECT" && proxy !== "REJECT" ? { proxy } : {}),
                 interval: 86400,
                 path: "./providers/my-vps.yaml",
@@ -477,7 +475,7 @@ function cyHarden20261103(config) {
     if (!rules.some((r) => typeof r === "string" && r.indexOf("3478") >= 0)) {
         head.push(CY_STUN_PORTS + "," + proxy, CY_STUN_PORTS + ",REJECT")
     }
-    // ---- [2026-11-04] 原则：中国/公司流量永远优先直连；Foxmail 组只接剩下的海外邮件 ----
+    // ---- 原则：中国/公司流量永远优先直连；Foxmail 组只接剩下的海外邮件 ----
     // 公司域名（COMPANY_DOMAINS/INTRANET_DOMAINS/CUSTOM_DIRECT_DOMAINS）+ 国内邮箱合并为一个 DIRECT 区块，
     // 固定插在 SSH 例外、VPS IP、大航海 IP 之后，Foxmail/Gmail 规则之前；后面的重复规则删除。
     {

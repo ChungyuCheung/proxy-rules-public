@@ -4,20 +4,12 @@
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail / AI 走「⚡ 节点选择」）；公司域名改 COMPANY_DOMAINS。
-// 2026-11-05 v9.3: Route accounts.google.com to the AI group.
-// 2026-11-05 v9.2: AI desktop process rules use the AI group before generic routing.
-// 2026-11-05 v9.1：新增「🤖 AI」组（与 Foxmail 同样绑定 my-vps 订阅，留空跟随「⚡ 节点选择」）；引入 MetaCubeX 每日更新的 category-ai-!cn.yaml 规则集 + 高频 AI 静态域名，置于 Google 代理规则之前。
-// 2026-11-04 v9.0：Foxmail 进程规则改为 AND,((PROCESS-NAME,Foxmail.exe),(NOT,((GEOIP,CN,no-resolve)))) ：只有目标非中国 IP 才走「📧 Foxmail」，中国 IP 落到后面的 cncidr/GEOIP,CN 直连。
-// 2026-11-04 v8.9：公司域名直连与国内邮箱直连合并为一块，置于 Foxmail 规则之前（原则：中国/公司流量永远优先直连，Foxmail 只接海外邮件）。
-// 2026-11-04：my-vps 订阅经「⚡ 节点选择」下载；VPS_URL 留空时 Foxmail 跟随「⚡ 节点选择」；国内邮箱（88.com/qq/163 等）直连，置于 Foxmail 规则前。
-// 2026-11-04：大航海机场订阅 IP 直连（面板拒绝代理连接），紧随 VPS 规则。
-// 2026-11-04：VPS 的 SSH（22 端口）走节点选择（国内直连被阻断），VPS 其余流量仍直连。
-// 2026-11-04：统一 no-resolve（GEOIP,CN 及含 IP 的规则集全部加 no-resolve，不再为判断 IP 而解析域名）；头部加最后更新时间。
+// 更新日志：CHANGELOG.md
 const PROXY = "⚡ 节点选择"
 const MAIL = "📧 Foxmail"
 const AI = "🤖 AI"
 
-// ==================== [2026-11-03] 自建 VPS（仅在本机填写）====================
+// ==================== 自建 VPS（仅在本机填写）====================
 // 在下方引号内粘贴自建 VPS 的订阅链接（Clash/mihomo 格式）。Foxmail 与 AI 只走这里的节点，
 // 不写死节点名/服务器地址：机器改名、换 VPS、换地址，只改这个链接即可。
 // 只在本机脚本副本里填写，切勿提交到仓库（会泄露订阅）！留空则 Foxmail 与 AI 跟随「⚡ 节点选择」。
@@ -52,7 +44,7 @@ const AI_PROCESSES = [
     "codex.exe",
 ]
 
-// [v9.1] 海外 AI 高频静态域名兜底（配合每日自动更新的 category-ai-!cn 规则集，固定走 AI 组）
+// 海外 AI 高频静态域名兜底（配合每日自动更新的 category-ai-!cn 规则集，固定走 AI 组）
 const AI_EXACT_DOMAINS = [
     "accounts.google.com",
     "copilot.microsoft.com",
@@ -142,7 +134,7 @@ const AI_SUFFIX_DOMAINS = [
     "fireworks.ai",
 ]
 
-// 公司/内网域名: 一律直连，解析交给 DHCP / 系统 DNS。新增直接加到这里。
+// 公司/内网域名: 一律直连，解析交给 DHCP / 系统 DNS。更多域名可加到这里。
 const COMPANY_DOMAINS = [
     "huinor.com",
     "huitone.com",
@@ -347,7 +339,7 @@ function main(config) {
         "DOMAIN-SUFFIX,msocdn.com,DIRECT",
         // 仅阻断 Google/YouTube 的 QUIC，强制回退 TCP；须放在其代理规则之前。
         "AND,((NETWORK,udp),(DST-PORT,443),(OR,(" + googleQuicDomainRules + "))),REJECT",
-        // [v9.1] AI 服务与 category-ai-!cn 规则集走 🤖 AI（须在 googleDomainRules 与 google/proxy 规则集之前，防 gemini/googleapis 等被抢先匹配到节点选择）
+        // AI 服务与 category-ai-!cn 规则集走 🤖 AI（须在 googleDomainRules 与 google/proxy 规则集之前，防 gemini/googleapis 等被抢先匹配到节点选择）
         ...toExactRules(AI_EXACT_DOMAINS, AI),
         ...toSuffixRules(AI_SUFFIX_DOMAINS, AI),
         "RULE-SET,ai," + AI,
@@ -385,7 +377,7 @@ function main(config) {
         // GEOIP / 最终兜底。
         "GEOIP,LAN,DIRECT,no-resolve",
 
-        // [2026-11-04] 加 no-resolve：只按已知 IP 判断，不为匹配而解析域名（未命中域名规则的走 MATCH）。
+        // no-resolve：只按已知 IP 判断，不为匹配而解析域名（未命中域名规则的走 MATCH）。
         "GEOIP,CN,DIRECT,no-resolve",
 
         // 其余全部走手动选择的节点
@@ -452,7 +444,7 @@ function main(config) {
 }
 
 // =====================================================================
-// [2026-11-03] 统一加固（所有 mihomo 脚本共用同一段，放在 main() 最后执行，覆盖前面的设置）
+// 统一加固（所有 mihomo 脚本共用同一段，放在 main() 最后执行，覆盖前面的设置）
 //   1) 自建 VPS IP 直连：IP-CIDR,216.36.82.250/32,DIRECT,no-resolve 放在第 1 条规则，
 //      使用任何机场订阅时都能直接访问自己的 VPS（不经机场节点）。
 //   2) WebRTC 防泄漏：STUN/TURN 端口（3478-3481、5349、19302-19309）先走代理，
@@ -460,13 +452,13 @@ function main(config) {
 //   3) DNS 防泄漏，统一规则：
 //      - 中国域名 + 公司/内网域名 + .lan/.local → system（当前网络的系统 DNS，公司/家里自动切换，不写死 IP）
 //      - 其余外网域名、以及 IP 规则需要的解析 → 外网加密 DoH（Google 8.8.8.8 / Cloudflare 1.1.1.1），经代理发出
-//      - 删除 fallback（避免回落到明文/国内 DNS），fake-ip 模式，关闭 IPv6 解析
+//      - 不使用 fallback（避免回落到明文/国内 DNS），fake-ip 模式，关闭 IPv6 解析
 //      - 机场节点域名用加密 DoH（阿里 / 腾讯，按 IP 写），节点必须直连才能解析，所以不走代理
 //   4) Foxmail 与 AI（仅桌面脚本，脚本顶部有 VPS_URL 时生效）：只走 VPS_URL 里的自建 VPS 节点；VPS_URL 留空则跟随主选择组。
 // =====================================================================
 const CY_VPS_IP_RULE = "IP-CIDR,216.36.82.250/32,DIRECT,no-resolve"
-// [2026-11-04] 大航海机场订阅面板 IP 直连（拒绝代理连接），紧随 VPS 规则
-// [2026-11-04] VPS SSH(22) 例外：走主选择组，置于 VPS 直连规则之前
+// 大航海机场订阅面板 IP 直连（拒绝代理连接），紧随 VPS 规则
+// VPS SSH(22) 例外：走主选择组，置于 VPS 直连规则之前
 const CY_VPS_SSH_MATCH = "AND,((IP-CIDR,216.36.82.250/32,no-resolve),(DST-PORT,22))"
 const CY_AIRPORT_IP_RULES = ["IP-CIDR,47.242.128.61/32,DIRECT,no-resolve"]
 const CY_STUN_PORTS = "OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309))"
@@ -474,12 +466,12 @@ const CY_FOREIGN_DOH = ["https://8.8.8.8/dns-query", "https://1.1.1.1/dns-query"
 const CY_NODE_DOH = ["https://223.5.5.5/dns-query", "https://1.12.12.12/dns-query"]
 const CY_MAIL = "📧 Foxmail"
 const CY_AI = "🤖 AI"
-// [2026-11-04] 国内邮箱服务器直连（置于 Foxmail 进程规则之前，修 88.com 等国内邮箱添加失败）；Gmail 仍走 Foxmail 组
+// 国内邮箱服务器直连（置于 Foxmail 进程规则之前，保证 88.com 等国内邮箱直接连接）；Gmail 仍走 Foxmail 组
 const CY_CN_MAIL_DOMAINS = ["88.com", "email.cn", "qq.com", "foxmail.com", "exmail.qq.com", "163.com", "126.com", "yeah.net", "188.com", "netease.com", "qiye.163.com", "sina.com", "sina.cn", "sohu.com", "139.com", "189.cn", "wo.cn", "aliyun.com", "mxhichina.com", "qiye.aliyun.com", "263.net", "21cn.com", "tom.com"]
 
 function cyHarden20261103(config) {
     let rules = Array.isArray(config.rules) ? config.rules.slice() : []
-    // 去掉旧的 VPS IP 规则（可能没有 no-resolve 或位置靠后）
+    // 过滤已有的 VPS IP 规则（可能没有 no-resolve 或位置靠后）
     rules = rules.filter((r) => !(typeof r === "string" && (/^IP-CIDR,(216\.36\.82\.250|47\.242\.128\.61)\/32,/.test(r) || /^AND,\(\(IP-CIDR,216\.36\.82\.250\//.test(r))))
     const matchRule = rules.find((r) => typeof r === "string" && /^MATCH,/.test(r))
     const groups = Array.isArray(config["proxy-groups"]) ? config["proxy-groups"] : []
@@ -499,7 +491,7 @@ function cyHarden20261103(config) {
                 config["proxy-providers"]["my-vps"] = {
                     type: "http",
                     url: VPS_URL.trim(),
-                    // [2026-11-04] 订阅经主选择组（机场节点）下载，防国内直连 VPS 时 EOF
+                    // 订阅经主选择组（机场节点）下载，防国内直连 VPS 时 EOF
                     ...(proxy && proxy !== "DIRECT" && proxy !== "REJECT" ? { proxy } : {}),
                     interval: 86400,
                     path: "./providers/my-vps.yaml",
@@ -539,9 +531,9 @@ function cyHarden20261103(config) {
     if (!rules.some((r) => typeof r === "string" && r.indexOf("3478") >= 0)) {
         head.push(CY_STUN_PORTS + "," + proxy, CY_STUN_PORTS + ",REJECT")
     }
-    // ---- [2026-11-04] 原则：中国/公司流量永远优先直连；Foxmail 组只接剩下的海外邮件 ----
+    // ---- 原则：中国/公司流量永远优先直连；Foxmail 组只接剩下的海外邮件 ----
     // 公司域名（COMPANY_DOMAINS/INTRANET_DOMAINS/CUSTOM_DIRECT_DOMAINS）+ 国内邮箱合并为一个 DIRECT 区块，
-    // 固定插在 SSH 例外、VPS IP、大航海 IP 之后，Foxmail/Gmail 规则之前；后面的重复规则删除。
+    // 固定插在 SSH 例外、VPS IP、大航海 IP 之后，Foxmail/Gmail 规则之前；后面的重复规则去重。
     {
         const cyCo = []
         for (const list of [

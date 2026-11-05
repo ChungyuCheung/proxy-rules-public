@@ -4,12 +4,8 @@
 #  用途：国内直连 / 海外代理；自建 VPS 216.36.82.250 直连；DNS 防泄漏（中国+内网=system，外网=DoH 经 PROXY）；
 #        WebRTC/STUN 不回落直连。手机用 Gmail App，无 Foxmail 规则。
 #  >>> 使用前：把下面 proxy-providers 里 airport1~3 的 url 换成自己的机场订阅链接（不用的删掉）<<<
-#  最新改动 2026-11-04 v1.4：GEOIP,CN 与 Apple/ChinaMax/Global 规则集加 no-resolve；头部加最后更新时间。
-#  2026-11-04 v1.3：VPS 的 SSH（22 端口）走 PROXY，其余仍直连。
-#  2026-11-04 v1.2：大航海机场订阅 IP 直连。
-#  2026-11-03：VPS IP 直连置顶、外网 DoH、规则集改 GitHub raw。历史版本见私有仓库 git 记录。
 # =====================================================================
-
+# 更新日志：CHANGELOG.md
 
 mixed-port: 7890
 allow-lan: false
@@ -49,7 +45,7 @@ dns:
   use-hosts: true
   use-system-hosts: true
   respect-rules: false
-  # [2026-11-03] 外网域名 / IP 规则解析：Google、Cloudflare 加密 DoH，经 PROXY 发出（防 DNS 泄漏）
+  # 外网域名 / IP 规则解析：Google、Cloudflare 加密 DoH，经 PROXY 发出（防 DNS 泄漏）
   #              旧版这里是 system + 223.5.5.5 明文，会把外网域名查询暴露给本地网络
   default-nameserver:
     - 223.5.5.5
@@ -61,13 +57,13 @@ dns:
   direct-nameserver:
     - system
   direct-nameserver-follow-policy: false
-  # [2026-11-03] 机场节点域名：加密 DoH（阿里/腾讯，按 IP 写）；节点必须直连解析，不能走代理
+  # 机场节点域名：加密 DoH（阿里/腾讯，按 IP 写）；节点必须直连解析，不能走代理
   proxy-server-nameserver:
     - "https://223.5.5.5/dns-query"
     - "https://1.12.12.12/dns-query"
   # 对应 cy.conf [Host] 段：本地与公司域名锁定系统 DNS
   nameserver-policy:
-    # [2026-11-03] 中国域名 → 系统 DNS
+    # 中国域名 → 系统 DNS
     "rule-set:ChinaMax": system
     "+.cn": system
     "+.local": system
@@ -248,7 +244,7 @@ rule-providers:
     url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Apple/Apple_Classical.yaml"
     path: ./ruleset/Apple.yaml
     interval: 86400
-    # [2026-11-03] GitHub raw 国内直连常失败，改经 PROXY 下载
+    # GitHub raw 经 PROXY 下载，避免国内直连失败
     proxy: PROXY
   ChinaMax:
     type: http
@@ -257,7 +253,7 @@ rule-providers:
     url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax_Classical.yaml"
     path: ./ruleset/ChinaMax.yaml
     interval: 86400
-    # [2026-11-03] GitHub raw 国内直连常失败，改经 PROXY 下载
+    # GitHub raw 经 PROXY 下载，避免国内直连失败
     proxy: PROXY
   Global:
     type: http
@@ -266,17 +262,17 @@ rule-providers:
     url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Global/Global_Classical.yaml"
     path: ./ruleset/Global.yaml
     interval: 86400
-    # [2026-11-03] GitHub raw 国内直连常失败，改经 PROXY 下载
+    # GitHub raw 经 PROXY 下载，避免国内直连失败
     proxy: PROXY
 
 rules:
-  # [2026-11-04] VPS SSH(22) 例外：国内直连被阻断，走 PROXY（须在 VPS 直连之前）
+  # VPS SSH(22) 例外：国内直连被阻断，走 PROXY（须在 VPS 直连之前）
   - AND,((IP-CIDR,216.36.82.250/32,no-resolve),(DST-PORT,22)),PROXY
-  # [2026-11-03] 自建 VPS IP 直连（必须第一条，no-resolve）
+  # 自建 VPS IP 直连（必须第一条，no-resolve）
   - IP-CIDR,216.36.82.250/32,DIRECT,no-resolve
-  # [2026-11-04] 大航海机场订阅面板 IP 直连（拒绝代理连接）
+  # 大航海机场订阅面板 IP 直连（拒绝代理连接）
   - IP-CIDR,47.242.128.61/32,DIRECT,no-resolve
-  # [2026-11-03] WebRTC/STUN 防泄漏：先走代理，节点不支持 UDP 则拒绝，不回落 DIRECT
+  # WebRTC/STUN 防泄漏：先走代理，节点不支持 UDP 则拒绝，不回落 DIRECT
   - OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309)),PROXY
   - OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309)),REJECT
   - DOMAIN,register.appattest.apple.com,DIRECT
