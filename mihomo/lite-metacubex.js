@@ -1,9 +1,10 @@
-// ===== mihomo/lite-metacubex.js v1.14 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
-// 最后更新：2026-11-05 15:10 UTC+8
+// ===== mihomo/lite-metacubex.js v1.15 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// 最后更新：2026-11-05 18:11 UTC+8
 // 用途：内网/公司直连 + 系统 DNS；中国直连；Foxmail 与 AI 服务走自建 VPS（未填则走节点选择）；其余走「⚡ 节点选择」。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail / AI 走「⚡ 节点选择」）；CUSTOM_DIRECT_DOMAINS（自己的内网域名）。
+// 2026-11-05 v1.15: AI desktop process rules use the AI group before generic routing.
 // 2026-11-05 v1.14：新增「🤖 AI」组（与 Foxmail 同样绑定 my-vps 订阅，留空跟随「⚡ 节点选择」）；引入 MetaCubeX 每日更新的 category-ai-!cn.mrs 规则集 + 高频 AI 静态域名。
 // 2026-11-04 v1.13：Foxmail 进程规则改为 AND,((PROCESS-NAME,Foxmail.exe),(NOT,((GEOIP,CN,no-resolve)))) ：只有目标非中国 IP 才走「📧 Foxmail」，中国 IP 落到后面的 cncidr/GEOIP,CN 直连。
 // 2026-11-04 v1.12：synology.me 并入 COMPANY_DOMAINS（随公司块直连、走 system DNS），排在 Foxmail 规则之前，与其他脚本一致。
@@ -44,6 +45,17 @@ const NODE_FILTER =
 const MAIL_PROCESSES = ["Foxmail.exe"]
 const MAIL_EXACT_DOMAINS = ["imap.gmail.com", "smtp.gmail.com", "pop.gmail.com"]
 const MAIL_SUFFIX_DOMAINS = ["googlemail.com"]
+
+// AI desktop processes: route application traffic through the AI group.
+// Keep generic runtimes (browser, WebView and node) out of this list.
+const AI_PROCESSES = [
+    "ChatGPT.exe",
+    "Gemini.exe",
+    "GeminiAppLauncher.exe",
+    "GeminiCrashpadHandler.exe",
+    "Claude.exe",
+    "codex.exe",
+]
 
 // [v1.14] 海外 AI 高频静态域名兜底（配合每日自动更新的 MetaCubeX category-ai-!cn.mrs 规则集，固定走 AI 组）
 const AI_EXACT_DOMAINS = [
@@ -262,6 +274,9 @@ function main(config) {
     config.rules = [
         // 局域网 / 私网 IP 直连
         ...LAN_CIDRS.map((c) => "IP-CIDR," + c + ",DIRECT,no-resolve"),
+        // AI app traffic precedes generic STUN, domain and application rules.
+        ...AI_PROCESSES.map(p => `PROCESS-NAME,${p},${AI}`),
+
         // WebRTC/STUN 防泄漏：先走节点，节点不支持 UDP 则拒绝，不落到 DIRECT
         STUN_PORTS + "," + PROXY,
         STUN_PORTS + ",REJECT",

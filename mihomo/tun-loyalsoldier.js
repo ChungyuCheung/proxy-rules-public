@@ -1,9 +1,10 @@
-// ===== mihomo/tun-loyalsoldier.js v9.1 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
-// 最后更新：2026-11-05 15:10 UTC+8
+// ===== mihomo/tun-loyalsoldier.js v9.2 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-05 18:11 UTC+8
 // 用途：完整分流（公司/微软认证直连、Google 代理、广告拦截、Apple 直连等）；Foxmail 与 AI 服务走自建 VPS（未填则走节点选择）。需开启 TUN。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail / AI 走「⚡ 节点选择」）；公司域名改 COMPANY_DOMAINS。
+// 2026-11-05 v9.2: AI desktop process rules use the AI group before generic routing.
 // 2026-11-05 v9.1：新增「🤖 AI」组（与 Foxmail 同样绑定 my-vps 订阅，留空跟随「⚡ 节点选择」）；引入 MetaCubeX 每日更新的 category-ai-!cn.yaml 规则集 + 高频 AI 静态域名，置于 Google 代理规则之前。
 // 2026-11-04 v9.0：Foxmail 进程规则改为 AND,((PROCESS-NAME,Foxmail.exe),(NOT,((GEOIP,CN,no-resolve)))) ：只有目标非中国 IP 才走「📧 Foxmail」，中国 IP 落到后面的 cncidr/GEOIP,CN 直连。
 // 2026-11-04 v8.9：公司域名直连与国内邮箱直连合并为一块，置于 Foxmail 规则之前（原则：中国/公司流量永远优先直连，Foxmail 只接海外邮件）。
@@ -38,6 +39,17 @@ const CUSTOM_RULES = [
 const MAIL_PROCESSES = ["Foxmail.exe"]
 const MAIL_EXACT_DOMAINS = ["imap.gmail.com", "smtp.gmail.com", "pop.gmail.com"]
 const MAIL_SUFFIX_DOMAINS = ["googlemail.com"]
+
+// AI desktop processes: route application traffic through the AI group.
+// Keep generic runtimes (browser, WebView and node) out of this list.
+const AI_PROCESSES = [
+    "ChatGPT.exe",
+    "Gemini.exe",
+    "GeminiAppLauncher.exe",
+    "GeminiCrashpadHandler.exe",
+    "Claude.exe",
+    "codex.exe",
+]
 
 // [v9.1] 海外 AI 高频静态域名兜底（配合每日自动更新的 category-ai-!cn 规则集，固定走 AI 组）
 const AI_EXACT_DOMAINS = [
@@ -328,6 +340,9 @@ function main(config) {
         "IP-CIDR6,::1/128,DIRECT,no-resolve",
         "IP-CIDR6,fc00::/7,DIRECT,no-resolve",
         "IP-CIDR6,fe80::/10,DIRECT,no-resolve",
+
+        // AI app traffic precedes generic STUN, domain and application rules.
+        ...AI_PROCESSES.map(p => `PROCESS-NAME,${p},${AI}`),
 
         // [v7.7] Foxmail 与 Gmail 收发信服务器走 MAIL 组（置于其他规则之前）
         ...MAIL_PROCESSES.map(p => `AND,((PROCESS-NAME,${p}),(NOT,((GEOIP,CN,no-resolve)))),${MAIL}`),
