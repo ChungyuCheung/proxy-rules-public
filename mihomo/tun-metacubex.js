@@ -1,9 +1,10 @@
-// ===== mihomo/tun-metacubex.js v9.0 | TUN 模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本）=====
-// 最后更新：2026-11-04 22:54 UTC+8
-// 用途：完整分流（公司/微软认证直连、Google/AI 代理、广告拦截、Apple 直连等）；Foxmail 走自建 VPS（未填则走节点选择）。需开启 TUN。
+// ===== mihomo/tun-metacubex.js v9.1 | TUN 模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-05 15:10 UTC+8
+// 用途：完整分流（公司/微软认证直连、Google 代理、广告拦截、Apple 直连等）；Foxmail 与 AI 服务走自建 VPS（未填则走节点选择）。需开启 TUN。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
-// 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail 走「⚡ 节点选择」）；公司域名改 COMPANY_DOMAINS。
+// 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail / AI 走「⚡ 节点选择」）；公司域名改 COMPANY_DOMAINS。
+// 2026-11-05 v9.1：新增「🤖 AI」组（与 Foxmail 同样绑定 my-vps 订阅，留空跟随「⚡ 节点选择」）；引入 MetaCubeX 每日更新的 category-ai-!cn.mrs 规则集 + 高频 AI 静态域名，置于 Google 代理规则之前。
 // 2026-11-04 v9.0：Foxmail 进程规则改为 AND,((PROCESS-NAME,Foxmail.exe),(NOT,((GEOIP,CN,no-resolve)))) ：只有目标非中国 IP 才走「📧 Foxmail」，中国 IP 落到后面的 cncidr/GEOIP,CN 直连。
 // 2026-11-04 v8.9：公司域名直连与国内邮箱直连合并为一块，置于 Foxmail 规则之前（原则：中国/公司流量永远优先直连，Foxmail 只接海外邮件）。
 // 2026-11-04：my-vps 订阅经「⚡ 节点选择」下载；VPS_URL 留空时 Foxmail 跟随「⚡ 节点选择」；国内邮箱（88.com/qq/163 等）直连，置于 Foxmail 规则前。
@@ -12,11 +13,12 @@
 // 2026-11-04：统一 no-resolve（GEOIP,CN 及含 IP 的规则集全部加 no-resolve，不再为判断 IP 而解析域名）；头部加最后更新时间。
 const PROXY = "⚡ 节点选择"
 const MAIL = "📧 Foxmail"
+const AI = "🤖 AI"
 // ==================== [v8.0] 仅在本机填写 ====================
-// 在下方引号内粘贴你自建 VPS 的订阅链接（Clash/mihomo 格式）。Foxmail 只会走这里的节点。
+// 在下方引号内粘贴你自建 VPS 的订阅链接（Clash/mihomo 格式）。Foxmail 与 AI 只会走这里的节点。
 // 不写死节点名/服务器地址：机器改名、换 VPS、换地址，只要改这个链接即可。
 // 只在本地 Bettbox / Clash Verge Rev / FlClash 的脚本副本里填写，切勿提交到仓库（会泄露订阅）！
-// 每次从仓库更新本脚本后需要重新粘贴。留空则 Foxmail 跟随「⚡ 节点选择」。
+// 每次从仓库更新本脚本后需要重新粘贴。留空则 Foxmail 与 AI 跟随「⚡ 节点选择」。
 const VPS_URL = ""
 const VPS_PROVIDER = "my-vps"
 // ============================================================
@@ -36,6 +38,95 @@ const CUSTOM_RULES = [
 const MAIL_PROCESSES = ["Foxmail.exe"]
 const MAIL_EXACT_DOMAINS = ["imap.gmail.com", "smtp.gmail.com", "pop.gmail.com"]
 const MAIL_SUFFIX_DOMAINS = ["googlemail.com"]
+
+// [v9.1] 海外 AI 高频静态域名兜底（配合每日自动更新的 MetaCubeX category-ai-!cn.mrs 规则集，固定走 AI 组）
+const AI_EXACT_DOMAINS = [
+    "copilot.microsoft.com",
+    "copilot-proxy.githubusercontent.com",
+    "ai.google.dev",
+    "alkalicore-pa.clients6.google.com",
+    "alkalimakersuite-pa.clients6.google.com",
+    "alkalimena-pa.clients6.google.com",
+    "webchannel-alkalimakersuite-pa.clients6.google.com",
+    "geminiweb-pa.clients.google.com",
+    "geminiweb-pa.clients6.google.com",
+    "appsgenaiserver-pa.clients.google.com",
+    "appsgenaiserver-pa.clients6.google.com",
+    "appsgenaiserver-pa.googleapis.com",
+    "cloudaicompanion.googleapis.com",
+    "cloudcode-pa.googleapis.com",
+    "daily-cloudcode-pa.googleapis.com",
+    "notebooklm-pa.googleapis.com",
+    "notebooklm.googleapis.com",
+    "antigravity-pa.googleapis.com",
+    "antigravity.googleapis.com",
+]
+
+const AI_SUFFIX_DOMAINS = [
+    // OpenAI / ChatGPT
+    "chatgpt.com",
+    "openai.com",
+    "openaiapi.com",
+    "oaiusercontent.com",
+    "oaistatic.com",
+    "sora.com",
+    "ai.com",
+    "chat.com",
+    // Anthropic / Claude
+    "anthropic.com",
+    "claude.ai",
+    "claude.com",
+    "claudeusercontent.com",
+    // Google Gemini / AI Studio / NotebookLM / DeepMind / Antigravity
+    "gemini.google.com",
+    "gemini.google",
+    "aistudio.google.com",
+    "makersuite.google.com",
+    "notebooklm.google.com",
+    "notebooklm.google",
+    "deepmind.google",
+    "deepmind.com",
+    "antigravity.google",
+    "antigravity-unleash.goog",
+    "generativelanguage.googleapis.com",
+    "proactivebackend-pa.googleapis.com",
+    "aisandbox-pa.googleapis.com",
+    "aida.googleapis.com",
+    "jules.google.com",
+    "labs.google.com",
+    // xAI / Grok
+    "x.ai",
+    "grok.com",
+    "grok.x.com",
+    // Copilot / Code AI
+    "copilot.cloud.microsoft",
+    "githubcopilot.com",
+    "cursor.com",
+    "cursor.sh",
+    "cursorapi.com",
+    "windsurf.com",
+    "codeium.com",
+    // 其他主流海外 AI
+    "perplexity.ai",
+    "poe.com",
+    "quora.com",
+    "huggingface.co",
+    "hf.co",
+    "hf.space",
+    "cdn-lfs.huggingface.co",
+    "openrouter.ai",
+    "mistral.ai",
+    "meta.ai",
+    "dify.ai",
+    "you.com",
+    "phind.com",
+    "character.ai",
+    "replicate.com",
+    "together.ai",
+    "cohere.com",
+    "groq.com",
+    "fireworks.ai",
+]
 
 // 公司/内网域名: 一律直连
 const COMPANY_DOMAINS = [
@@ -125,7 +216,7 @@ function main(config) {
         config["find-process-mode"] = "strict"
     }
 
-    // ---- 1. 手动选择组 + Foxmail 组 ----
+    // ---- 1. 手动选择组 + Foxmail 组 + AI 组 ----
     // [v8.0] 自建 VPS provider（仅当 VPS_URL 已在本机填写）
     const vpsOn = typeof VPS_URL === "string" && VPS_URL.trim() !== ""
     if (vpsOn) {
@@ -172,6 +263,18 @@ function main(config) {
                 lazy: false,
             }
             : { name: MAIL, type: "select", proxies: [PROXY] },
+        // [v9.1] AI 服务只走自建 VPS：填了 VPS_URL 就只用 my-vps provider；留空则跟随「⚡ 节点选择」
+        vpsOn
+            ? {
+                name: AI,
+                type: "fallback",
+                use: [VPS_PROVIDER],
+                url: "https://www.gstatic.com/generate_204",
+                interval: 300,
+                timeout: 5000,
+                lazy: false,
+            }
+            : { name: AI, type: "select", proxies: [PROXY] },
     ]
 
     // ---- 2. MetaCubeX meta-rules-dat (.mrs) 规则集 ----
@@ -190,6 +293,7 @@ function main(config) {
         reject: mrs("domain", "geosite", "category-ads-all", "reject"),
         icloud: mrs("domain", "geosite", "icloud@cn", "icloud"),
         apple: mrs("domain", "geosite", "apple@cn", "apple"),
+        ai: mrs("domain", "geosite", "category-ai-!cn", "ai"),
         google: mrs("domain", "geosite", "google@cn", "google"),
         proxy: mrs("domain", "geosite", "geolocation-!cn", "proxy"),
         direct: mrs("domain", "geosite", "cn", "direct"),
@@ -253,6 +357,10 @@ function main(config) {
         "DOMAIN-SUFFIX,msocdn.com,DIRECT",
 
         "AND,((NETWORK,udp),(DST-PORT,443),(OR,(" + googleQuicDomainRules + "))),REJECT",
+        // [v9.1] AI 服务与 MetaCubeX category-ai-!cn 规则集走 🤖 AI（须在 googleDomainRules 与 google/proxy 规则集之前，防 gemini/googleapis 等被抢先匹配到节点选择）
+        ...toExactRules(AI_EXACT_DOMAINS, AI),
+        ...toSuffixRules(AI_SUFFIX_DOMAINS, AI),
+        "RULE-SET,ai," + AI,
         ...googleDomainRules,
 
         "DOMAIN-SUFFIX,discord.com," + PROXY,
@@ -327,7 +435,7 @@ function main(config) {
 //      - 其余外网域名、以及 IP 规则需要的解析 → 外网加密 DoH（Google 8.8.8.8 / Cloudflare 1.1.1.1），经代理发出
 //      - 删除 fallback（避免回落到明文/国内 DNS），fake-ip 模式，关闭 IPv6 解析
 //      - 机场节点域名用加密 DoH（阿里 / 腾讯，按 IP 写），节点必须直连才能解析，所以不走代理
-//   4) Foxmail（仅桌面脚本，脚本顶部有 VPS_URL 时生效）：只走 VPS_URL 里的自建 VPS 节点；VPS_URL 留空则跟随主选择组。
+//   4) Foxmail 与 AI（仅桌面脚本，脚本顶部有 VPS_URL 时生效）：只走 VPS_URL 里的自建 VPS 节点；VPS_URL 留空则跟随主选择组。
 // =====================================================================
 const CY_VPS_IP_RULE = "IP-CIDR,216.36.82.250/32,DIRECT,no-resolve"
 // [2026-11-04] 大航海机场订阅面板 IP 直连（拒绝代理连接），紧随 VPS 规则
@@ -338,6 +446,7 @@ const CY_STUN_PORTS = "OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-
 const CY_FOREIGN_DOH = ["https://8.8.8.8/dns-query", "https://1.1.1.1/dns-query"]
 const CY_NODE_DOH = ["https://223.5.5.5/dns-query", "https://1.12.12.12/dns-query"]
 const CY_MAIL = "📧 Foxmail"
+const CY_AI = "🤖 AI"
 // [2026-11-04] 国内邮箱服务器直连（置于 Foxmail 进程规则之前，修 88.com 等国内邮箱添加失败）；Gmail 仍走 Foxmail 组
 const CY_CN_MAIL_DOMAINS = ["88.com", "email.cn", "qq.com", "foxmail.com", "exmail.qq.com", "163.com", "126.com", "yeah.net", "188.com", "netease.com", "qiye.163.com", "sina.com", "sina.cn", "sohu.com", "139.com", "189.cn", "wo.cn", "aliyun.com", "mxhichina.com", "qiye.aliyun.com", "263.net", "21cn.com", "tom.com"]
 
@@ -352,36 +461,49 @@ function cyHarden20261103(config) {
 
     const head = [...(proxy && proxy !== "DIRECT" ? [CY_VPS_SSH_MATCH + "," + proxy] : []), CY_VPS_IP_RULE, ...CY_AIRPORT_IP_RULES]
 
-    // ---- Foxmail 只走自建 VPS（仅当脚本定义了 VPS_URL 且还没有 Foxmail 组时由这里补上）----
-    if (typeof VPS_URL !== "undefined" && !groups.some((g) => g && g.name === CY_MAIL)) {
+    // ---- Foxmail / AI 只走自建 VPS（仅当脚本定义了 VPS_URL 且还没有对应组时由这里补上）----
+    if (typeof VPS_URL !== "undefined") {
         const vpsOn = typeof VPS_URL === "string" && VPS_URL.trim() !== ""
         if (vpsOn) {
             if (!config["proxy-providers"] || typeof config["proxy-providers"] !== "object" || Array.isArray(config["proxy-providers"])) {
                 config["proxy-providers"] = {}
             }
-            config["proxy-providers"]["my-vps"] = {
-                type: "http",
-                url: VPS_URL.trim(),
-                // [2026-11-04] 订阅经主选择组（机场节点）下载，防国内直连 VPS 时 EOF
-                ...(proxy && proxy !== "DIRECT" && proxy !== "REJECT" ? { proxy } : {}),
-                interval: 86400,
-                path: "./providers/my-vps.yaml",
-                "health-check": { enable: true, url: "https://www.gstatic.com/generate_204", interval: 300 },
+            if (!config["proxy-providers"]["my-vps"]) {
+                config["proxy-providers"]["my-vps"] = {
+                    type: "http",
+                    url: VPS_URL.trim(),
+                    // [2026-11-04] 订阅经主选择组（机场节点）下载，防国内直连 VPS 时 EOF
+                    ...(proxy && proxy !== "DIRECT" && proxy !== "REJECT" ? { proxy } : {}),
+                    interval: 86400,
+                    path: "./providers/my-vps.yaml",
+                    "health-check": { enable: true, url: "https://www.gstatic.com/generate_204", interval: 300 },
+                }
             }
-            groups.push({ name: CY_MAIL, type: "fallback", use: ["my-vps"], url: "https://www.gstatic.com/generate_204", interval: 300, timeout: 5000 })
-        } else {
-            groups.push({ name: CY_MAIL, type: "select", proxies: [proxy && proxy !== "REJECT" ? proxy : "DIRECT"] })
+        }
+        if (!groups.some((g) => g && g.name === CY_MAIL)) {
+            if (vpsOn) {
+                groups.push({ name: CY_MAIL, type: "fallback", use: ["my-vps"], url: "https://www.gstatic.com/generate_204", interval: 300, timeout: 5000 })
+            } else {
+                groups.push({ name: CY_MAIL, type: "select", proxies: [proxy && proxy !== "REJECT" ? proxy : "DIRECT"] })
+            }
+            rules = rules.filter((r) => !(typeof r === "string" && /(Foxmail\.exe|imap\.gmail\.com|smtp\.gmail\.com|pop\.gmail\.com|googlemail\.com)/.test(r)))
+            head.push(
+                "AND,((PROCESS-NAME,Foxmail.exe),(NOT,((GEOIP,CN,no-resolve))))," + CY_MAIL,
+                "DOMAIN,imap.gmail.com," + CY_MAIL,
+                "DOMAIN,smtp.gmail.com," + CY_MAIL,
+                "DOMAIN,pop.gmail.com," + CY_MAIL,
+                "DOMAIN-SUFFIX,googlemail.com," + CY_MAIL
+            )
+            if (!config["find-process-mode"] || config["find-process-mode"] === "off") config["find-process-mode"] = "strict"
+        }
+        if (!groups.some((g) => g && g.name === CY_AI)) {
+            if (vpsOn) {
+                groups.push({ name: CY_AI, type: "fallback", use: ["my-vps"], url: "https://www.gstatic.com/generate_204", interval: 300, timeout: 5000 })
+            } else {
+                groups.push({ name: CY_AI, type: "select", proxies: [proxy && proxy !== "REJECT" ? proxy : "DIRECT"] })
+            }
         }
         config["proxy-groups"] = groups
-        rules = rules.filter((r) => !(typeof r === "string" && /(Foxmail\.exe|imap\.gmail\.com|smtp\.gmail\.com|pop\.gmail\.com|googlemail\.com)/.test(r)))
-        head.push(
-            "AND,((PROCESS-NAME,Foxmail.exe),(NOT,((GEOIP,CN,no-resolve))))," + CY_MAIL,
-            "DOMAIN,imap.gmail.com," + CY_MAIL,
-            "DOMAIN,smtp.gmail.com," + CY_MAIL,
-            "DOMAIN,pop.gmail.com," + CY_MAIL,
-            "DOMAIN-SUFFIX,googlemail.com," + CY_MAIL
-        )
-        if (!config["find-process-mode"] || config["find-process-mode"] === "off") config["find-process-mode"] = "strict"
     }
 
     // ---- WebRTC/STUN（已有则不重复添加）----
