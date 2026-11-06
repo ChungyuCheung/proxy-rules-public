@@ -9,6 +9,11 @@
 
 ## cy.conf
 
+### 2026-11-06 v5.26
+
+- 新增 `DOMAIN,http-intake.logs.us5.datadoghq.com,🤖 AI`，让指定 Claude 日志入口与 Claude 共用 AI 出口；只匹配此完整域名。
+- 核对 `api.anthropic.com`、`bridge.claudeusercontent.com`、`downloads.claude.ai`、`platform.claude.com`：已分别被现有 `anthropic.com`、`claudeusercontent.com`、`claude.ai`、`claude.com` 后缀规则覆盖，继续走「🤖 AI」。
+
 ### 2026-11-06 v5.25
 
 - 删除 MEXC / Bybit（含欧盟站及相关 API / CDN）共 43 条专用域名规则；交易所按通用分流处理，未命中其他规则时由 `FINAL,PROXY` 兜底。
@@ -58,6 +63,11 @@
 - [v5.17] 国内常用 App 后备域名：系统 DNS（与 [Rule] 后备直连一致）
 
 ## cy-simple.conf
+
+### 2026-11-06 v1.20
+
+- 与完整版一致，补充指定日志域名 `http-intake.logs.us5.datadoghq.com` 的 AI 精确分流。
+- 核对 Claude API、Bridge、下载和平台域名均由现有本地后缀规则匹配到「🤖 AI」，无需依赖远程 AI 列表。
 
 ### 2026-11-06 v1.19
 
