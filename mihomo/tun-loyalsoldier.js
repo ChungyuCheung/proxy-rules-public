@@ -1,5 +1,5 @@
-// ===== mihomo/tun-loyalsoldier.js v9.3 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
-// 最后更新：2026-11-05 19:52 UTC+8
+// ===== mihomo/tun-loyalsoldier.js v9.4 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-06 17:54 UTC+8
 // 用途：完整分流（公司/微软认证直连、Google 代理、广告拦截、Apple 直连等）；Foxmail 与 AI 服务走自建 VPS（未填则走节点选择）。需开启 TUN。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
@@ -46,6 +46,8 @@ const AI_PROCESSES = [
 
 // 海外 AI 高频静态域名兜底（配合每日自动更新的 category-ai-!cn 规则集，固定走 AI 组）
 const AI_EXACT_DOMAINS = [
+    // Claude 日志入口：精确域名分流，优先于广告拦截与通用规则集。
+    "http-intake.logs.us5.datadoghq.com",
     "accounts.google.com",
     "copilot.microsoft.com",
     "copilot-proxy.githubusercontent.com",

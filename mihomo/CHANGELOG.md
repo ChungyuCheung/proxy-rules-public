@@ -12,6 +12,7 @@
 
 ### 版本更新记录
 
+- 2026-11-06 v1.17：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v1.16: Route accounts.google.com to the AI group.
 - 2026-11-05 v1.15: AI desktop process rules use the AI group before generic routing.
 - 2026-11-05 v1.14：新增「🤖 AI」组（与 Foxmail 同样绑定 my-vps 订阅，留空跟随「⚡ 节点选择」）；引入 MetaCubeX 每日更新的 category-ai-!cn.mrs 规则集 + 高频 AI 静态域名。
@@ -54,6 +55,7 @@
 
 ### 版本更新记录
 
+- 2026-11-06 v9.4：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v9.3: Route accounts.google.com to the AI group.
 - 2026-11-05 v9.2: AI desktop process rules use the AI group before generic routing.
 - 2026-11-05 v9.1：新增「🤖 AI」组（与 Foxmail 同样绑定 my-vps 订阅，留空跟随「⚡ 节点选择」）；引入 MetaCubeX 每日更新的 category-ai-!cn.yaml 规则集 + 高频 AI 静态域名，置于 Google 代理规则之前。
@@ -98,6 +100,7 @@
 
 ### 版本更新记录
 
+- 2026-11-06 v9.4：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v9.3: Route accounts.google.com to the AI group.
 - 2026-11-05 v9.2: AI desktop process rules use the AI group before generic routing.
 - 2026-11-05 v9.1：新增「🤖 AI」组（与 Foxmail 同样绑定 my-vps 订阅，留空跟随「⚡ 节点选择」）；引入 MetaCubeX 每日更新的 category-ai-!cn.mrs 规则集 + 高频 AI 静态域名，置于 Google 代理规则之前。
@@ -152,6 +155,7 @@
 
 ### 版本更新记录
 
+- 2026-11-06 v9.4：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v9.3: Route accounts.google.com to the AI group.
 - 2026-11-05 v9.2: AI desktop process rules use the AI group before generic routing.
 - 2026-11-05 v9.1：新增「🤖 AI」组（与 Foxmail 同样绑定 my-vps 订阅，留空跟随「⚡ 节点选择」）；引入 MetaCubeX 每日更新的 category-ai-!cn.yaml 规则集 + 高频 AI 静态域名，置于 Google 代理规则之前。
@@ -206,6 +210,7 @@
 
 ### 版本更新记录
 
+- 2026-11-06 v9.4：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v9.3: Route accounts.google.com to the AI group.
 - 2026-11-05 v9.2: AI desktop process rules use the AI group before generic routing.
 - 2026-11-05 v9.1：新增「🤖 AI」组（与 Foxmail 同样绑定 my-vps 订阅，留空跟随「⚡ 节点选择」）；引入 MetaCubeX 每日更新的 category-ai-!cn.mrs 规则集 + 高频 AI 静态域名，置于 Google 代理规则之前。
