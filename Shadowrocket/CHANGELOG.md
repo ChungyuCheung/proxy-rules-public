@@ -1,5 +1,12 @@
 # Shadowrocket 更新日志
 
+## 2026-11-09 15:41 UTC+8：Google 改为单层独立 VPS 分组
+
+- `cy.conf v5.29`：Google 与邮件、AI 并列，使用相同的 NovixLink 筛选与 URL 测试参数，独立自动选择 VPS 协议节点。
+- `cy-simple.conf v1.23`：Google 保留单层手选，只纳入 NovixLink VPS 节点；原 AI/邮件手选组保持。
+- 删除 `🌐 Google 节点` 子组及 Google 到 AI/PROXY/节点池的嵌套选择；需要其他地区出口时使用其他配置文件。
+- Google / YouTube / Gemini 继续共用 Google 组；规则、DNS、邮件、其他 AI 和公司/国内直连均未改动，不嵌入私密订阅。
+
 ## 2026-11-09 15:27 UTC+8：Google 公司出口可手动切换
 
 - Google / YouTube / Gemini 共用新增 `🌐 Google` 选择组，初始首选原 `🤖 AI`；本机已配置 VPS 时默认走 VPS，仓库的 `VPS_URL` 保持为空。
@@ -24,6 +31,10 @@
 - 本次只整理注释，配置内容和功能版本号保持不变。
 
 ## cy.conf
+
+### 2026-11-09 15:41 UTC+8 v5.29
+
+- Google 简化为与邮件、AI 并列的独立 VPS 分组；移除节点池与嵌套选择，规则和其他分组保持。
 
 ### 2026-11-09 15:27 UTC+8 v5.28
 
@@ -87,6 +98,10 @@
 - [v5.17] 国内常用 App 后备域名：系统 DNS（与 [Rule] 后备直连一致）
 
 ## cy-simple.conf
+
+### 2026-11-09 15:41 UTC+8 v1.23
+
+- Google 简化为与邮件、AI 并列的独立 VPS 分组；移除节点池与嵌套选择，规则和其他分组保持。
 
 ### 2026-11-09 15:27 UTC+8 v1.22
 

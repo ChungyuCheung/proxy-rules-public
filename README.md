@@ -8,9 +8,9 @@
 
 「配置」→ 右上角 + → 粘贴链接下载，然后选用。
 
-- **cy.conf** — 完整版（L大 + MetaCubeX，Google/YouTube/Gemini 共用选择组，默认 AI/VPS）
+- **cy.conf** — 完整版（L大 + MetaCubeX，邮件/AI/Google 三个独立 VPS 自动组）
   `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy.conf`
-- **cy-simple.conf** — 简约版：内网直连、中国直连、Google 出口可选、邮件与 AI 保留原组、其余代理
+- **cy-simple.conf** — 简约版：内网/中国直连，Google 独立 VPS 手选组，邮件与 AI 保持
   `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy-simple.conf`
 
 ## mihomo 覆写脚本：Bettbox / Clash Verge Rev / FlClash（Windows / macOS / Android）
@@ -33,8 +33,8 @@
 - **Clash Verge Rev**：订阅右键「编辑扩展脚本」或「全局扩展脚本」，粘贴脚本内容保存。
 - **FlClash**：同样用上面 `mihomo/` 里的 `.js` 脚本 ——「工具 → 覆写 / 脚本」添加并在订阅上启用；关闭「覆写 DNS」和「追加系统 DNS」。
 - 需要本机填写（不要提交）：脚本开头的 `VPS_URL`（自建 VPS 订阅，填写后 Foxmail 与 AI 使用 VPS、Google 默认跟随 AI，留空则跟随「⚡ 节点选择」）；公司域名改 `COMPANY_DOMAINS`。
-- Google/YouTube/Gemini 共用新增「🌐 Google」选择组，初始首选原 AI/VPS；其他 AI（含 Grok）、邮件与公司/国内明确直连规则保持。Mihomo 可直接选节点，Shadowrocket 可选对应的 Google 节点池或 PROXY。
-- 临时换区后断开相关旧连接，再检查新连接实际出口；恢复时将 Google 组切回 AI。Shadowrocket 精简版仍需先在原 AI/邮件组手选 VPS；完整版沿用 NovixLink 自动组。
+- Google/YouTube/Gemini 共用「🌐 Google」。Mihomo 保留可切换选择组、默认引用 AI/VPS；Shadowrocket 的 Google 与邮件、AI 并列，独立使用 NovixLink VPS：完整版自动测速，精简版单层手选。
+- Mihomo 可在 Google 组手动换节点，恢复时切回 AI；Shadowrocket 需要其他地区出口时直接使用其他配置文件，本配置没有 Google 节点池或两级选择。切换后断开相关旧连接，再检查新连接实际出口。
 - 旧链接 `Bettbox/bettbox-*.js` 已停用，请改用上面 `mihomo/` 的新地址重新导入（tun→tun-loyalsoldier，mrs→tun-metacubex，system-proxy→sysproxy-loyalsoldier，simple→lite-metacubex）。
 
 ## Clash Verge Rev（其他）
