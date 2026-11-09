@@ -1,7 +1,9 @@
 # Shadowrocket 更新日志
 
-## 2026-11-09：Google 全域名统一固定 VPS 出口（待验证）
+## 2026-11-09：Google 全域名统一固定 VPS 出口（客户端待实测）
 
+- 版本：`cy.conf v5.27`、`cy-simple.conf v1.21`；头部与 `#!name` 一致，最后更新时间统一为 `2026-11-09 12:21 UTC+8`。
+- 补齐已合并 Google 分流改动遗漏的版本元数据及说明；本次不再修改配置项或规则，不嵌入私密订阅。
 - `cy.conf`、`cy-simple.conf`：在 AI 规则后增加 Google 常用域名本地兜底及 MetaCubeX `classical/google.list`，统一发送到现有 `🤖 AI` 分组。
 - `cy.conf`：原 Loyalsoldier `google.txt` 子集的策略由 `PROXY` 调整为 `🤖 AI`，避免旧规则从常规代理组访问 Google。
 - 保留邮件独立组、其他海外网站主代理组、中国/公司直连及既有 DNS/QUIC 设置。简约版仍需手动选择 NovixLink VPS 节点。
@@ -15,6 +17,10 @@
 - 本次只整理注释，配置内容和功能版本号保持不变。
 
 ## cy.conf
+
+### 2026-11-09 12:21 UTC+8 v5.27
+
+- Google 常用域名兜底及完整 `google.list` 统一走 `🤖 AI`；补齐上次合并遗漏的头部版本、`#!name` 和最后更新时间，客户端待实测。
 
 ### 2026-11-06 v5.26
 
@@ -70,6 +76,10 @@
 - [v5.17] 国内常用 App 后备域名：系统 DNS（与 [Rule] 后备直连一致）
 
 ## cy-simple.conf
+
+### 2026-11-09 12:21 UTC+8 v1.21
+
+- Google 常用域名兜底及完整 `google.list` 统一走 `🤖 AI`；补齐上次合并遗漏的头部版本、`#!name` 和最后更新时间，客户端待实测。
 
 ### 2026-11-06 v1.20
 

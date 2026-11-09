@@ -1,7 +1,9 @@
 # mihomo 更新日志
 
-## 2026-11-09：Google 全域名统一固定 VPS 出口（待验证）
+## 2026-11-09：Google 全域名统一固定 VPS 出口（客户端待实测）
 
+- 版本：四份完整脚本 `v9.5`；`lite-metacubex.js v1.18`。头部最后更新时间统一为 `2026-11-09 12:21 UTC+8`。
+- 补齐已合并 Google 分流改动遗漏的版本号、时间与 README 说明；本次不再修改运行逻辑，仓库中的五处 `VPS_URL` 均为空。
 - `tun-metacubex.js`、`sysproxy-metacubex.js`、`lite-metacubex.js`：引入 MetaCubeX 完整 `geosite/google.mrs`，独立 `google-vps` 缓存，Google 流量统一走现有 `🤖 AI` 组（已设置 `VPS_URL` 时走自建 VPS）。
 - `tun-loyalsoldier.js`、`sysproxy-loyalsoldier.js`：以 MetaCubeX `geosite/google.yaml` 代替仅覆盖 Google 中国子集的 Loyalsoldier `google.txt`，同样转发到 `🤖 AI`。
 - 完整版脚本将本地 Google/YouTube 常见域名兜底改为 `🤖 AI`，并放到原有 `reject` 广告规则后，尽量保留广告拦截优先级。
@@ -20,6 +22,7 @@
 
 ### 版本更新记录
 
+- 2026-11-09 12:21 UTC+8 v1.18：Google 完整域名规则及现有本地兜底统一走 `🤖 AI`；补齐上次合并遗漏的版本元数据。仅本机填写 `VPS_URL` 后使用自建 VPS，仓库保持为空；客户端待实测。
 - 2026-11-06 v1.17：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v1.16: Route accounts.google.com to the AI group.
 - 2026-11-05 v1.15: AI desktop process rules use the AI group before generic routing.
@@ -63,6 +66,7 @@
 
 ### 版本更新记录
 
+- 2026-11-09 12:21 UTC+8 v9.5：Google 完整域名规则及现有本地兜底统一走 `🤖 AI`；补齐上次合并遗漏的版本元数据。仅本机填写 `VPS_URL` 后使用自建 VPS，仓库保持为空；客户端待实测。
 - 2026-11-06 v9.4：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v9.3: Route accounts.google.com to the AI group.
 - 2026-11-05 v9.2: AI desktop process rules use the AI group before generic routing.
@@ -108,6 +112,7 @@
 
 ### 版本更新记录
 
+- 2026-11-09 12:21 UTC+8 v9.5：Google 完整域名规则及现有本地兜底统一走 `🤖 AI`；补齐上次合并遗漏的版本元数据。仅本机填写 `VPS_URL` 后使用自建 VPS，仓库保持为空；客户端待实测。
 - 2026-11-06 v9.4：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v9.3: Route accounts.google.com to the AI group.
 - 2026-11-05 v9.2: AI desktop process rules use the AI group before generic routing.
@@ -163,6 +168,7 @@
 
 ### 版本更新记录
 
+- 2026-11-09 12:21 UTC+8 v9.5：Google 完整域名规则及现有本地兜底统一走 `🤖 AI`；补齐上次合并遗漏的版本元数据。仅本机填写 `VPS_URL` 后使用自建 VPS，仓库保持为空；客户端待实测。
 - 2026-11-06 v9.4：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v9.3: Route accounts.google.com to the AI group.
 - 2026-11-05 v9.2: AI desktop process rules use the AI group before generic routing.
@@ -218,6 +224,7 @@
 
 ### 版本更新记录
 
+- 2026-11-09 12:21 UTC+8 v9.5：Google 完整域名规则及现有本地兜底统一走 `🤖 AI`；补齐上次合并遗漏的版本元数据。仅本机填写 `VPS_URL` 后使用自建 VPS，仓库保持为空；客户端待实测。
 - 2026-11-06 v9.4：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v9.3: Route accounts.google.com to the AI group.
 - 2026-11-05 v9.2: AI desktop process rules use the AI group before generic routing.

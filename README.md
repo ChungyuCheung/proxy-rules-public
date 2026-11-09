@@ -1,6 +1,6 @@
 # proxy-rules-public
 
-代理规则 / 配置的公开镜像，由私有仓库自动同步（只放去敏后的最新版），请勿直接修改。下面都是 raw 直链，可直接填进客户端。
+代理规则 / 配置的公开镜像，由私有仓库按白名单原样同步（不自动脱敏，源文件不得填写私密订阅），请勿直接修改。下面都是 raw 直链，可直接填进客户端。
 
 通用：中国和内网域名走系统 DNS，外网用加密 DNS；已做 DNS / WebRTC 防泄漏；规则集在线更新。
 
@@ -8,9 +8,9 @@
 
 「配置」→ 右上角 + → 粘贴链接下载，然后选用。
 
-- **cy.conf** — 完整版（L大 规则，在线更新）
+- **cy.conf** — 完整版（L大 + MetaCubeX 规则，Google 走 AI/VPS，在线更新）
   `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy.conf`
-- **cy-simple.conf** — 简约版：内网直连、中国直连、其余代理
+- **cy-simple.conf** — 简约版：内网直连、中国直连、邮件与 AI/Google 走 VPS、其余代理
   `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy-simple.conf`
 
 ## mihomo 覆写脚本：Bettbox / Clash Verge Rev / FlClash（Windows / macOS / Android）
@@ -32,7 +32,8 @@
 - **Bettbox**：订阅卡片「⋮」→ 覆写 / 脚本 → 用链接添加，挂到每个订阅；关闭「覆写 DNS」。不要用「配置 → 从 URL 导入」（那里只认 YAML）。
 - **Clash Verge Rev**：订阅右键「编辑扩展脚本」或「全局扩展脚本」，粘贴脚本内容保存。
 - **FlClash**：同样用上面 `mihomo/` 里的 `.js` 脚本 ——「工具 → 覆写 / 脚本」添加并在订阅上启用；关闭「覆写 DNS」和「追加系统 DNS」。
-- 需要本机填写（不要提交）：脚本开头的 `VPS_URL`（自建 VPS 订阅，填了 Foxmail 只走它，留空则 Foxmail 跟随「⚡ 节点选择」）；公司域名改 `COMPANY_DOMAINS`。
+- 需要本机填写（不要提交）：脚本开头的 `VPS_URL`（自建 VPS 订阅，填写后 Foxmail 与 AI/Google 只走它，留空则跟随「⚡ 节点选择」）；公司域名改 `COMPANY_DOMAINS`。
+- 五份 mihomo 脚本与两份 Shadowrocket 配置使用 MetaCubeX 完整 Google 域名规则，收录的域名统一走「🤖 AI」；Gmail 收发信服务器仍优先走邮件组。Shadowrocket 须在 AI/邮件组选择同一固定公网 IP 的 VPS 节点；客户端实际出口仍需验证。
 - 旧链接 `Bettbox/bettbox-*.js` 已停用，请改用上面 `mihomo/` 的新地址重新导入（tun→tun-loyalsoldier，mrs→tun-metacubex，system-proxy→sysproxy-loyalsoldier，simple→lite-metacubex）。
 
 ## Clash Verge Rev（其他）

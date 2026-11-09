@@ -1,6 +1,6 @@
-// ===== mihomo/tun-loyalsoldier.js v9.4 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
-// 最后更新：2026-11-06 17:54 UTC+8
-// 用途：完整分流（公司/微软认证直连、Google 代理、广告拦截、Apple 直连等）；Foxmail 与 AI 服务走自建 VPS（未填则走节点选择）。需开启 TUN。
+// ===== mihomo/tun-loyalsoldier.js v9.5 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-09 12:21 UTC+8
+// 用途：完整分流（公司/微软认证直连、Google 走 AI/VPS、广告拦截、Apple 直连等）；Foxmail 与 AI 服务走自建 VPS（未填则走节点选择）。需开启 TUN。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail / AI 走「⚡ 节点选择」）；公司域名改 COMPANY_DOMAINS。
