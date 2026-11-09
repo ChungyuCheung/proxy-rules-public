@@ -1,5 +1,13 @@
 # mihomo 更新日志
 
+## 2026-11-09：Google 全域名统一固定 VPS 出口（待验证）
+
+- `tun-metacubex.js`、`sysproxy-metacubex.js`、`lite-metacubex.js`：引入 MetaCubeX 完整 `geosite/google.mrs`，独立 `google-vps` 缓存，Google 流量统一走现有 `🤖 AI` 组（已设置 `VPS_URL` 时走自建 VPS）。
+- `tun-loyalsoldier.js`、`sysproxy-loyalsoldier.js`：以 MetaCubeX `geosite/google.yaml` 代替仅覆盖 Google 中国子集的 Loyalsoldier `google.txt`，同样转发到 `🤖 AI`。
+- 完整版脚本将本地 Google/YouTube 常见域名兜底改为 `🤖 AI`，并放到原有 `reject` 广告规则后，尽量保留广告拦截优先级。
+- Foxmail IMAP/SMTP 独立组、公司/国内邮箱直连、DNS、WebRTC/QUIC、其他网站手动选择组保持原有设计。
+- 尚需客户端实机验证：主代理切换后核查 `accounts.google.com`、`mail.google.com`、`clients4.google.com`、`imap.gmail.com` 和 `smtp.gmail.com` 的实际策略与出口；不同协议须确保同一公网 IP。
+
 本目录的更新历史统一记录于此。脚本内仅保留当前版本、最后更新时间、用途、用法及必要的行为说明。新增变更请按对应文件记录于本文件，避免再次在脚本中累积历史注释。
 
 ## 2026-11-05：更新日志迁移

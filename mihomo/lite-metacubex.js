@@ -261,6 +261,7 @@ function main(config) {
     })
     config["rule-providers"] = {
         ai: mrs("domain", "geosite", "category-ai-!cn", "ai"),
+        google: mrs("domain", "geosite", "google", "google-vps"),
         cn: mrs("domain", "geosite", "cn"),
         cncidr: mrs("ipcidr", "geoip", "cn"),
     }
@@ -286,6 +287,8 @@ function main(config) {
         ...AI_EXACT_DOMAINS.map((d) => "DOMAIN," + d + "," + AI),
         ...AI_SUFFIX_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + "," + AI),
         "RULE-SET,ai," + AI,
+        // MetaCubeX 完整 Google 规则：Google 账号及 API 始终使用固定 VPS 的 AI 组
+        "RULE-SET,google," + AI,
         // 中国域名 / IP 直连
         "RULE-SET,cn,DIRECT",
         "RULE-SET,cncidr,DIRECT,no-resolve",

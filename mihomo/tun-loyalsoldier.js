@@ -308,7 +308,14 @@ function main(config) {
             interval: 86400,
             proxy: PROXY,
         },
-        google: rp("domain", "google"),
+        google: {
+            type: "http",
+            behavior: "domain",
+            url: META_YAML_BASE + "/geosite/google.yaml",
+            path: "./ruleset/loyalsoldier/google-vps.yaml",
+            interval: 86400,
+            proxy: PROXY,
+        },
         proxy: rp("domain", "proxy"),
         direct: rp("domain", "direct"),
         private: rp("domain", "private"),
@@ -319,7 +326,7 @@ function main(config) {
         lancidr: rp("ipcidr", "lancidr"),
         applications: rp("classical", "applications"),
     }
-    const googleDomainRules = toSuffixRules(GOOGLE_PROXY_DOMAINS, PROXY)
+    const googleDomainRules = toSuffixRules(GOOGLE_PROXY_DOMAINS, AI)
     const googleQuicDomainRules = GOOGLE_PROXY_DOMAINS.map((d) => `(DOMAIN-SUFFIX,${d})`).join(",")
     const microsoftAuthDomainRules = toExactRules(MICROSOFT_AUTH_DOMAINS, "DIRECT")
     const microsoftAuthSuffixRules = toSuffixRules(MICROSOFT_AUTH_SUFFIXES, "DIRECT")
@@ -369,8 +376,6 @@ function main(config) {
         ...toExactRules(AI_EXACT_DOMAINS, AI),
         ...toSuffixRules(AI_SUFFIX_DOMAINS, AI),
         "RULE-SET,ai," + AI,
-        ...googleDomainRules,
-
         "DOMAIN-SUFFIX,discord.com," + PROXY,
         "DOMAIN-SUFFIX,discordapp.com," + PROXY,
         "DOMAIN-SUFFIX,discordapp.net," + PROXY,
@@ -382,9 +387,11 @@ function main(config) {
         "RULE-SET,applications,DIRECT,no-resolve",
         "RULE-SET,private,DIRECT",
         "RULE-SET,reject,REJECT",
+        // Google 本地兜底移到广告拦截之后，并统一走固定 VPS 的 AI 组
+        ...googleDomainRules,
         "RULE-SET,icloud,DIRECT",
         "RULE-SET,apple,DIRECT",
-        "RULE-SET,google," + PROXY,
+        "RULE-SET,google," + AI,
         "RULE-SET,proxy," + PROXY,
         "RULE-SET,direct,DIRECT",
         "RULE-SET,lancidr,DIRECT,no-resolve",

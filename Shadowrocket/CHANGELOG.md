@@ -1,5 +1,12 @@
 # Shadowrocket 更新日志
 
+## 2026-11-09：Google 全域名统一固定 VPS 出口（待验证）
+
+- `cy.conf`、`cy-simple.conf`：在 AI 规则后增加 Google 常用域名本地兜底及 MetaCubeX `classical/google.list`，统一发送到现有 `🤖 AI` 分组。
+- `cy.conf`：原 Loyalsoldier `google.txt` 子集的策略由 `PROXY` 调整为 `🤖 AI`，避免旧规则从常规代理组访问 Google。
+- 保留邮件独立组、其他海外网站主代理组、中国/公司直连及既有 DNS/QUIC 设置。简约版仍需手动选择 NovixLink VPS 节点。
+- 远程规则仅覆盖规则集已收录的 Google 域名；不保证 IP 直连或所有第三方嵌入服务统一出口。需要客户端实测。
+
 本文件记录本目录配置的历史变更，按来源文件分节。历史记录描述当时的修改，当前行为以对应配置为准。后续更新在这里补充，不再累积到配置注释中。
 
 ## 2026-11-05 日志整理

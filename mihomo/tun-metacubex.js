@@ -302,7 +302,7 @@ function main(config) {
         icloud: mrs("domain", "geosite", "icloud@cn", "icloud"),
         apple: mrs("domain", "geosite", "apple@cn", "apple"),
         ai: mrs("domain", "geosite", "category-ai-!cn", "ai"),
-        google: mrs("domain", "geosite", "google@cn", "google"),
+        google: mrs("domain", "geosite", "google", "google-vps"),
         proxy: mrs("domain", "geosite", "geolocation-!cn", "proxy"),
         direct: mrs("domain", "geosite", "cn", "direct"),
         private: mrs("domain", "geosite", "private", "private"),
@@ -322,7 +322,7 @@ function main(config) {
             proxy: PROXY,
         },
     }
-    const googleDomainRules = toSuffixRules(GOOGLE_PROXY_DOMAINS, PROXY)
+    const googleDomainRules = toSuffixRules(GOOGLE_PROXY_DOMAINS, AI)
     const googleQuicDomainRules = GOOGLE_PROXY_DOMAINS.map((d) => `(DOMAIN-SUFFIX,${d})`).join(",")
     const microsoftAuthDomainRules = toExactRules(MICROSOFT_AUTH_DOMAINS, "DIRECT")
     const microsoftAuthSuffixRules = toSuffixRules(MICROSOFT_AUTH_SUFFIXES, "DIRECT")
@@ -372,8 +372,6 @@ function main(config) {
         ...toExactRules(AI_EXACT_DOMAINS, AI),
         ...toSuffixRules(AI_SUFFIX_DOMAINS, AI),
         "RULE-SET,ai," + AI,
-        ...googleDomainRules,
-
         "DOMAIN-SUFFIX,discord.com," + PROXY,
         "DOMAIN-SUFFIX,discordapp.com," + PROXY,
         "DOMAIN-SUFFIX,discordapp.net," + PROXY,
@@ -385,9 +383,11 @@ function main(config) {
         "RULE-SET,applications,DIRECT,no-resolve",
         "RULE-SET,private,DIRECT",
         "RULE-SET,reject,REJECT",
+        // Google 本地兜底移到广告拦截之后，并统一走固定 VPS 的 AI 组
+        ...googleDomainRules,
         "RULE-SET,icloud,DIRECT",
         "RULE-SET,apple,DIRECT",
-        "RULE-SET,google," + PROXY,
+        "RULE-SET,google," + AI,
         "RULE-SET,proxy," + PROXY,
         "RULE-SET,direct,DIRECT",
         "RULE-SET,lancidr,DIRECT,no-resolve",
