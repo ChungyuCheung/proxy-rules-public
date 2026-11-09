@@ -1,5 +1,5 @@
-// ===== mihomo/tun-loyalsoldier.js v9.6 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
-// 最后更新：2026-11-09 15:27 UTC+8
+// ===== mihomo/tun-loyalsoldier.js v9.7 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-10 00:57 UTC+8
 // 用途：完整分流（公司/微软认证直连、Google 选择组（默认 AI/VPS，可手选）、广告拦截、Apple 直连等）；Foxmail 与 AI 服务走自建 VPS（未填则走节点选择）。需开启 TUN。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
@@ -137,21 +137,6 @@ function toExactRules(list, policy) {
     return list.map(d => `DOMAIN,${d},${policy}`)
 }
 
-const GOOGLE_PROXY_DOMAINS = [
-    "google.com",
-    "googleapis.com",
-    "gstatic.com",
-    "googleusercontent.com",
-    "ggpht.com",
-    "googlevideo.com",
-    "youtube.com",
-    "youtu.be",
-    "ytimg.com",
-    "youtubei.googleapis.com",
-    "youtube-nocookie.com",
-    "googleadservices.com",
-]
-
 const WEBRTC_STUN_TURN_PORTS =
     'OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309))'
 
@@ -162,7 +147,22 @@ const GOOGLE_PROCESSES = [
     "GeminiAppLauncher.exe",
     "GeminiCrashpadHandler.exe",
 ]
+// Gemini 移动端及共享登录/资源接口：在广告规则和宽泛 AI 分类之前匹配。
 const GOOGLE_AI_EXACT_DOMAINS = [
+    "assistant-s3-pa.googleapis.com",
+    "speechs3proto2-pa.googleapis.com",
+    "play.googleapis.com",
+    "www.googleapis.com",
+    "apis.google.com",
+    "ogs.google.com",
+    "myaccount.google.com",
+    "www.google.com",
+    "oauth2.googleapis.com",
+    "lh3.googleusercontent.com",
+    "www.gstatic.com",
+    "ssl.gstatic.com",
+    "accounts.gstatic.com",
+    "content-autofill.googleapis.com",
     "accounts.google.com",
     "ai.google.dev",
     "alkalicore-pa.clients6.google.com",
@@ -183,6 +183,7 @@ const GOOGLE_AI_EXACT_DOMAINS = [
     "antigravity.googleapis.com",
 ]
 const GOOGLE_AI_SUFFIX_DOMAINS = [
+    "bard.google.com",
     "gemini.google.com",
     "gemini.google",
     "aistudio.google.com",
@@ -233,6 +234,12 @@ function companyProxyGroups(vpsOn, otherProviders) {
             : { "include-all": true }),
         "exclude-filter": NODE_FILTER,
     }))
+}
+
+// 仅对常用 Google 域名的 UDP 443 回退 TCP；必须先于进程/域名代理规则。
+function googleQuicRule() {
+    const domains = GOOGLE_SUFFIX_DOMAINS.map((d) => `(DOMAIN-SUFFIX,${d})`).join(",")
+    return "AND,((NETWORK,udp),(DST-PORT,443),(OR,(" + domains + "))),REJECT"
 }
 
 // 从 AI 分类中先分出 Google，避免宽泛 AI 规则抢先匹配。
@@ -390,7 +397,6 @@ function main(config) {
         lancidr: rp("ipcidr", "lancidr"),
         applications: rp("classical", "applications"),
     }
-    const googleQuicDomainRules = GOOGLE_PROXY_DOMAINS.map((d) => `(DOMAIN-SUFFIX,${d})`).join(",")
     const microsoftAuthDomainRules = toExactRules(MICROSOFT_AUTH_DOMAINS, "DIRECT")
     const microsoftAuthSuffixRules = toSuffixRules(MICROSOFT_AUTH_SUFFIXES, "DIRECT")
 
@@ -407,6 +413,7 @@ function main(config) {
         "IP-CIDR6,fc00::/7,DIRECT,no-resolve",
         "IP-CIDR6,fe80::/10,DIRECT,no-resolve",
 
+        googleQuicRule(),
         // AI app traffic precedes generic STUN, domain and application rules.
         ...GOOGLE_PROCESSES.map(p => `PROCESS-NAME,${p},${GOOGLE}`),
         ...AI_PROCESSES.map(p => `PROCESS-NAME,${p},${AI}`),
@@ -435,7 +442,6 @@ function main(config) {
         "DOMAIN-SUFFIX,msedge.net,DIRECT",
         "DOMAIN-SUFFIX,msocdn.com,DIRECT",
 
-        "AND,((NETWORK,udp),(DST-PORT,443),(OR,(" + googleQuicDomainRules + "))),REJECT",
         // Google 先进入独立选择组，其余 AI 继续使用原 AI 分组。
         ...companyAiRules(),
         ...toExactRules(AI_EXACT_DOMAINS, AI),

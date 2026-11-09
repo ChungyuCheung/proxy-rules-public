@@ -1,5 +1,12 @@
 # Shadowrocket 更新日志
 
+## 2026-11-10 00:57 UTC+8：显式补齐 Gemini 移动端与共享登录接口
+
+- `cy.conf v5.30`、`cy-simple.conf v1.24`：补齐 Bard、移动端语音、Play/API、共享账号鉴权与图片/静态资源显式规则，统一走原 `🌐 Google`，置于宽泛 AI 分类与可选广告规则之前。
+- 用户清单中的域名原本已被 Google 后缀规则覆盖，新增精确条目用于清晰维护与优先级保护，不能据此确认手机故障原因。
+- 保留 Google 独立 NovixLink VPS 分组，并标注首页台湾节点不会改变此组出口。保持 WeatherKit 路由/重写、MITM、IPv6 与 block-quic 设置；不添加 no-resolve 域名参数、宽泛关键字或新模块。
+- 本地校验配置中的规则顺序与分组；实际 Gemini/Live 仍需手机核对新连接记录。
+
 ## 2026-11-09 15:41 UTC+8：Google 改为单层独立 VPS 分组
 
 - `cy.conf v5.29`：Google 与邮件、AI 并列，使用相同的 NovixLink 筛选与 URL 测试参数，独立自动选择 VPS 协议节点。

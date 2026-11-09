@@ -1,5 +1,12 @@
 # mihomo 更新日志
 
+## 2026-11-10 00:57 UTC+8：Gemini 移动端规则与 Google QUIC 优先级
+
+- 四份完整脚本 `v9.7`、简约版 `v1.20`：补齐 Bard、移动端语音、Play/API、共享账号鉴权与图片/静态资源显式规则，统一走 `🌐 Google`。新增共享 OAuth Token 与登录静态资源接口；不使用宽泛关键字或为域名追加 no-resolve。
+- 完整版中上述关键共享接口前移到广告拦截之前；普通 Google 域名仍保留原广告优先级。原有 Google 后缀已经覆盖用户清单，本次加固显式优先级，不将无法使用归因于已证实的域名漏配。
+- Google 常用后缀的 UDP 443 限制前置至独立进程规则之前，并补入 lite；仅拒绝匹配的 QUIC 流量，TCP/HTTP2/gRPC、其他域名 UDP 与 STUN 规则保持。Google 分组、VPS 订阅和 DNS 设置不变。
+- 本地验证生成配置及规则优先级；iOS/Android 的实际出口、账号可用性和 Live 通话仍待实机验证。
+
 ## 2026-11-09 15:27 UTC+8：Google 公司出口可手动切换
 
 - Google / YouTube / Gemini 共用新增 `🌐 Google` 选择组，初始首选原 `🤖 AI`；本机已配置 VPS 时默认走 VPS，仓库的 `VPS_URL` 保持为空。

@@ -1,5 +1,5 @@
-// ===== mihomo/lite-metacubex.js v1.19 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
-// 最后更新：2026-11-09 15:27 UTC+8
+// ===== mihomo/lite-metacubex.js v1.20 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// 最后更新：2026-11-10 00:57 UTC+8
 // 用途：内网/公司直连 + 系统 DNS；中国直连；Foxmail 与 AI 服务走自建 VPS；Google 默认跟随 AI，可手选其他出口（未填则走节点选择）；其余走「⚡ 节点选择」。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
@@ -141,7 +141,22 @@ const GOOGLE_PROCESSES = [
     "GeminiAppLauncher.exe",
     "GeminiCrashpadHandler.exe",
 ]
+// Gemini 移动端及共享登录/资源接口：在广告规则和宽泛 AI 分类之前匹配。
 const GOOGLE_AI_EXACT_DOMAINS = [
+    "assistant-s3-pa.googleapis.com",
+    "speechs3proto2-pa.googleapis.com",
+    "play.googleapis.com",
+    "www.googleapis.com",
+    "apis.google.com",
+    "ogs.google.com",
+    "myaccount.google.com",
+    "www.google.com",
+    "oauth2.googleapis.com",
+    "lh3.googleusercontent.com",
+    "www.gstatic.com",
+    "ssl.gstatic.com",
+    "accounts.gstatic.com",
+    "content-autofill.googleapis.com",
     "accounts.google.com",
     "ai.google.dev",
     "alkalicore-pa.clients6.google.com",
@@ -162,6 +177,7 @@ const GOOGLE_AI_EXACT_DOMAINS = [
     "antigravity.googleapis.com",
 ]
 const GOOGLE_AI_SUFFIX_DOMAINS = [
+    "bard.google.com",
     "gemini.google.com",
     "gemini.google",
     "aistudio.google.com",
@@ -212,6 +228,12 @@ function companyProxyGroups(vpsOn, otherProviders) {
             : { "include-all": true }),
         "exclude-filter": NODE_FILTER,
     }))
+}
+
+// 仅对常用 Google 域名的 UDP 443 回退 TCP；必须先于进程/域名代理规则。
+function googleQuicRule() {
+    const domains = GOOGLE_SUFFIX_DOMAINS.map((d) => `(DOMAIN-SUFFIX,${d})`).join(",")
+    return "AND,((NETWORK,udp),(DST-PORT,443),(OR,(" + domains + "))),REJECT"
 }
 
 // 从 AI 分类中先分出 Google，避免宽泛 AI 规则抢先匹配。
@@ -338,6 +360,7 @@ function main(config) {
     config.rules = [
         // 局域网 / 私网 IP 直连
         ...LAN_CIDRS.map((c) => "IP-CIDR," + c + ",DIRECT,no-resolve"),
+        googleQuicRule(),
         // AI app traffic precedes generic STUN, domain and application rules.
         ...GOOGLE_PROCESSES.map(p => `PROCESS-NAME,${p},${GOOGLE}`),
         ...AI_PROCESSES.map(p => `PROCESS-NAME,${p},${AI}`),
