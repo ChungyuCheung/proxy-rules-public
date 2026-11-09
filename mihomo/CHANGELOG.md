@@ -1,5 +1,12 @@
 # mihomo 更新日志
 
+## 2026-11-09 15:27 UTC+8：Google 公司出口可手动切换
+
+- Google / YouTube / Gemini 共用新增 `🌐 Google` 选择组，初始首选原 `🤖 AI`；本机已配置 VPS 时默认走 VPS，仓库的 `VPS_URL` 保持为空。
+- 可在公司组选择主代理或其他节点，切换 Google 出口时其他 AI 与邮件仍使用原组。Gemini 主程序和辅助进程统一进入 Google 组。
+- MetaCubeX google / google-deepmind / youtube 分类与本地兜底配合，Google AI 分类先于宽泛 AI 分类；完整脚本的普通 Google 兜底保留原广告拦截优先级。
+- 其他 AI（含 Grok）、邮件、公司/国内明确直连、DNS 和 WebRTC/QUIC 设计保持。邮件、明确直连与其他独立进程仍是优先例外；纯 IP、未收录域名和已建立连接需在客户端另行验证。
+
 ## 2026-11-09：Google 全域名统一固定 VPS 出口（客户端待实测）
 
 - 版本：四份完整脚本 `v9.5`；`lite-metacubex.js v1.18`。头部最后更新时间统一为 `2026-11-09 12:21 UTC+8`。
@@ -22,6 +29,7 @@
 
 ### 版本更新记录
 
+- 2026-11-09 15:27 UTC+8 v1.19：新增 Google/YouTube/Gemini 共用选择组，默认引用原 AI/VPS，可手动换区；其他 AI、邮件、直连和 DNS/防泄漏策略保持，`VPS_URL` 为空。
 - 2026-11-09 12:21 UTC+8 v1.18：Google 完整域名规则及现有本地兜底统一走 `🤖 AI`；补齐上次合并遗漏的版本元数据。仅本机填写 `VPS_URL` 后使用自建 VPS，仓库保持为空；客户端待实测。
 - 2026-11-06 v1.17：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v1.16: Route accounts.google.com to the AI group.
@@ -66,6 +74,7 @@
 
 ### 版本更新记录
 
+- 2026-11-09 15:27 UTC+8 v9.6：新增 Google/YouTube/Gemini 共用选择组，默认引用原 AI/VPS，可手动换区；其他 AI、邮件、直连和 DNS/防泄漏策略保持，`VPS_URL` 为空。
 - 2026-11-09 12:21 UTC+8 v9.5：Google 完整域名规则及现有本地兜底统一走 `🤖 AI`；补齐上次合并遗漏的版本元数据。仅本机填写 `VPS_URL` 后使用自建 VPS，仓库保持为空；客户端待实测。
 - 2026-11-06 v9.4：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v9.3: Route accounts.google.com to the AI group.
@@ -112,6 +121,7 @@
 
 ### 版本更新记录
 
+- 2026-11-09 15:27 UTC+8 v9.6：新增 Google/YouTube/Gemini 共用选择组，默认引用原 AI/VPS，可手动换区；其他 AI、邮件、直连和 DNS/防泄漏策略保持，`VPS_URL` 为空。
 - 2026-11-09 12:21 UTC+8 v9.5：Google 完整域名规则及现有本地兜底统一走 `🤖 AI`；补齐上次合并遗漏的版本元数据。仅本机填写 `VPS_URL` 后使用自建 VPS，仓库保持为空；客户端待实测。
 - 2026-11-06 v9.4：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v9.3: Route accounts.google.com to the AI group.
@@ -168,6 +178,7 @@
 
 ### 版本更新记录
 
+- 2026-11-09 15:27 UTC+8 v9.6：新增 Google/YouTube/Gemini 共用选择组，默认引用原 AI/VPS，可手动换区；其他 AI、邮件、直连和 DNS/防泄漏策略保持，`VPS_URL` 为空。
 - 2026-11-09 12:21 UTC+8 v9.5：Google 完整域名规则及现有本地兜底统一走 `🤖 AI`；补齐上次合并遗漏的版本元数据。仅本机填写 `VPS_URL` 后使用自建 VPS，仓库保持为空；客户端待实测。
 - 2026-11-06 v9.4：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v9.3: Route accounts.google.com to the AI group.
@@ -224,6 +235,7 @@
 
 ### 版本更新记录
 
+- 2026-11-09 15:27 UTC+8 v9.6：新增 Google/YouTube/Gemini 共用选择组，默认引用原 AI/VPS，可手动换区；其他 AI、邮件、直连和 DNS/防泄漏策略保持，`VPS_URL` 为空。
 - 2026-11-09 12:21 UTC+8 v9.5：Google 完整域名规则及现有本地兜底统一走 `🤖 AI`；补齐上次合并遗漏的版本元数据。仅本机填写 `VPS_URL` 后使用自建 VPS，仓库保持为空；客户端待实测。
 - 2026-11-06 v9.4：在 `AI_EXACT_DOMAINS` 中补充 `http-intake.logs.us5.datadoghq.com`，生成的精确 AI 规则优先于广告拦截及通用规则集；Claude API / Bridge / 下载 / 平台域名继续由现有后缀规则覆盖。
 - 2026-11-05 v9.3: Route accounts.google.com to the AI group.

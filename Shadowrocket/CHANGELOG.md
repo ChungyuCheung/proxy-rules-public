@@ -1,5 +1,12 @@
 # Shadowrocket 更新日志
 
+## 2026-11-09 15:27 UTC+8：Google 公司出口可手动切换
+
+- Google / YouTube / Gemini 共用新增 `🌐 Google` 选择组，初始首选原 `🤖 AI`；本机已配置 VPS 时默认走 VPS，仓库的 `VPS_URL` 保持为空。
+- 可在公司组选择主代理或其他节点，切换 Google 出口时其他 AI 与邮件仍使用原组。Gemini 主程序和辅助进程统一进入 Google 组。
+- MetaCubeX google / google-deepmind / youtube 分类与本地兜底配合，Google AI 分类先于宽泛 AI 分类；完整脚本的普通 Google 兜底保留原广告拦截优先级。
+- 其他 AI（含 Grok）、邮件、公司/国内明确直连、DNS 和 WebRTC/QUIC 设计保持。邮件、明确直连与其他独立进程仍是优先例外；纯 IP、未收录域名和已建立连接需在客户端另行验证。
+
 ## 2026-11-09：Google 全域名统一固定 VPS 出口（客户端待实测）
 
 - 版本：`cy.conf v5.27`、`cy-simple.conf v1.21`；头部与 `#!name` 一致，最后更新时间统一为 `2026-11-09 12:21 UTC+8`。
@@ -17,6 +24,10 @@
 - 本次只整理注释，配置内容和功能版本号保持不变。
 
 ## cy.conf
+
+### 2026-11-09 15:27 UTC+8 v5.28
+
+- 新增 Google 公司选择组及独立节点池，Google/YouTube/Gemini 共用出口；默认首选原 AI，其他 AI 与邮件原组保持；不嵌入私密订阅。
 
 ### 2026-11-09 12:21 UTC+8 v5.27
 
@@ -76,6 +87,10 @@
 - [v5.17] 国内常用 App 后备域名：系统 DNS（与 [Rule] 后备直连一致）
 
 ## cy-simple.conf
+
+### 2026-11-09 15:27 UTC+8 v1.22
+
+- 新增 Google 公司选择组及独立节点池，Google/YouTube/Gemini 共用出口；默认首选原 AI，其他 AI 与邮件原组保持；不嵌入私密订阅。
 
 ### 2026-11-09 12:21 UTC+8 v1.21
 

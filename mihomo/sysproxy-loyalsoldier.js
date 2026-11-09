@@ -1,6 +1,6 @@
-// ===== mihomo/sysproxy-loyalsoldier.js v9.5 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
-// 最后更新：2026-11-09 12:21 UTC+8
-// 用途：同 tun-loyalsoldier.js 的分流（Google 走 AI/VPS），但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
+// ===== mihomo/sysproxy-loyalsoldier.js v9.6 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-09 15:27 UTC+8
+// 用途：同 tun-loyalsoldier.js 的分流（Google 选择组（默认 AI/VPS，可手选）），但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail / AI 走「⚡ 节点选择」）；公司域名改 COMPANY_DOMAINS。
@@ -37,41 +37,18 @@ const CUSTOM_RULES = [
 // Keep generic runtimes (browser, WebView and node) out of this list.
 const AI_PROCESSES = [
     "ChatGPT.exe",
-    "Gemini.exe",
-    "GeminiAppLauncher.exe",
-    "GeminiCrashpadHandler.exe",
     "Claude.exe",
     "codex.exe",
 ]
 
 // 海外 AI 高频静态域名兜底（配合每日自动更新的 category-ai-!cn 规则集，固定走 AI 组）
 const AI_EXACT_DOMAINS = [
-    // Claude 日志入口：精确域名分流，优先于广告拦截与通用规则集。
     "http-intake.logs.us5.datadoghq.com",
-    "accounts.google.com",
     "copilot.microsoft.com",
     "copilot-proxy.githubusercontent.com",
-    "ai.google.dev",
-    "alkalicore-pa.clients6.google.com",
-    "alkalimakersuite-pa.clients6.google.com",
-    "alkalimena-pa.clients6.google.com",
-    "webchannel-alkalimakersuite-pa.clients6.google.com",
-    "geminiweb-pa.clients.google.com",
-    "geminiweb-pa.clients6.google.com",
-    "appsgenaiserver-pa.clients.google.com",
-    "appsgenaiserver-pa.clients6.google.com",
-    "appsgenaiserver-pa.googleapis.com",
-    "cloudaicompanion.googleapis.com",
-    "cloudcode-pa.googleapis.com",
-    "daily-cloudcode-pa.googleapis.com",
-    "notebooklm-pa.googleapis.com",
-    "notebooklm.googleapis.com",
-    "antigravity-pa.googleapis.com",
-    "antigravity.googleapis.com",
 ]
 
 const AI_SUFFIX_DOMAINS = [
-    // OpenAI / ChatGPT
     "chatgpt.com",
     "openai.com",
     "openaiapi.com",
@@ -80,33 +57,13 @@ const AI_SUFFIX_DOMAINS = [
     "sora.com",
     "ai.com",
     "chat.com",
-    // Anthropic / Claude
     "anthropic.com",
     "claude.ai",
     "claude.com",
     "claudeusercontent.com",
-    // Google Gemini / AI Studio / NotebookLM / DeepMind / Antigravity
-    "gemini.google.com",
-    "gemini.google",
-    "aistudio.google.com",
-    "makersuite.google.com",
-    "notebooklm.google.com",
-    "notebooklm.google",
-    "deepmind.google",
-    "deepmind.com",
-    "antigravity.google",
-    "antigravity-unleash.goog",
-    "generativelanguage.googleapis.com",
-    "proactivebackend-pa.googleapis.com",
-    "aisandbox-pa.googleapis.com",
-    "aida.googleapis.com",
-    "jules.google.com",
-    "labs.google.com",
-    // xAI / Grok
     "x.ai",
     "grok.com",
     "grok.x.com",
-    // Copilot / Code AI
     "copilot.cloud.microsoft",
     "githubcopilot.com",
     "cursor.com",
@@ -114,7 +71,6 @@ const AI_SUFFIX_DOMAINS = [
     "cursorapi.com",
     "windsurf.com",
     "codeium.com",
-    // 其他主流海外 AI
     "perplexity.ai",
     "poe.com",
     "quora.com",
@@ -201,6 +157,109 @@ const GOOGLE_PROXY_DOMAINS = [
     "googleadservices.com",
 ]
 
+// 同公司服务共用选择组；默认跟随 AI/VPS，可在客户端手选其他节点。
+const GOOGLE = "🌐 Google"
+const GOOGLE_PROCESSES = [
+    "Gemini.exe",
+    "GeminiAppLauncher.exe",
+    "GeminiCrashpadHandler.exe",
+]
+const GOOGLE_AI_EXACT_DOMAINS = [
+    "accounts.google.com",
+    "ai.google.dev",
+    "alkalicore-pa.clients6.google.com",
+    "alkalimakersuite-pa.clients6.google.com",
+    "alkalimena-pa.clients6.google.com",
+    "webchannel-alkalimakersuite-pa.clients6.google.com",
+    "geminiweb-pa.clients.google.com",
+    "geminiweb-pa.clients6.google.com",
+    "appsgenaiserver-pa.clients.google.com",
+    "appsgenaiserver-pa.clients6.google.com",
+    "appsgenaiserver-pa.googleapis.com",
+    "cloudaicompanion.googleapis.com",
+    "cloudcode-pa.googleapis.com",
+    "daily-cloudcode-pa.googleapis.com",
+    "notebooklm-pa.googleapis.com",
+    "notebooklm.googleapis.com",
+    "antigravity-pa.googleapis.com",
+    "antigravity.googleapis.com",
+]
+const GOOGLE_AI_SUFFIX_DOMAINS = [
+    "gemini.google.com",
+    "gemini.google",
+    "aistudio.google.com",
+    "makersuite.google.com",
+    "notebooklm.google.com",
+    "notebooklm.google",
+    "deepmind.google",
+    "deepmind.com",
+    "antigravity.google",
+    "antigravity-unleash.goog",
+    "generativelanguage.googleapis.com",
+    "proactivebackend-pa.googleapis.com",
+    "aisandbox-pa.googleapis.com",
+    "aida.googleapis.com",
+    "jules.google.com",
+    "labs.google.com",
+]
+const GOOGLE_SUFFIX_DOMAINS = [
+    "google.com",
+    "googleapis.com",
+    "gstatic.com",
+    "googleusercontent.com",
+    "ggpht.com",
+    "googlevideo.com",
+    "youtube.com",
+    "youtu.be",
+    "ytimg.com",
+    "youtube-nocookie.com",
+    "googleadservices.com",
+    "google.dev",
+    "gmail.com",
+    "gemini.google",
+    "notebooklm.google",
+    "deepmind.google",
+    "deepmind.com",
+    "antigravity.google",
+    "antigravity-unleash.goog",
+]
+
+function companyProxyGroups(vpsOn, otherProviders) {
+    return [
+        { name: GOOGLE, proxies: [AI, PROXY] },
+    ].map((group) => ({
+        ...group,
+        type: "select",
+        ...(vpsOn
+            ? { "include-all-proxies": true, ...(otherProviders.length ? { use: otherProviders } : {}) }
+            : { "include-all": true }),
+        "exclude-filter": NODE_FILTER,
+    }))
+}
+
+// 从 AI 分类中先分出 Google，避免宽泛 AI 规则抢先匹配。
+function companyAiRules() {
+    return [
+        ...GOOGLE_AI_EXACT_DOMAINS.map((d) => "DOMAIN," + d + "," + GOOGLE),
+        ...GOOGLE_AI_SUFFIX_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + "," + GOOGLE),
+        "RULE-SET,google_ai," + GOOGLE,
+    ]
+}
+
+// 常见域名本地兜底；完整版仍在既有广告拦截之后匹配。
+function companyDomainRules() {
+    return [
+        ...GOOGLE_SUFFIX_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + "," + GOOGLE),
+    ]
+}
+
+function companyRemoteRules() {
+    return [
+        "RULE-SET,youtube," + GOOGLE,
+        "RULE-SET,google," + GOOGLE,
+    ]
+}
+
 function main(config) {
     if (!config || typeof config !== "object") config = {}
     // ---- 0. 多 IP 并发建连，减少首连卡顿 ----
@@ -258,6 +317,7 @@ function main(config) {
                 lazy: false,
             }
             : { name: AI, type: "select", proxies: [PROXY] },
+        ...companyProxyGroups(vpsOn, otherProviders),
     ]
     // ---- 2. Loyalsoldier 规则集 ----
     const rp = (behavior, name) => ({
@@ -269,6 +329,15 @@ function main(config) {
         proxy: PROXY,
     })
 
+    const companyProvider = (name) => ({
+        type: "http",
+        behavior: "domain",
+        format: "yaml",
+        url: META_YAML_BASE + "/geosite/" + name + ".yaml",
+        path: "./ruleset/loyalsoldier/company-" + name + ".yaml",
+        interval: 86400,
+        proxy: PROXY,
+    })
     config["rule-providers"] = {
         reject: rp("domain", "reject"),
         icloud: rp("domain", "icloud"),
@@ -282,14 +351,9 @@ function main(config) {
             interval: 86400,
             proxy: PROXY,
         },
-        google: {
-            type: "http",
-            behavior: "domain",
-            url: META_YAML_BASE + "/geosite/google.yaml",
-            path: "./ruleset/loyalsoldier/google-vps.yaml",
-            interval: 86400,
-            proxy: PROXY,
-        },
+        google: companyProvider("google"),
+        google_ai: companyProvider("google-deepmind"),
+        youtube: companyProvider("youtube"),
         proxy: rp("domain", "proxy"),
         direct: rp("domain", "direct"),
         private: rp("domain", "private"),
@@ -300,7 +364,6 @@ function main(config) {
         lancidr: rp("ipcidr", "lancidr"),
         applications: rp("classical", "applications"),
     }
-    const googleDomainRules = toSuffixRules(GOOGLE_PROXY_DOMAINS, AI)
     const googleQuicDomainRules = GOOGLE_PROXY_DOMAINS.map((d) => `(DOMAIN-SUFFIX,${d})`).join(",")
     const microsoftAuthDomainRules = toExactRules(MICROSOFT_AUTH_DOMAINS, "DIRECT")
     const microsoftAuthSuffixRules = toSuffixRules(MICROSOFT_AUTH_SUFFIXES, "DIRECT")
@@ -319,6 +382,7 @@ function main(config) {
         "IP-CIDR6,fc00::/7,DIRECT,no-resolve",
         "IP-CIDR6,fe80::/10,DIRECT,no-resolve",
         // AI app traffic precedes generic STUN, domain and application rules.
+        ...GOOGLE_PROCESSES.map(p => `PROCESS-NAME,${p},${GOOGLE}`),
         ...AI_PROCESSES.map(p => `PROCESS-NAME,${p},${AI}`),
 
         CY_STUN_PORTS + "," + PROXY,
@@ -348,7 +412,8 @@ function main(config) {
         "DOMAIN-SUFFIX,msocdn.com,DIRECT",
         // 仅阻断 Google/YouTube 的 QUIC，强制回退 TCP；须放在其代理规则之前。
         "AND,((NETWORK,udp),(DST-PORT,443),(OR,(" + googleQuicDomainRules + "))),REJECT",
-        // AI 服务与 category-ai-!cn 规则集走 🤖 AI（须在 googleDomainRules 与 google/proxy 规则集之前，防 gemini/googleapis 等被抢先匹配到节点选择）
+        // Google 先进入独立选择组，其余 AI 继续使用原 AI 分组。
+        ...companyAiRules(),
         ...toExactRules(AI_EXACT_DOMAINS, AI),
         ...toSuffixRules(AI_SUFFIX_DOMAINS, AI),
         "RULE-SET,ai," + AI,
@@ -365,13 +430,13 @@ function main(config) {
         "RULE-SET,private,DIRECT",
 
         "RULE-SET,reject,REJECT",
-        // Google 本地兜底移到广告拦截之后，并统一走固定 VPS 的 AI 组
-        ...googleDomainRules,
+        // 保留广告拦截优先级，常用公司域名在此兜底。
+        ...companyDomainRules(),
 
         "RULE-SET,icloud,DIRECT",
         "RULE-SET,apple,DIRECT",
 
-        "RULE-SET,google," + AI,
+        ...companyRemoteRules(),
         "RULE-SET,proxy," + PROXY,
 
         "RULE-SET,direct,DIRECT",
