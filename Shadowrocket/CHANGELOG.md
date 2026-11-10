@@ -1,5 +1,9 @@
 # Shadowrocket 更新日志
 
+## 2026-11-10 23:48 UTC+8：补充 amber.de 与 exaone.ai 本地 AI 后缀规则
+
+- `cy.conf v5.31`、`cy-simple.conf v1.25`：MetaCubeX `category-ai-!cn.list` 暂未收录 `amber.de` 与 `exaone.ai`，已在两份配置的本地 AI 规则区补充 `DOMAIN-SUFFIX,amber.de,🤖 AI` 与 `DOMAIN-SUFFIX,exaone.ai,🤖 AI`，位于远程 AI 列表与通用代理规则之前。
+
 ## 2026-11-10 00:57 UTC+8：显式补齐 Gemini 移动端与共享登录接口
 
 - `cy.conf v5.30`、`cy-simple.conf v1.24`：补齐 Bard、移动端语音、Play/API、共享账号鉴权与图片/静态资源显式规则，统一走原 `🌐 Google`，置于宽泛 AI 分类与可选广告规则之前。

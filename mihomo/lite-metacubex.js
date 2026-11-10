@@ -1,5 +1,5 @@
-// ===== mihomo/lite-metacubex.js v1.20 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
-// 最后更新：2026-11-10 00:57 UTC+8
+// ===== mihomo/lite-metacubex.js v1.21 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// 最后更新：2026-11-10 23:48 UTC+8
 // 用途：内网/公司直连 + 系统 DNS；中国直连；Foxmail 与 AI 服务走自建 VPS；Google 默认跟随 AI，可手选其他出口（未填则走节点选择）；其余走「⚡ 节点选择」。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
@@ -95,6 +95,8 @@ const AI_SUFFIX_DOMAINS = [
     "cohere.com",
     "groq.com",
     "fireworks.ai",
+    "amber.de",
+    "exaone.ai",
 ]
 
 // 公司/内网域名：直连 + system DNS

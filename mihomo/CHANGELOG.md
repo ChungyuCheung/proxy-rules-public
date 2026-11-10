@@ -1,5 +1,9 @@
 # mihomo 更新日志
 
+## 2026-11-10 23:48 UTC+8：补充 amber.de 与 exaone.ai 本地 AI 后缀规则
+
+- 四份完整脚本 `v9.8`、简约版 `v1.21`：MetaCubeX `category-ai-!cn` 暂未收录 `amber.de` 与 `exaone.ai`，已在 `AI_SUFFIX_DOMAINS` 中补充这两个域名后缀，统一走 `🤖 AI` 分组（优先于通用外网与广告拦截规则）。
+
 ## 2026-11-10 00:57 UTC+8：Gemini 移动端规则与 Google QUIC 优先级
 
 - 四份完整脚本 `v9.7`、简约版 `v1.20`：补齐 Bard、移动端语音、Play/API、共享账号鉴权与图片/静态资源显式规则，统一走 `🌐 Google`。新增共享 OAuth Token 与登录静态资源接口；不使用宽泛关键字或为域名追加 no-resolve。
