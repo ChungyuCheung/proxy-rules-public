@@ -1,5 +1,11 @@
 # Shadowrocket 更新日志
 
+## 2026-11-11 23:35 UTC+8：显式策略与节点筛选分层
+
+- cy.conf v5.38、cy-simple.conf v1.32：根据手机截图，v5.37 的业务组只显示 VPS，未显示显式引用的节点选择；此前仅核对文本引用的测试不足以确认客户端显示。
+- 邮件、AI、Google 顶层组不再设置 policy-regex-filter，只显式列出「⚡ 节点选择」和各自「VPS 手选」子组。正则仅放在三个独立的 VPS 手选子组中，保留各业务独立选点；共七个 select 组，无自动测速/回退。
+- 写法参考：https://github.com/Johnshall/Shadowrocket-ADBlock-Rules-Forever/blob/release/lazy_group.conf 的显式策略组与正则节点组分层示例。手机显示和更新后的保存选择仍需实测，不以文本检查代替客户端验证。
+
 ## 2026-11-11 23:00 UTC+8：节点选择仅跟随首页
 
 - cy.conf v5.37、cy-simple.conf v1.31：将「⚡ 节点选择」改为 `select,PROXY`，删除此组的 policy-regex-filter，不再纳入 WARP-reality 等具体节点。用户反馈配置更新后原手选 PROXY 变成其他节点；仅把 PROXY 放在首项无法保证客户端保存选择，现从候选列表中移除其他选项。
