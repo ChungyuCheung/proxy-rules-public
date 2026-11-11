@@ -1,5 +1,5 @@
-// ===== mihomo/tun-metacubex.js v9.8 | TUN 模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本）=====
-// 最后更新：2026-11-10 23:48 UTC+8
+// ===== mihomo/tun-metacubex.js v9.9 | TUN 模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-11 10:00 UTC+8
 // 用途：完整分流（公司/微软认证直连、Google 选择组（默认 AI/VPS，可手选）、广告拦截、Apple 直连等）；Foxmail 与 AI 服务走自建 VPS（未填则走节点选择）。需开启 TUN。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
@@ -91,6 +91,7 @@ const AI_SUFFIX_DOMAINS = [
     "groq.com",
     "fireworks.ai",
     "amber.de",
+    "ambersearch.de",
     "exaone.ai",
 ]
 

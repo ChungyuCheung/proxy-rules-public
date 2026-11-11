@@ -1,5 +1,9 @@
 # mihomo 更新日志
 
+## 2026-11-11 10:00 UTC+8：补充 ambersearch.de
+
+- 四份完整脚本 `v9.9`、简约版 `v1.22`：将 `ambersearch.de` 加入本地 AI 后缀列表，主域名及全部子域名走原 `🤖 AI` 分组；保留 `amber.de`、`exaone.ai` 及其他分流设置。
+
 ## 2026-11-10 23:48 UTC+8：补充 amber.de 与 exaone.ai 本地 AI 后缀规则
 
 - 四份完整脚本 `v9.8`、简约版 `v1.21`：MetaCubeX `category-ai-!cn` 暂未收录 `amber.de` 与 `exaone.ai`，已在 `AI_SUFFIX_DOMAINS` 中补充这两个域名后缀，统一走 `🤖 AI` 分组（优先于通用外网与广告拦截规则）。

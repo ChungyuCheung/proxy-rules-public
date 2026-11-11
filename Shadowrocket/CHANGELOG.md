@@ -1,5 +1,9 @@
 # Shadowrocket 更新日志
 
+## 2026-11-11 10:00 UTC+8：补充 ambersearch.de
+
+- `cy.conf v5.32`、`cy-simple.conf v1.26`：新增 `DOMAIN-SUFFIX,ambersearch.de,🤖 AI`，覆盖主域名及全部子域名，位于远程 AI 列表与通用代理规则之前；分组与 DNS 设置不变。
+
 ## 2026-11-10 23:48 UTC+8：补充 amber.de 与 exaone.ai 本地 AI 后缀规则
 
 - `cy.conf v5.31`、`cy-simple.conf v1.25`：MetaCubeX `category-ai-!cn.list` 暂未收录 `amber.de` 与 `exaone.ai`，已在两份配置的本地 AI 规则区补充 `DOMAIN-SUFFIX,amber.de,🤖 AI` 与 `DOMAIN-SUFFIX,exaone.ai,🤖 AI`，位于远程 AI 列表与通用代理规则之前。
