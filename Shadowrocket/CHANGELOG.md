@@ -1,5 +1,12 @@
 # Shadowrocket 更新日志
 
+## 2026-11-11 18:00 UTC+8：两台 VPS 可独立手选
+
+- cy.conf v5.34、cy-simple.conf v1.28：邮件、AI、Google 均为 select，名称筛选统一为 NovixLink / Webshare（忽略大小写、排除信息节点）。精简版邮件/AI 原本可选所有节点，本次收紧为两种 VPS 名称。
+- 各组可直接选具体 VPS 节点，或选共用的「♻️ VPS 自动」url-test 组（300 秒检查）；三个组均选自动时共用同一自动出口。手选具体节点可固定出口。
+- 先在客户端首页导入两份订阅。Webshare-Private 是原订阅策略组，不是第三个节点；实际 Webshare 节点为两条。仓库不写订阅 URL。
+- 名称筛选和选项结构测试通过；iPhone 实机连通性与配置导入仍待验证。
+
 ## 2026-11-11 17:00 UTC+8：RackNerd VPS 直连
 
 - `cy.conf v5.33`、`cy-simple.conf v1.27`：新增 `IP-CIDR,192.3.153.152/32,DIRECT,no-resolve`（含 SSH），位于自建 VPS 直连之后、大航海面板之前；经机场节点连接其 SSH 会被断开。分组与 DNS 设置不变。

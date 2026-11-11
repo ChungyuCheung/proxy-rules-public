@@ -1,11 +1,11 @@
 # =====================================================================
-# cy-clash-ios.yaml v1.6 | iPhone Clash 1.0.15 (171) / ProjectClash
-# 最后更新：2026-11-11 17:00 UTC+8
+# cy-clash-ios.yaml v1.7 | iPhone Clash 1.0.15 (171) / ProjectClash
+# 最后更新：2026-11-11 18:00 UTC+8
 # 基准：Shadowrocket cy.conf v5.26（2026-11-06）；静态规则顺序与策略保持一致。
-# 国内/内网直连；海外走 PROXY；邮件与 AI 只选 NovixLink 自建 VPS，300 秒自动测速。
+# 国内/内网直连；海外走 PROXY；邮件 / AI / Google 可手选 NovixLink / Webshare 或自动回退。
 # 使用：填写 airport1~3 的 Clash/mihomo 订阅（含自建 VPS）；删除不用的 provider 及 use 引用。
 # 首次在 PROXY 手选日常节点；默认 REJECT。单独导入的其他 Profile 不会自动进入本文件。
-# 邮件/AI：节点名须含 NovixLink（忽略大小写），排除流量/到期等信息节点；
+# 邮件/AI/Google：节点名须含 NovixLink 或 Webshare（忽略大小写），排除信息节点；
 #          无匹配节点时 REJECT，不回落机场或直连。测速不代表 Gmail 端口或 AI 服务可用。
 # DNS：直连/国内/内网/节点域名=system，海外四个 DoH 均经 PROXY；无系统 DNS 回退。
 # 规则：MetaCubeX MRS 分类对应小火箭；与 Loyalsoldier 的域名收录可能有差异。
@@ -195,7 +195,7 @@ proxy-providers:
       additional-prefix: '[A3] '
 
 # REJECT 是显式空组兜底，避免内核默认 COMPATIBLE 可能直连。
-# 首次在 PROXY 手选日常节点；邮件/AI 自动选择健康的 NovixLink 节点。
+# 首次在 PROXY 手选日常节点；业务组可手选具体 VPS 或共用自动回退。
 proxy-groups:
 - name: PROXY
   type: select
@@ -207,36 +207,51 @@ proxy-groups:
   - airport3
   exclude-filter: (?i)(剩余|剩餘|流量|到期|官网|官網|套餐|重置|公告|客服|更新|提醒|订阅|訂閱|traffic|expire|remaining|reset)
 - name: 📧 邮件
-  type: url-test
+  type: select
   proxies:
+  - ♻️ VPS 自动回退
   - REJECT
   use:
   - airport1
   - airport2
   - airport3
-  filter: (?i)NovixLink
+  filter: (?i)(NovixLink|Webshare)
   exclude-filter: (?i)(剩余|剩餘|流量|到期|官网|官網|套餐|重置|公告|客服|更新|提醒|订阅|訂閱|traffic|expire|remaining|reset)
-  url: https://www.gstatic.com/generate_204
-  expected-status: 204
-  interval: 300
-  timeout: 5000
-  tolerance: 0
-  lazy: false
 - name: 🤖 AI
-  type: url-test
+  type: select
   proxies:
+  - ♻️ VPS 自动回退
   - REJECT
   use:
   - airport1
   - airport2
   - airport3
-  filter: (?i)NovixLink
+  filter: (?i)(NovixLink|Webshare)
+  exclude-filter: (?i)(剩余|剩餘|流量|到期|官网|官網|套餐|重置|公告|客服|更新|提醒|订阅|訂閱|traffic|expire|remaining|reset)
+
+- name: 🌐 Google
+  type: select
+  proxies:
+  - ♻️ VPS 自动回退
+  - REJECT
+  use:
+  - airport1
+  - airport2
+  - airport3
+  filter: (?i)(NovixLink|Webshare)
+  exclude-filter: (?i)(剩余|剩餘|流量|到期|官网|官網|套餐|重置|公告|客服|更新|提醒|订阅|訂閱|traffic|expire|remaining|reset)
+- name: ♻️ VPS 自动回退
+  type: fallback
+  empty-fallback: REJECT
+  use:
+  - airport1
+  - airport2
+  - airport3
+  filter: (?i)(NovixLink|Webshare)
   exclude-filter: (?i)(剩余|剩餘|流量|到期|官网|官網|套餐|重置|公告|客服|更新|提醒|订阅|訂閱|traffic|expire|remaining|reset)
   url: https://www.gstatic.com/generate_204
-  expected-status: 204
   interval: 300
   timeout: 5000
-  tolerance: 0
   lazy: false
 
 # iOS 优先 MRS 预编译域名规则，减少文本规则加载内存；每日经 PROXY 更新。
@@ -277,8 +292,8 @@ rule-providers:
     type: http
     behavior: domain
     format: mrs
-    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/google@cn.mrs
-    path: ./ruleset/meta/geosite-google@cn.mrs
+    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/google.mrs
+    path: ./ruleset/meta/geosite-google-full.mrs
     interval: 86400
     proxy: PROXY
   proxy:
@@ -309,6 +324,9 @@ sub-rules:
   AI-OUT:
   - AND,((NETWORK,udp),(DST-PORT,443)),REJECT
   - MATCH,🤖 AI
+  GOOGLE-OUT:
+  - AND,((NETWORK,udp),(DST-PORT,443)),REJECT
+  - MATCH,🌐 Google
 
 # 每个 SUB-RULE 后紧跟同条件 REJECT：若内核因节点不支持 UDP 而跳过该路由，
 # 立即拒绝，避免继续命中后续 DIRECT。STUN/TURN 同理；IP 类规则保留 no-resolve。
@@ -372,7 +390,9 @@ rules:
 - DOMAIN-SUFFIX,paypalobjects.com,REJECT
 - SUB-RULE,(DOMAIN-SUFFIX,paypal.me),PROXY-OUT
 - DOMAIN-SUFFIX,paypal.me,REJECT
-- SUB-RULE,(DOMAIN,accounts.google.com),AI-OUT
+- SUB-RULE,(RULE-SET,google),GOOGLE-OUT
+- RULE-SET,google,REJECT
+- SUB-RULE,(DOMAIN,accounts.google.com),GOOGLE-OUT
 - DOMAIN,accounts.google.com,REJECT
 - SUB-RULE,(DOMAIN-SUFFIX,chatgpt.com),AI-OUT
 - DOMAIN-SUFFIX,chatgpt.com,REJECT

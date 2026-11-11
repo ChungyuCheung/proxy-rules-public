@@ -1,9 +1,9 @@
-// ===== mihomo/sysproxy-loyalsoldier.js v9.11 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
-// 最后更新：2026-11-11 17:00 UTC+8
+// ===== mihomo/sysproxy-loyalsoldier.js v9.12 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-11 18:00 UTC+8
 // 用途：同 tun-loyalsoldier.js 的分流（Google 选择组（默认 AI/VPS，可手选）），但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
 // 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
-// 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail / AI 走「⚡ 节点选择」）；公司域名改 COMPANY_DOMAINS。
+// 分组：邮件 / AI / Google 手选当前配置中的 NovixLink / Webshare 或自动回退；独立订阅卡片不会自动合并。
 // 更新日志：CHANGELOG.md
 const PROXY = "⚡ 节点选择"
 const MAIL = "📧 Foxmail"
@@ -12,7 +12,7 @@ const AI = "🤖 AI"
 // ==================== 自建 VPS（仅在本机填写）====================
 // 在下方引号内粘贴自建 VPS 的订阅链接（Clash/mihomo 格式）。Foxmail 与 AI 只走这里的节点，
 // 不写死节点名/服务器地址：机器改名、换 VPS、换地址，只改这个链接即可。
-// 只在本机脚本副本里填写，切勿提交到仓库（会泄露订阅）！留空则 Foxmail 与 AI 跟随「⚡ 节点选择」。
+// 仅作兼容，通常留空；最终业务组按当前配置的 NovixLink / Webshare 名称筛选，不读取其他订阅卡片。
 const VPS_URL = ""
 const VPS_PROVIDER = "my-vps"
 // =====================================================================================
@@ -523,7 +523,22 @@ function main(config) {
     config.dns = dns
     // webrtc: false  -- legacy (pre-mihomo); modern leak prevention via tun/client/browser. Removed to avoid unknown key.
 
-    return cyHarden20261103(config)
+    return cyVpsSelectors(cyHarden20261103(config))
+}
+
+// Only the active configuration is visible; separate client profiles are not merged.
+function cyVpsSelectors(config) {
+    const filter = "(?i)(NovixLink|Webshare)"
+    const excluded = new RegExp(NODE_FILTER.replace("(?i)", ""), "i")
+    const names = [...new Set((config.proxies || []).filter(p => p && /NovixLink|Webshare/i.test(p.name) && !excluded.test(p.name)).map(p => p.name))]
+    const use = Object.keys(config["proxy-providers"] || {})
+    const pool = { proxies: names, ...(use.length ? { use, filter } : {}), "exclude-filter": NODE_FILTER, "empty-fallback": "REJECT" }
+    const auto = "♻️ VPS 自动回退"
+    config["proxy-groups"] = config["proxy-groups"].filter(g => ![MAIL, AI, GOOGLE, auto].includes(g.name)).concat([
+        { name: auto, type: "fallback", ...pool, ...(!names.length && !use.length ? { proxies: [PROXY] } : {}), url: "https://www.gstatic.com/generate_204", interval: 300, timeout: 5000, lazy: false },
+        ...[MAIL, AI, GOOGLE].map(name => ({ name, type: "select", ...pool, proxies: [...names, auto, PROXY] })),
+    ])
+    return config
 }
 
 // =====================================================================

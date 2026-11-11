@@ -1,15 +1,15 @@
-// ===== mihomo/lite-metacubex.js v1.24 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
-// 最后更新：2026-11-11 17:00 UTC+8
+// ===== mihomo/lite-metacubex.js v1.25 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// 最后更新：2026-11-11 18:00 UTC+8
 // 用途：内网/公司直连 + 系统 DNS；中国直连；Foxmail 与 AI 服务走自建 VPS；Google 默认跟随 AI，可手选其他出口（未填则走节点选择）；其余走「⚡ 节点选择」。
 // 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
-// 需填：VPS_URL（自建 VPS 订阅，仅本机填写，留空则 Foxmail / AI 走「⚡ 节点选择」）；CUSTOM_DIRECT_DOMAINS（自己的内网域名）。
+// 分组：邮件 / AI / Google 手选当前配置中的 NovixLink / Webshare 或自动回退；独立订阅卡片不会自动合并。
 // 更新日志：CHANGELOG.md
 
 // ==================== 仅在本机填写 ====================
 // 把自建 VPS 的订阅链接（Clash/mihomo 格式）粘贴到下面引号里。
-// - Foxmail 与 AI 只会使用这个订阅里的全部节点（不按名字筛选，VPS 改名、换机器、换地址都不用改脚本）。
-// - 留空：Foxmail 与 AI 跟随「⚡ 节点选择」（机场节点）。
+// - 仅作兼容，通常留空；最终业务组仍按 NovixLink / Webshare 名称筛选。
+// - 无本地匹配且无 provider 时跟随主组；provider 筛选为空时自动组 REJECT，可手选主组。
 // - 只在本机 Bettbox 的脚本里填写，切勿提交到 GitHub（公开仓库会泄露订阅）！
 //   每次从链接更新本脚本后需要重新粘贴。
 const VPS_URL = ""
@@ -414,7 +414,22 @@ function main(config) {
         "nameserver-policy": policy,
         "use-system-hosts": true,
     }
-    return cyHarden20261103(config)
+    return cyVpsSelectors(cyHarden20261103(config))
+}
+
+// Only the active configuration is visible; separate client profiles are not merged.
+function cyVpsSelectors(config) {
+    const filter = "(?i)(NovixLink|Webshare)"
+    const excluded = new RegExp(NODE_FILTER.replace("(?i)", ""), "i")
+    const names = [...new Set((config.proxies || []).filter(p => p && /NovixLink|Webshare/i.test(p.name) && !excluded.test(p.name)).map(p => p.name))]
+    const use = Object.keys(config["proxy-providers"] || {})
+    const pool = { proxies: names, ...(use.length ? { use, filter } : {}), "exclude-filter": NODE_FILTER, "empty-fallback": "REJECT" }
+    const auto = "♻️ VPS 自动回退"
+    config["proxy-groups"] = config["proxy-groups"].filter(g => ![MAIL, AI, GOOGLE, auto].includes(g.name)).concat([
+        { name: auto, type: "fallback", ...pool, ...(!names.length && !use.length ? { proxies: [PROXY] } : {}), url: "https://www.gstatic.com/generate_204", interval: 300, timeout: 5000, lazy: false },
+        ...[MAIL, AI, GOOGLE].map(name => ({ name, type: "select", ...pool, proxies: [...names, auto, PROXY] })),
+    ])
+    return config
 }
 
 // =====================================================================

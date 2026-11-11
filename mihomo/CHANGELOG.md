@@ -1,5 +1,12 @@
 # mihomo 更新日志
 
+## 2026-11-11 18:00 UTC+8：NovixLink / Webshare 手选与自动回退
+
+- 四份完整版 v9.12、lite v1.25：最终邮件、AI、Google 均为独立 select 组，展示当前配置内名称含 NovixLink / Webshare 的节点（忽略大小写、排除信息节点）、共用的 VPS 自动回退组，以及主组。
+- 当前配置的 proxy-providers 通过 use + filter 动态引入；自动组空候选用 REJECT，避免隐式 DIRECT。无本地匹配且无 provider 时保持跟随主组。有 provider 但筛选为空时可手选主组。
+- 独立订阅卡片不会自动合并；同时使用两台 VPS 需要在客户端本机合并订阅或配置两个 provider。原 VPS_URL 保留兼容且仓库保持为空，不保存真实订阅。
+- 25 项测试全部通过，包含五份脚本与 VPS_URL 留空/已填共十份配置的 mihomo v1.19.13 原生检查；新增节点名称、信息节点排除、手选独立性、空配置与 provider 筛选断言。连通性仍需客户端实测。
+
 ## 2026-11-11 17:00 UTC+8：RackNerd VPS 直连
 
 - 四份完整脚本 `v9.11`、简约版 `v1.24`：统一加固段新增 `IP-CIDR,192.3.153.152/32,DIRECT,no-resolve`，位于自建 VPS 直连之后、大航海面板之前，包含 SSH(22)。旧规则过滤正则同步加入该 IP，避免订阅自带的同 IP 规则重复。

@@ -1,5 +1,11 @@
 # iOS 更新日志
 
+## 2026-11-11 18:00 UTC+8 — cy-clash-ios.yaml v1.7
+
+- 邮件、AI 改为手选 NovixLink / Webshare；新增 Google 独立手选组与共用 VPS 自动回退组。候选来自本配置 airport provider，无匹配时自动组 REJECT；所有真实订阅仍仅在客户端填写。
+- Google provider 从 google@cn 扩展到完整 google.mrs，优先于宽泛 AI 分类进入 GOOGLE-OUT；其 UDP 443 拒绝与不支持 UDP 时的同条件 REJECT 后备保留。原先已优先匹配的直连/邮件规则保留。
+- Python YAML 解析、分组/规则顺序断言和 mihomo v1.19.13 原生语法检查通过（本地 inline 假节点与规则，不代表手机实测）。
+
 ## 2026-11-11 17:00 UTC+8 — cy-clash-ios.yaml v1.6
 
 - 新增 RackNerd VPS `IP-CIDR,192.3.153.152/32,DIRECT,no-resolve`（含 SSH），位于自建 VPS 直连之后、大航海面板之前；经机场节点连接其 SSH 会被断开。
