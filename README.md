@@ -35,7 +35,7 @@
 - 邮件 / AI / Google 均为纯手选 select，选择具体 NovixLink / Webshare 节点；没有 VPS 自动回退或自动测速组。节点故障不会自动换节点，实际出口 IP 仍取决于上游。
 - Bettbox 使用机场订阅时，仅在本机脚本副本填写 VPS_URL / VPS_URL_2 两台 VPS 的 Clash/mihomo 订阅；仓库保持为空。直接使用 VPS 订阅卡片时可留空。独立卡片不会自动合并，点击从链接更新脚本会覆盖本地填写值。Shadowrocket 先在首页导入两份订阅，再手选节点。
 - Google/YouTube/Gemini 共用「🌐 Google」；Mihomo 的 Google 可手动跟随 AI。业务组选「⚡ 节点选择」会跟随日常主组，想保持 VPS 出口请选具体节点。切换后检查新连接的实际出口；provider 健康检查不会替手选组切换节点。
-- Shadowrocket 的「⚡ 节点选择」列出所有非信息节点，PROXY 选项跟随首页节点。邮件 / AI / Google 可手动跟随节点选择，也可直接选 VPS；普通规则中的 PROXY 仍跟随首页。没有故障自动回退。
+- Shadowrocket 的「⚡ 节点选择」仅含 PROXY，始终跟随首页节点，不再列出其他候选；更换普通节点请在首页选择。邮件 / AI / Google 可手动跟随节点选择，也可直接选 VPS。没有故障自动回退。
 - 旧链接 `Bettbox/bettbox-*.js` 已停用，请改用上面 `mihomo/` 的新地址重新导入（tun→tun-loyalsoldier，mrs→tun-metacubex，system-proxy→sysproxy-loyalsoldier，simple→lite-metacubex）。
 
 ## Clash Verge Rev（其他）

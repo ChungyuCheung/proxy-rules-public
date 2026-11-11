@@ -1,5 +1,11 @@
 # Shadowrocket 更新日志
 
+## 2026-11-11 23:00 UTC+8：节点选择仅跟随首页
+
+- cy.conf v5.37、cy-simple.conf v1.31：将「⚡ 节点选择」改为 `select,PROXY`，删除此组的 policy-regex-filter，不再纳入 WARP-reality 等具体节点。用户反馈配置更新后原手选 PROXY 变成其他节点；仅把 PROXY 放在首项无法保证客户端保存选择，现从候选列表中移除其他选项。
+- 邮件、AI、Google 保留直接手选 VPS 或跟随节点选择。更换普通节点在首页操作，不引入自动测速/回退。
+- 回归断言检查该组仅有 PROXY，业务组名称筛选和引用仍保持；Shadowrocket 更新后的选择持久性和显示需手机实测。
+
 ## 2026-11-11 22:40 UTC+8：补回普通节点手选入口
 
 - cy.conf v5.36、cy-simple.conf v1.30：新增「⚡ 节点选择」select 组，列出所有非信息节点；其中 PROXY 跟随首页所选节点。邮件、AI、Google 均可手动选择跟随该组，保留直接选择 NovixLink / Webshare 节点的选项。
