@@ -1,6 +1,6 @@
-// ===== cy-rules.js v2.14 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
-// 最后更新：2026-11-04 22:54 UTC+8
-// 用途：与 Shadowrocket cy.conf 同一套分流（国内直连、海外代理、AI/交易所分地区），自建 VPS 216.36.82.250 直连；
+// ===== cy-rules.js v2.15 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
+// 最后更新：2026-11-11 17:00 UTC+8
+// 用途：与 Shadowrocket cy.conf 同一套分流（国内直连、海外代理、AI/交易所分地区），自建 VPS 216.36.82.250、RackNerd 192.3.153.152 直连；
 //       DNS / WebRTC 防泄漏（中国+内网=system，外网=DoH 经代理；STUN 不回落直连）。手机用 Gmail App，无 Foxmail 规则。
 // 用法：配置详情 → 覆写脚本 → 用 raw 链接导入，保存并选中；每个订阅都选上。公司域名在 COMPANY_DOMAINS。
 // 更新日志：CHANGELOG.md
@@ -407,6 +407,7 @@ function main(config) {
 // 统一加固（所有 mihomo 脚本共用同一段，放在 main() 最后执行，覆盖前面的设置）
 //   1) 自建 VPS IP 直连：IP-CIDR,216.36.82.250/32,DIRECT,no-resolve 放在第 1 条规则，
 //      使用任何机场订阅时都能直接访问自己的 VPS（不经机场节点）。
+//      RackNerd VPS（192.3.153.152）紧随其后同样直连，含 SSH(22)。
 //   2) WebRTC 防泄漏：STUN/TURN 端口（3478-3481、5349、19302-19309）先走代理，
 //      节点不支持 UDP 时立即 REJECT，绝不回落 DIRECT（防止暴露真实公网 IP）。
 //   3) DNS 防泄漏，统一规则：
@@ -417,6 +418,8 @@ function main(config) {
 //   4) Foxmail（仅桌面脚本，脚本顶部有 VPS_URL 时生效）：只走 VPS_URL 里的自建 VPS 节点；VPS_URL 留空则跟随主选择组。
 // =====================================================================
 const CY_VPS_IP_RULE = "IP-CIDR,216.36.82.250/32,DIRECT,no-resolve"
+// RackNerd VPS 直连（含 SSH；经机场节点连接会被断开），紧随 VPS 规则
+const CY_RACKNERD_IP_RULES = ["IP-CIDR,192.3.153.152/32,DIRECT,no-resolve"]
 // 大航海机场订阅面板 IP 直连（拒绝代理连接），紧随 VPS 规则
 // VPS SSH(22) 例外：走主选择组，置于 VPS 直连规则之前
 const CY_VPS_SSH_MATCH = "AND,((IP-CIDR,216.36.82.250/32,no-resolve),(DST-PORT,22))"
@@ -431,13 +434,13 @@ const CY_CN_MAIL_DOMAINS = ["88.com", "email.cn", "qq.com", "foxmail.com", "exma
 function cyHarden20261103(config) {
     let rules = Array.isArray(config.rules) ? config.rules.slice() : []
     // 去掉旧的 VPS IP 规则（可能没有 no-resolve 或位置靠后）
-    rules = rules.filter((r) => !(typeof r === "string" && (/^IP-CIDR,(216\.36\.82\.250|47\.242\.128\.61)\/32,/.test(r) || /^AND,\(\(IP-CIDR,216\.36\.82\.250\//.test(r))))
+    rules = rules.filter((r) => !(typeof r === "string" && (/^IP-CIDR,(216\.36\.82\.250|192\.3\.153\.152|47\.242\.128\.61)\/32,/.test(r) || /^AND,\(\(IP-CIDR,216\.36\.82\.250\//.test(r))))
     const matchRule = rules.find((r) => typeof r === "string" && /^MATCH,/.test(r))
     const groups = Array.isArray(config["proxy-groups"]) ? config["proxy-groups"] : []
     let proxy = matchRule ? matchRule.split(",")[1].trim() : ""
     if (!proxy || proxy === "DIRECT" || proxy === "REJECT") proxy = groups.length ? groups[0].name : "DIRECT"
 
-    const head = [...(proxy && proxy !== "DIRECT" ? [CY_VPS_SSH_MATCH + "," + (groups.some((g) => g && g.name === G_SELECT) ? G_SELECT : proxy)] : []), CY_VPS_IP_RULE, ...CY_AIRPORT_IP_RULES]
+    const head = [...(proxy && proxy !== "DIRECT" ? [CY_VPS_SSH_MATCH + "," + (groups.some((g) => g && g.name === G_SELECT) ? G_SELECT : proxy)] : []), CY_VPS_IP_RULE, ...CY_RACKNERD_IP_RULES, ...CY_AIRPORT_IP_RULES]
 
     // ---- Foxmail 只走自建 VPS（仅当脚本定义了 VPS_URL 且还没有 Foxmail 组时由这里补上）----
     if (typeof VPS_URL !== "undefined" && !groups.some((g) => g && g.name === CY_MAIL)) {
@@ -494,7 +497,7 @@ function cyHarden20261103(config) {
         const block = [...cyCo, ...(hasFox ? CY_CN_MAIL_DOMAINS : [])].map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT")
         const uniq = block.filter((r, i) => block.indexOf(r) === i)
         rules = rules.filter((r) => uniq.indexOf(r) < 0)
-        head.splice(head.indexOf(CY_VPS_IP_RULE) + 1 + CY_AIRPORT_IP_RULES.length, 0, ...uniq)
+        head.splice(head.indexOf(CY_VPS_IP_RULE) + 1 + CY_RACKNERD_IP_RULES.length + CY_AIRPORT_IP_RULES.length, 0, ...uniq)
     }
     config.rules = head.concat(rules)
 

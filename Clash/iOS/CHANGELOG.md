@@ -1,5 +1,9 @@
 # iOS 更新日志
 
+## 2026-11-11 17:00 UTC+8 — cy-clash-ios.yaml v1.6
+
+- 新增 RackNerd VPS `IP-CIDR,192.3.153.152/32,DIRECT,no-resolve`（含 SSH），位于自建 VPS 直连之后、大航海面板之前；经机场节点连接其 SSH 会被断开。
+
 ## 2026-11-08 — cy-clash-ios.yaml v1.5
 
 - 基于远端最新 Shadowrocket cy.conf v5.26 同步静态规则顺序；补腾讯 ASN、完整 AI / Google 登录及 Claude 指定日志域名；删除地区分组、交易所专用清单与 weixin / wechat / qpic 关键词规则，PayPal 走 PROXY，交易所按通用规则分流。

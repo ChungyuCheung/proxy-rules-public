@@ -1,5 +1,9 @@
 # Shadowrocket 更新日志
 
+## 2026-11-11 17:00 UTC+8：RackNerd VPS 直连
+
+- `cy.conf v5.33`、`cy-simple.conf v1.27`：新增 `IP-CIDR,192.3.153.152/32,DIRECT,no-resolve`（含 SSH），位于自建 VPS 直连之后、大航海面板之前；经机场节点连接其 SSH 会被断开。分组与 DNS 设置不变。
+
 ## 2026-11-11 10:00 UTC+8：补充 ambersearch.de
 
 - `cy.conf v5.32`、`cy-simple.conf v1.26`：新增 `DOMAIN-SUFFIX,ambersearch.de,🤖 AI`，覆盖主域名及全部子域名，位于远程 AI 列表与通用代理规则之前；分组与 DNS 设置不变。

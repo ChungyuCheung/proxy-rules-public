@@ -1,6 +1,6 @@
 # =====================================================================
-# cy-clash-ios.yaml v1.5 | iPhone Clash 1.0.15 (171) / ProjectClash
-# 最后更新：2026-11-08 09:19 UTC+8
+# cy-clash-ios.yaml v1.6 | iPhone Clash 1.0.15 (171) / ProjectClash
+# 最后更新：2026-11-11 17:00 UTC+8
 # 基准：Shadowrocket cy.conf v5.26（2026-11-06）；静态规则顺序与策略保持一致。
 # 国内/内网直连；海外走 PROXY；邮件与 AI 只选 NovixLink 自建 VPS，300 秒自动测速。
 # 使用：填写 airport1~3 的 Clash/mihomo 订阅（含自建 VPS）；删除不用的 provider 及 use 引用。
@@ -316,6 +316,7 @@ rules:
 - SUB-RULE,(AND,((IP-CIDR,216.36.82.250/32,no-resolve),(DST-PORT,22))),PROXY-OUT
 - AND,((IP-CIDR,216.36.82.250/32,no-resolve),(DST-PORT,22)),REJECT
 - IP-CIDR,216.36.82.250/32,DIRECT,no-resolve
+- IP-CIDR,192.3.153.152/32,DIRECT,no-resolve
 - IP-CIDR,47.242.128.61/32,DIRECT,no-resolve
 - OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309)),PROXY
 - OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309)),REJECT
