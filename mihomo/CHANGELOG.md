@@ -1,5 +1,13 @@
 # mihomo 更新日志
 
+## 2026-11-11 20:10 UTC+8：双 VPS 订阅与纯手动选择
+
+- 四份完整版 v9.13、lite v1.26：移除 VPS 自动回退组；邮件、AI 纯 select，Google 可手选具体节点或跟随 AI。节点不可用时不自动回退到其他 VPS。
+- 新增 VPS_URL_2 / my-vps-2；两条订阅只在客户端本地填写，仓库均为空。主组排除两个专用 provider，业务组可筛选两份 provider 的 NovixLink / Webshare 节点；仅填第二条也支持。
+- 业务组保留手动跟随主组选项。provider 健康检查仅记录状态，不会改变手动选择；实际出口地址由节点上游决定。
+- 回归测试更新为四组纯手选、双 provider、机场 provider 隔离与 Google 跟随 AI；保留 UDP 保护与 VPS SSH 直连检查。
+- 验证：25 项测试全部通过，原生 mihomo v1.19.13 覆盖五份脚本 × 两个订阅各自留空/已填共 20 份配置；第二条独立填写与双订阅均已覆盖。测试 provider 使用本地 inline 数据，不代表真实服务可用。
+
 ## 2026-11-11 18:00 UTC+8：NovixLink / Webshare 手选与自动回退
 
 - 四份完整版 v9.12、lite v1.25：最终邮件、AI、Google 均为独立 select 组，展示当前配置内名称含 NovixLink / Webshare 的节点（忽略大小写、排除信息节点）、共用的 VPS 自动回退组，以及主组。

@@ -1,5 +1,11 @@
 # iOS 更新日志
 
+## 2026-11-11 20:10 UTC+8 — cy-clash-ios.yaml v1.8
+
+- 移除 VPS 自动回退组；邮件、AI、Google 均为纯 select 手选节点，Google 也可手选跟随 AI。邮件/AI 初始 REJECT，须手动选具体节点。
+- 保留 Google 分流与 QUIC / 不支持 UDP 时的拒绝保护。真实订阅继续仅在客户端填写。
+- 验证：YAML 分组/引用与 Google 分流断言、mihomo v1.19.13 原生语法检查通过（本地 inline 数据）。
+
 ## 2026-11-11 18:00 UTC+8 — cy-clash-ios.yaml v1.7
 
 - 邮件、AI 改为手选 NovixLink / Webshare；新增 Google 独立手选组与共用 VPS 自动回退组。候选来自本配置 airport provider，无匹配时自动组 REJECT；所有真实订阅仍仅在客户端填写。

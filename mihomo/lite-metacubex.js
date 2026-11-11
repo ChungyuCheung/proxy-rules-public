@@ -1,18 +1,19 @@
-// ===== mihomo/lite-metacubex.js v1.25 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
-// 最后更新：2026-11-11 18:00 UTC+8
+// ===== mihomo/lite-metacubex.js v1.26 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// 最后更新：2026-11-11 20:10 UTC+8
 // 用途：内网/公司直连 + 系统 DNS；中国直连；Foxmail 与 AI 服务走自建 VPS；Google 默认跟随 AI，可手选其他出口（未填则走节点选择）；其余走「⚡ 节点选择」。
 // 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
-// 分组：邮件 / AI / Google 手选当前配置中的 NovixLink / Webshare 或自动回退；独立订阅卡片不会自动合并。
+// 分组：邮件 / AI / Google 均为纯手动选择组（select），固定 IP 不自动切换；候选为 NovixLink / Webshare 节点及 VPS_URL / VPS_URL_2。
 // 更新日志：CHANGELOG.md
 
 // ==================== 仅在本机填写 ====================
-// 把自建 VPS 的订阅链接（Clash/mihomo 格式）粘贴到下面引号里。
-// - 仅作兼容，通常留空；最终业务组仍按 NovixLink / Webshare 名称筛选。
-// - 无本地匹配且无 provider 时跟随主组；provider 筛选为空时自动组 REJECT，可手选主组。
+// 把自建 VPS 的订阅链接（支持填 1~2 台，Clash/mihomo 格式）粘贴到下面引号里。
+// - 填了之后，在 Bettbox 切任何机场订阅时，Foxmail / AI / Google 都能直接手动点选这两台 VPS 的节点（固定 IP，不自动切换）。
+// - 留空：只筛选当前订阅里名称含 NovixLink / Webshare 的节点；无匹配时跟随「⚡ 节点选择」。
 // - 只在本机 Bettbox 的脚本里填写，切勿提交到 GitHub（公开仓库会泄露订阅）！
 //   每次从链接更新本脚本后需要重新粘贴。
 const VPS_URL = ""
+const VPS_URL_2 = ""
 // ======================================================
 
 // ==================== 自定义内网域名（可自行添加）====================
@@ -27,6 +28,7 @@ const PROXY = "⚡ 节点选择"
 const MAIL = "📧 Foxmail"
 const AI = "🤖 AI"
 const VPS_PROVIDER = "my-vps"
+const VPS_PROVIDER_2 = "my-vps-2"
 
 // 机场信息类伪节点（剩余流量/到期等）不进主组
 const NODE_FILTER =
@@ -417,17 +419,49 @@ function main(config) {
     return cyVpsSelectors(cyHarden20261103(config))
 }
 
-// Only the active configuration is visible; separate client profiles are not merged.
+// Only the active configuration is visible; separate client profiles are not merged unless VPS_URL / VPS_URL_2 is set locally.
 function cyVpsSelectors(config) {
     const filter = "(?i)(NovixLink|Webshare)"
     const excluded = new RegExp(NODE_FILTER.replace("(?i)", ""), "i")
     const names = [...new Set((config.proxies || []).filter(p => p && /NovixLink|Webshare/i.test(p.name) && !excluded.test(p.name)).map(p => p.name))]
-    const use = Object.keys(config["proxy-providers"] || {})
-    const pool = { proxies: names, ...(use.length ? { use, filter } : {}), "exclude-filter": NODE_FILTER, "empty-fallback": "REJECT" }
-    const auto = "♻️ VPS 自动回退"
-    config["proxy-groups"] = config["proxy-groups"].filter(g => ![MAIL, AI, GOOGLE, auto].includes(g.name)).concat([
-        { name: auto, type: "fallback", ...pool, ...(!names.length && !use.length ? { proxies: [PROXY] } : {}), url: "https://www.gstatic.com/generate_204", interval: 300, timeout: 5000, lazy: false },
-        ...[MAIL, AI, GOOGLE].map(name => ({ name, type: "select", ...pool, proxies: [...names, auto, PROXY] })),
+    const vps2On = typeof VPS_URL_2 !== "undefined" && typeof VPS_URL_2 === "string" && VPS_URL_2.trim() !== ""
+    if (vps2On) {
+        if (!config["proxy-providers"] || typeof config["proxy-providers"] !== "object" || Array.isArray(config["proxy-providers"])) {
+            config["proxy-providers"] = {}
+        }
+        const p2Name = typeof VPS_PROVIDER_2 !== "undefined" ? VPS_PROVIDER_2 : "my-vps-2"
+        config["proxy-providers"][p2Name] = {
+            type: "http",
+            url: VPS_URL_2.trim(),
+            proxy: PROXY,
+            interval: 86400,
+            path: "./providers/" + p2Name + ".yaml",
+            "health-check": { enable: true, url: "https://www.gstatic.com/generate_204", interval: 300 },
+        }
+    }
+    const vpsProviderNames = [
+        typeof VPS_PROVIDER !== "undefined" ? VPS_PROVIDER : "my-vps",
+        typeof VPS_PROVIDER_2 !== "undefined" ? VPS_PROVIDER_2 : "my-vps-2",
+    ]
+    const allProviders = Object.keys(config["proxy-providers"] || {})
+    const vpsProviders = allProviders.filter(k => vpsProviderNames.includes(k))
+    const otherProviders = allProviders.filter(k => !vpsProviderNames.includes(k))
+    if (vpsProviders.length) {
+        config["proxy-groups"] = (config["proxy-groups"] || []).map(g => {
+            if (!g || g.name !== PROXY) return g
+            const next = Object.assign({}, g, { "include-all-proxies": true })
+            delete next["include-all"]
+            if (otherProviders.length) next.use = otherProviders
+            else delete next.use
+            return next
+        })
+    }
+    const use = allProviders
+    const pool = { ...(use.length ? { use, filter } : {}), "exclude-filter": NODE_FILTER, "empty-fallback": "REJECT" }
+    config["proxy-groups"] = config["proxy-groups"].filter(g => ![MAIL, AI, GOOGLE].includes(g.name)).concat([
+        { name: MAIL, type: "select", ...pool, proxies: [...names, PROXY] },
+        { name: AI, type: "select", ...pool, proxies: [...names, PROXY] },
+        { name: GOOGLE, type: "select", ...pool, proxies: [AI, ...names, PROXY] },
     ])
     return config
 }

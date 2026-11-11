@@ -1,5 +1,10 @@
 # Shadowrocket 更新日志
 
+## 2026-11-11 20:10 UTC+8：移除自动选点
+
+- cy.conf v5.35、cy-simple.conf v1.29：删除 VPS 自动测速组及其引用；邮件、AI、Google 仅按 NovixLink / Webshare 名称筛选具体节点并纯手选。不再因测速或故障自动切换到其他 VPS。
+- 真实订阅仍仅在客户端首页导入，不写入仓库。手选固定的是节点，实际出口 IP 由上游决定。
+
 ## 2026-11-11 18:00 UTC+8：两台 VPS 可独立手选
 
 - cy.conf v5.34、cy-simple.conf v1.28：邮件、AI、Google 均为 select，名称筛选统一为 NovixLink / Webshare（忽略大小写、排除信息节点）。精简版邮件/AI 原本可选所有节点，本次收紧为两种 VPS 名称。
