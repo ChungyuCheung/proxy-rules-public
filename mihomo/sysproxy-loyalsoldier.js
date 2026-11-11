@@ -1,5 +1,5 @@
-// ===== mihomo/sysproxy-loyalsoldier.js v9.9 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
-// 最后更新：2026-11-11 10:00 UTC+8
+// ===== mihomo/sysproxy-loyalsoldier.js v9.10 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-11 13:49 UTC+8
 // 用途：同 tun-loyalsoldier.js 的分流（Google 选择组（默认 AI/VPS，可手选）），但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
 // 通用：VPS 216.36.82.250 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
@@ -552,6 +552,36 @@ const CY_AI = "🤖 AI"
 // 国内邮箱服务器直连（置于 Foxmail 进程规则之前，保证 88.com 等国内邮箱直接连接）；Gmail 仍走 Foxmail 组
 const CY_CN_MAIL_DOMAINS = ["88.com", "email.cn", "qq.com", "foxmail.com", "exmail.qq.com", "163.com", "126.com", "yeah.net", "188.com", "netease.com", "qiye.163.com", "sina.com", "sina.cn", "sohu.com", "139.com", "189.cn", "wo.cn", "aliyun.com", "mxhichina.com", "qiye.aliyun.com", "263.net", "21cn.com", "tom.com"]
 
+// 在原代理规则的位置阻断 QUIC，并拒绝因节点不支持 UDP 而跳过的连接。
+// 不前置全局 UDP 拒绝：先命中的公司/国内/内网 DIRECT 仍保持直连。
+function cyProtectProxyRules(rules) {
+    const policies = [PROXY, CY_MAIL, CY_AI, GOOGLE]
+    const guarded = []
+    for (const rule of rules) {
+        const parts = rule.split(",")
+        const noResolve = parts[parts.length - 1] === "no-resolve"
+        if (noResolve) parts.pop()
+        const policy = parts.pop()
+        if (!policies.includes(policy)) {
+            guarded.push(rule)
+            continue
+        }
+        const isMatch = parts[0] === "MATCH"
+        // 逻辑子条件没有策略参数；IP/RULE-SET 的 no-resolve 必须保留在条件内。
+        const condition = parts.join(",") + (noResolve ? ",no-resolve" : "")
+        guarded.push(
+            isMatch
+                ? "AND,((NETWORK,udp),(DST-PORT,443)),REJECT"
+                : "AND,((NETWORK,udp),(DST-PORT,443),(" + condition + ")),REJECT",
+            rule,
+            isMatch
+                ? "NETWORK,udp,REJECT"
+                : "AND,((NETWORK,udp),(" + condition + ")),REJECT"
+        )
+    }
+    return guarded
+}
+
 function cyHarden20261103(config) {
     let rules = Array.isArray(config.rules) ? config.rules.slice() : []
     // 过滤已有的 VPS IP 规则（可能没有 no-resolve 或位置靠后）
@@ -635,7 +665,7 @@ function cyHarden20261103(config) {
         rules = rules.filter((r) => uniq.indexOf(r) < 0)
         head.splice(head.indexOf(CY_VPS_IP_RULE) + 1 + CY_AIRPORT_IP_RULES.length, 0, ...uniq)
     }
-    config.rules = head.concat(rules)
+    config.rules = cyProtectProxyRules(head.concat(rules))
 
     // ---- DNS ----
     const dns = Object.assign({}, config.dns || {})

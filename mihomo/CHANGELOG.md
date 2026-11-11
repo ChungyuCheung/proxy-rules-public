@@ -1,5 +1,16 @@
 # mihomo 更新日志
 
+## 2026-11-11 13:49 UTC+8：代理 UDP 防直连回落与 QUIC 保护
+
+- 四份完整脚本 `v9.10`、简约版 `v1.23`：最终规则生成后统一为主代理、邮件、AI、Google 四种代理策略添加保护，原规则顺序、分组、DNS、订阅参数及仓库中留空的 `VPS_URL` 保持。
+- 在每条代理规则前以相同匹配条件拒绝 UDP 443，覆盖 OpenAI 等非 Google 目的地，促使支持回退的应用使用 TCP；不对全部流量前置 UDP 443 拦截，先命中的公司/内网/国内 DIRECT 保持。
+- 每条代理规则后添加同条件 UDP REJECT，防止节点不支持 UDP 时被内核跳过，继而命中后续 DIRECT 或其他代理出口；最终 MATCH 后同样有 UDP REJECT。其他端口的 UDP 在所选节点支持时保持代理，不支持时拒绝。
+- IP 与规则集逻辑子条件保留 `no-resolve`。原 Google QUIC 前置拒绝、STUN 代理/拒绝后备保留。系统代理版仍不能保护没有进入内核的 UDP；全局直连与主动选择 DIRECT 不在此保护范围。
+- 核对 Shadowrocket `cy.conf v5.32` 与 `cy-simple.conf v1.26`，两者已有 `block-quic = all-proxy` 和 `udp-policy-not-supported-behaviour = REJECT`，无需修改或升版。
+- 新增无依赖回归测试：`node --test mihomo/tests/udp-guard.test.cjs`，覆盖五份脚本、VPS 已填/留空、TCP/QUIC/其他 UDP、规则级拒绝、明确直连优先、SSH 例外、STUN 与 no-resolve。客户端实际出口与浏览器回退耗时仍需实机确认。
+- 验证：18 项测试通过；包含 mihomo v1.19.13 对五份脚本、VPS 已填/留空共 10 份生成配置的原生语法检查（远程 provider 换为本地 inline 测试数据，DNS/TUN 关闭，不代表订阅及实机连通性验证）。另与 Git 修改前版本对比，原规则相对顺序、DNS、策略组和 provider 参数未变。
+- 行为依据：[mihomo tunnel/tunnel.go](https://github.com/MetaCubeX/mihomo/blob/Meta/tunnel/tunnel.go) 中的 UDP `SupportUDP()` 检查与无命中默认 DIRECT；截图本身不能证明节点能力或请求已到达目标服务。
+
 ## 2026-11-11 10:00 UTC+8：补充 ambersearch.de
 
 - 四份完整脚本 `v9.9`、简约版 `v1.22`：将 `ambersearch.de` 加入本地 AI 后缀列表，主域名及全部子域名走原 `🤖 AI` 分组；保留 `amber.de`、`exaone.ai` 及其他分流设置。
