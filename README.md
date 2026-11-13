@@ -15,9 +15,26 @@
 
 ## mihomo 覆写脚本：Bettbox / Clash Verge Rev / FlClash（Windows / macOS / Android）
 
-同为 mihomo 内核，三个客户端通用，直接用 raw 链接导入。文件名 = 代理模式-规则集，选一个即可：
+同为 mihomo 内核，三个客户端通用，直接用 raw 链接导入。文件名 = 代理模式-规则集，选一个即可。
 
-- **tun-metacubex.js** — TUN 模式 + MetaCubeX .mrs 规则（推荐）
+### 第二代（推荐，`-v2` 文件，VPS_URLS 数组多 VPS）
+
+本机脚本副本的 `VPS_URLS` 数组里一行一条订阅，想要几台填几台；provider 自动编号 `my-vps-1…N`。
+
+- **tun-metacubex-v2.js** — TUN 模式 + MetaCubeX .mrs 规则（推荐）
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/tun-metacubex-v2.js`
+- **tun-loyalsoldier-v2.js** — TUN 模式 + Loyalsoldier（L大）规则
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/tun-loyalsoldier-v2.js`
+- **sysproxy-metacubex-v2.js** — 系统代理模式 + MetaCubeX .mrs 规则（不开 TUN；浏览器 WebRTC 需另装防泄漏扩展）
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/sysproxy-metacubex-v2.js`
+- **sysproxy-loyalsoldier-v2.js** — 系统代理模式 + Loyalsoldier（L大）规则（不开 TUN；浏览器 WebRTC 需另装防泄漏扩展）
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/sysproxy-loyalsoldier-v2.js`
+- **lite-metacubex-v2.js** — 简约版：内网直连、中国直连、其余代理（TUN / 系统代理均可）
+  `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/lite-metacubex-v2.js`
+
+### 旧版（v9.x / v1.x，`VPS_URL`～`VPS_URL_4` 四常量填写，最多四台）
+
+- **tun-metacubex.js** — TUN 模式 + MetaCubeX .mrs 规则
   `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/tun-metacubex.js`
 - **tun-loyalsoldier.js** — TUN 模式 + Loyalsoldier（L大）规则
   `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/tun-loyalsoldier.js`
