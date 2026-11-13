@@ -1,19 +1,21 @@
-// ===== mihomo/lite-metacubex.js v1.26 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
-// 最后更新：2026-11-11 20:10 UTC+8
+// ===== mihomo/lite-metacubex.js v1.27 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// 最后更新：2026-11-13
 // 用途：内网/公司直连 + 系统 DNS；中国直连；Foxmail 与 AI 服务走自建 VPS；Google 默认跟随 AI，可手选其他出口（未填则走节点选择）；其余走「⚡ 节点选择」。
 // 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
-// 分组：邮件 / AI / Google 均为纯手动选择组（select），固定 IP 不自动切换；候选为 NovixLink / Webshare 节点及 VPS_URL / VPS_URL_2。
+// 分组：邮件 / AI / Google 均为纯手动选择组（select）；支持 NovixLink / Webshare、XUI-Direct 和 RackNerd Reality/Hy2 节点。
 // 更新日志：CHANGELOG.md
 
 // ==================== 仅在本机填写 ====================
-// 把自建 VPS 的订阅链接（支持填 1~2 台，Clash/mihomo 格式）粘贴到下面引号里。
-// - 填了之后，在 Bettbox 切任何机场订阅时，Foxmail / AI / Google 都能直接手动点选这两台 VPS 的节点（固定 IP，不自动切换）。
-// - 留空：只筛选当前订阅里名称含 NovixLink / Webshare 的节点；无匹配时跟随「⚡ 节点选择」。
+// 最多填写四份 Clash/mihomo 订阅：可分别用于 NovixLink、Webshare、XUI 和 RackNerd 多协议订阅。
+// - 切换机场订阅后仍可手选上述节点；不会自动换节点，上游 WARP/VPNGate 的出口仍可能变化。
+// - 留空：只筛选当前订阅内上述名称的节点；无匹配时跟随「⚡ 节点选择」。
 // - 只在本机 Bettbox 的脚本里填写，切勿提交到 GitHub（公开仓库会泄露订阅）！
 //   每次从链接更新本脚本后需要重新粘贴。
 const VPS_URL = ""
 const VPS_URL_2 = ""
+const VPS_URL_3 = ""
+const VPS_URL_4 = ""
 // ======================================================
 
 // ==================== 自定义内网域名（可自行添加）====================
@@ -29,6 +31,8 @@ const MAIL = "📧 Foxmail"
 const AI = "🤖 AI"
 const VPS_PROVIDER = "my-vps"
 const VPS_PROVIDER_2 = "my-vps-2"
+const VPS_PROVIDER_3 = "my-vps-3"
+const VPS_PROVIDER_4 = "my-vps-4"
 
 // 机场信息类伪节点（剩余流量/到期等）不进主组
 const NODE_FILTER =
@@ -419,20 +423,19 @@ function main(config) {
     return cyVpsSelectors(cyHarden20261103(config))
 }
 
-// Only the active configuration is visible; separate client profiles are not merged unless VPS_URL / VPS_URL_2 is set locally.
+// Separate client profiles are not merged; fill VPS_URL through VPS_URL_4 locally to load their nodes.
 function cyVpsSelectors(config) {
-    const filter = "(?i)(NovixLink|Webshare)"
+    const filter = "(?i)(NovixLink|Webshare|^XUI-Direct$|^(WARP|VPNGate|Direct)-(Reality|Hy2)$)"
     const excluded = new RegExp(NODE_FILTER.replace("(?i)", ""), "i")
-    const names = [...new Set((config.proxies || []).filter(p => p && /NovixLink|Webshare/i.test(p.name) && !excluded.test(p.name)).map(p => p.name))]
-    const vps2On = typeof VPS_URL_2 !== "undefined" && typeof VPS_URL_2 === "string" && VPS_URL_2.trim() !== ""
-    if (vps2On) {
+    const names = [...new Set((config.proxies || []).filter(p => p && /NovixLink|Webshare|^XUI-Direct$|^(WARP|VPNGate|Direct)-(Reality|Hy2)$/i.test(p.name) && !excluded.test(p.name)).map(p => p.name))]
+    for (const [url, p2Name] of [[VPS_URL_2, VPS_PROVIDER_2], [VPS_URL_3, VPS_PROVIDER_3], [VPS_URL_4, VPS_PROVIDER_4]]) {
+        if (typeof url !== "string" || !url.trim()) continue
         if (!config["proxy-providers"] || typeof config["proxy-providers"] !== "object" || Array.isArray(config["proxy-providers"])) {
             config["proxy-providers"] = {}
         }
-        const p2Name = typeof VPS_PROVIDER_2 !== "undefined" ? VPS_PROVIDER_2 : "my-vps-2"
         config["proxy-providers"][p2Name] = {
             type: "http",
-            url: VPS_URL_2.trim(),
+            url: url.trim(),
             proxy: PROXY,
             interval: 86400,
             path: "./providers/" + p2Name + ".yaml",
@@ -442,6 +445,8 @@ function cyVpsSelectors(config) {
     const vpsProviderNames = [
         typeof VPS_PROVIDER !== "undefined" ? VPS_PROVIDER : "my-vps",
         typeof VPS_PROVIDER_2 !== "undefined" ? VPS_PROVIDER_2 : "my-vps-2",
+        VPS_PROVIDER_3,
+        VPS_PROVIDER_4,
     ]
     const allProviders = Object.keys(config["proxy-providers"] || {})
     const vpsProviders = allProviders.filter(k => vpsProviderNames.includes(k))

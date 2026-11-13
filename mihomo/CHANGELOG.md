@@ -1,5 +1,13 @@
 # mihomo 更新日志
 
+## 2026-11-13：RackNerd 直出与多协议节点加入手选组
+
+- 四份完整版 v9.14、lite v1.27：新增 VPS_URL_3 / VPS_URL_4，最多加载四份 Clash/mihomo 订阅，所有真实地址仅在客户端本地填写。
+- Foxmail、AI、Google 新增匹配 XUI-Direct，以及 WARP / VPNGate / Direct 的 Reality、Hy2 六个节点；保留 NovixLink / Webshare 候选。名称精确匹配新增节点，不引入 XUI-WARP 或无关机场节点。
+- 四份专用 provider 均与主机场组隔离，业务组保持 select；健康检查不自动切换选择，WARP / VPNGate 上游出口可能变化。
+- RackNerd 的 base64 `/sub` 在 mihomo 中使用同目录对应的 `clash.yaml`；只取 provider 节点，不导入订阅中的自动回退组。
+- 验证：25 项测试通过，包括五份脚本的四订阅共 16 种填写组合，以及 mihomo v1.19.13 对 30 份生成配置的原生语法检查；订阅实际节点名称已核对，连通性与客户端加载结果另行验证。
+
 ## 2026-11-11 20:10 UTC+8：双 VPS 订阅与纯手动选择
 
 - 四份完整版 v9.13、lite v1.26：移除 VPS 自动回退组；邮件、AI 纯 select，Google 可手选具体节点或跟随 AI。节点不可用时不自动回退到其他 VPS。
