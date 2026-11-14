@@ -1,6 +1,7 @@
-// ===== mihomo/lite-metacubex-v2.js v2.0 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本·第二代，TUN / 系统代理均可）=====
+// ===== mihomo/lite-metacubex-v2.js v1.0.0 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本·第二代，TUN / 系统代理均可）=====
 // 最后更新：2026-11-13
 // 第二代：与旧版 lite-metacubex.js（v1.x，VPS_URL 常量填写）并存；本版改用 VPS_URLS 数组，支持任意台数。
+// 第二代版本号从 v1.0.0 起独立计数，与旧版 v1.x 序列互不影响；两代靠文件名 -v2 区分。
 // 用途：内网/公司直连 + 系统 DNS；中国直连；Foxmail 与 AI 服务走自建 VPS；Google 默认跟随 AI，可手选其他出口（未填则走节点选择）；其余走「⚡ 节点选择」。
 // 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。

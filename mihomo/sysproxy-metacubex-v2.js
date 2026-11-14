@@ -1,6 +1,7 @@
-// ===== mihomo/sysproxy-metacubex-v2.js v10.0 | 系统代理模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本·第二代）=====
+// ===== mihomo/sysproxy-metacubex-v2.js v1.0.0 | 系统代理模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本·第二代）=====
 // 最后更新：2026-11-13
 // 第二代：与旧版 sysproxy-metacubex.js（v9.x，VPS_URL 常量填写）并存；本版改用 VPS_URLS 数组，支持任意台数。
+// 第二代版本号从 v1.0.0 起独立计数，与旧版 v9.x 序列互不影响。
 // 用途：同 tun-metacubex-v2.js 的分流（Google 选择组（默认 AI/VPS，可手选）），但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
 // 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
