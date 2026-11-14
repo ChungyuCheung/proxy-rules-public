@@ -1,5 +1,10 @@
 # Shadowrocket 更新日志
 
+## 2026-11-14 20:16 UTC+8：VPS 手选筛选词扩展
+
+- cy.conf v5.39、cy-simple.conf v1.33：邮件、AI、Google 三个「VPS 手选」子组的节点名称正则从 `NovixLink|Webshare` 扩展为 `NovixLink|Webshare|VPS|RackNerd`（大小写不敏感）。
+- 继续排除流量、到期、订阅公告等信息节点；保留现有手选机制，不修改顶层业务组、DNS、分流规则、订阅来源或出口策略。手机端实际节点显示需更新配置后确认。
+
 ## 2026-11-11 23:35 UTC+8：显式策略与节点筛选分层
 
 - cy.conf v5.38、cy-simple.conf v1.32：根据手机截图，v5.37 的业务组只显示 VPS，未显示显式引用的节点选择；此前仅核对文本引用的测试不足以确认客户端显示。
