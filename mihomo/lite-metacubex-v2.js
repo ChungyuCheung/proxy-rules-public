@@ -1,11 +1,11 @@
-// ===== mihomo/lite-metacubex-v2.js v1.0.0 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本·第二代，TUN / 系统代理均可）=====
-// 最后更新：2026-11-13
+// ===== mihomo/=-v2.js v1.1.0 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本·第二代，TUN / 系统代理均可）=====
+// 最后更新：2026-11-15
 // 第二代：与旧版 lite-metacubex.js（v1.x，VPS_URL 常量填写）并存；本版改用 VPS_URLS 数组，支持任意台数。
 // 第二代版本号从 v1.0.0 起独立计数，与旧版 v1.x 序列互不影响；两代靠文件名 -v2 区分。
 // 用途：内网/公司直连 + 系统 DNS；中国直连；Foxmail 与 AI 服务走自建 VPS；Google 默认跟随 AI，可手选其他出口（未填则走节点选择）；其余走「⚡ 节点选择」。
 // 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
-// 分组：邮件 / AI / Google 均为纯手动选择组（select）；支持 NovixLink / Webshare、XUI-Direct 和 RackNerd Reality/Hy2 节点。
+// 分组：邮件 / AI / Google 为纯手选组；VPS_URLS 各订阅的节点全部进入业务组（不按名称筛选，仅排除信息节点）。
 // 更新日志：CHANGELOG.md
 
 // ==================== 仅在本机填写 ====================
@@ -19,8 +19,8 @@ const VPS_URLS = [
     // "https://example.com/vps-first",
     // "https://example.com/vps-second",
 ]
-// 可选：默认候选之外额外匹配的节点名称（正则片段，与默认候选合并；一般留空）。
-// 例：填 "MyVPS|美国VPS-" 后，名称含 MyVPS 或 美国VPS- 的节点也会进入邮件/AI/Google 组。
+// 可选：当前订阅自带节点中额外匹配的名称（正则片段；VPS_URLS 订阅的节点不受名称筛选，全部显示）。
+// 例：填 "MyVPS|美国VPS-" 后，当前订阅里名称含 MyVPS 或 美国VPS- 的节点也会进入业务组。
 const VPS_EXTRA_FILTER = ""
 // ======================================================
 
@@ -434,7 +434,6 @@ function main(config) {
 function cyVpsSelectors(config) {
     const extra = typeof VPS_EXTRA_FILTER === "string" && VPS_EXTRA_FILTER.trim() !== "" ? "|" + VPS_EXTRA_FILTER.trim() : ""
     const pattern = "NovixLink|Webshare|^XUI-Direct$|^(WARP|VPNGate|Direct)-(Reality|Hy2)$" + extra
-    const filter = "(?i)(" + pattern + ")"
     const excluded = new RegExp(NODE_FILTER.replace("(?i)", ""), "i")
     const names = [...new Set((config.proxies || []).filter(p => p && new RegExp(pattern, "i").test(p.name) && !excluded.test(p.name)).map(p => p.name))]
     // Providers my-vps-1…N were created in main() from VPS_URLS; discover them by name here.
@@ -452,8 +451,9 @@ function cyVpsSelectors(config) {
             return next
         })
     }
-    const use = allProviders
-    const pool = { ...(use.length ? { use, filter } : {}), "exclude-filter": NODE_FILTER, "empty-fallback": "REJECT" }
+    // 业务组直接纳入 VPS_URLS 各订阅的全部节点（不做名称筛选，仅排除信息节点）；
+    // 只有当前订阅自带的节点仍按上面的名称正则匹配。
+    const pool = { ...(vpsProviderNames.length ? { use: vpsProviderNames } : {}), "exclude-filter": NODE_FILTER, "empty-fallback": "REJECT" }
     config["proxy-groups"] = config["proxy-groups"].filter(g => ![MAIL, AI, GOOGLE].includes(g.name)).concat([
         { name: MAIL, type: "select", ...pool, proxies: [...names, PROXY] },
         { name: AI, type: "select", ...pool, proxies: [...names, PROXY] },
