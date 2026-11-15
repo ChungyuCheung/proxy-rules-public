@@ -1,4 +1,4 @@
-// ===== mihomo/=-v2.js v1.1.0 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本·第二代）=====
+// ===== mihomo/tun-loyalsoldier-v2.js v1.1.0 | TUN 模式 + Loyalsoldier 规则（mihomo 覆写脚本·第二代）=====
 // 最后更新：2026-11-15
 // 第二代：与旧版 tun-loyalsoldier.js（v9.x，VPS_URL 常量填写）并存；本版改用 VPS_URLS 数组，支持任意台数。
 // 第二代版本号从 v1.0.0 起独立计数，与旧版 v9.x 序列互不影响。

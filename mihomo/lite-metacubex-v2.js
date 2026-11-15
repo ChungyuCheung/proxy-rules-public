@@ -1,4 +1,4 @@
-// ===== mihomo/=-v2.js v1.1.0 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本·第二代，TUN / 系统代理均可）=====
+// ===== mihomo/lite-metacubex-v2.js v1.1.0 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本·第二代，TUN / 系统代理均可）=====
 // 最后更新：2026-11-15
 // 第二代：与旧版 lite-metacubex.js（v1.x，VPS_URL 常量填写）并存；本版改用 VPS_URLS 数组，支持任意台数。
 // 第二代版本号从 v1.0.0 起独立计数，与旧版 v1.x 序列互不影响；两代靠文件名 -v2 区分。
