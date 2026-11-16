@@ -1,9 +1,9 @@
-// ===== mihomo/lite-metacubex.js v1.27 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
-// 最后更新：2026-11-13
+// ===== mihomo/lite-metacubex.js v1.28 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// 最后更新：2026-11-16
 // 用途：内网/公司直连 + 系统 DNS；中国直连；Foxmail 与 AI 服务走自建 VPS；Google 默认跟随 AI，可手选其他出口（未填则走节点选择）；其余走「⚡ 节点选择」。
 // 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
-// 分组：邮件 / AI / Google 均为纯手动选择组（select）；支持 NovixLink / Webshare、XUI-Direct 和 RackNerd Reality/Hy2 节点。
+// 分组：邮件 / AI / Google 为纯手选组；VPS 订阅的节点全部进入业务组（不按名称筛选，仅排除信息节点）。
 // 更新日志：CHANGELOG.md
 
 // ==================== 仅在本机填写 ====================
@@ -425,7 +425,6 @@ function main(config) {
 
 // Separate client profiles are not merged; fill VPS_URL through VPS_URL_4 locally to load their nodes.
 function cyVpsSelectors(config) {
-    const filter = "(?i)(NovixLink|Webshare|^XUI-Direct$|^(WARP|VPNGate|Direct)-(Reality|Hy2)$)"
     const excluded = new RegExp(NODE_FILTER.replace("(?i)", ""), "i")
     const names = [...new Set((config.proxies || []).filter(p => p && /NovixLink|Webshare|^XUI-Direct$|^(WARP|VPNGate|Direct)-(Reality|Hy2)$/i.test(p.name) && !excluded.test(p.name)).map(p => p.name))]
     for (const [url, p2Name] of [[VPS_URL_2, VPS_PROVIDER_2], [VPS_URL_3, VPS_PROVIDER_3], [VPS_URL_4, VPS_PROVIDER_4]]) {
@@ -461,8 +460,9 @@ function cyVpsSelectors(config) {
             return next
         })
     }
-    const use = allProviders
-    const pool = { ...(use.length ? { use, filter } : {}), "exclude-filter": NODE_FILTER, "empty-fallback": "REJECT" }
+    // 业务组直接纳入 VPS 订阅的全部节点（不做名称筛选，仅排除信息节点）；
+    // 只有当前订阅自带的节点仍按名称正则匹配。
+    const pool = { ...(vpsProviders.length ? { use: vpsProviders } : {}), "exclude-filter": NODE_FILTER, "empty-fallback": "REJECT" }
     config["proxy-groups"] = config["proxy-groups"].filter(g => ![MAIL, AI, GOOGLE].includes(g.name)).concat([
         { name: MAIL, type: "select", ...pool, proxies: [...names, PROXY] },
         { name: AI, type: "select", ...pool, proxies: [...names, PROXY] },
