@@ -1,5 +1,17 @@
 # mihomo 更新日志
 
+## 2026-11-17 20:35 UTC+8：第三代脚本（-v3 新文件，融合 Homeport 静态住宅 IP 链式代理）
+
+- 新增第三代五份文件（`tun-metacubex-v3.js`、`tun-loyalsoldier-v3.js`、`sysproxy-metacubex-v3.js`、`sysproxy-loyalsoldier-v3.js`、`lite-metacubex-v3.js`），版本号统一从 **v3.0.0** 起计数；第一代与第二代（`-v2.js`）文件保持不变。
+- 核心能力：参考 `0xkaka/homeport`（Fork：`ChungyuCheung/homeport`），新增 `WEBSHARE_PROXIES` 数组，支持在本机填写多个 Webshare 静态住宅代理（`"IP:端口:用户名:密码"`、`"自定义名|IP:端口:用户名:密码"` 或对象格式），自动生成绑定 `dialer-proxy: "HP_Relay"` 的 `socks5` 住宅节点（`🏠 Webshare-1 (IP)` 等）。
+- 解决 VPS 单点故障痛点：通过「本机 → `HP_Relay`（机场节点前置中转）→ `🏠 Webshare-N`（静态住宅代理）→ 目标站点」链式转发，当自建 VPS 故障、失联或流量耗尽时，`📧 Foxmail`、`🤖 AI`、`🌐 Google` 与 `🏠 住宅出口` 仍能经由机场节点中转继续使用静态住宅 IP。
+- 新增两个纯手选 `select` 分组（共 6 个手选组）：
+  - `🏠 住宅出口`：专门接管支付、人机验证、风控与遥测域名（Stripe、Persona、hCaptcha、Cloudflare 验证、reCAPTCHA、Sentry、Datadog、GrowthBook、Fathom、Segment、SiftScience、Intercom、Webshare、IPInfo 及 Google 钱包进程），置于广告拦截 `reject` 规则之前，防止风控/遥测域名被拦截引发封号；同时作为候选组加入 `📧 Foxmail`、`🤖 AI`、`🌐 Google`。
+  - `HP_Relay`：Webshare 静态住宅节点的前置中转组（`type: select`），默认首选 `⚡ 节点选择`，并筛选台/日/新/美/韩机场节点（排除香港、倍率、IPv6、信息节点与 `^🏠` 住宅节点自身），底部保留 `DIRECT` 兜底。
+- 补充 Claude / Anthropic 规则：新增 `2607:6bc0::/48` 与 `2607:6bc0:11::/48` IPv6 拒绝规则、Anthropic AS399358 IPv4 段 `160.79.104.0/21`（无需额外 GeoASN 库）、`clau.de` / `claudemcpcontent.com` / `modelcontextprotocol.io` 后缀及移动端进程名。
+- UDP 与防环路加固：`cyProtectProxyRules` 同步覆盖 `🏠 住宅出口`（阻断 QUIC UDP 443 并拒绝不支持 UDP 的回落）；主组与 `HP_Relay` 自动排除 `^🏠` 节点，防止链式代理自引用环路；仓库模板中 `VPS_URLS` 与 `WEBSHARE_PROXIES` 均保持为空 `[]`。
+- 验证：64 项单测全部通过，覆盖三代共 15 份脚本。
+
 ## 2026-11-16：旧版对齐第二代，业务组不再按名称筛选 VPS 节点
 
 - 旧版五份文件 v9.14 → **v9.15**、lite v1.27 → **v1.28**：与第二代 v1.1.0 行为对齐——邮件/AI/Google 业务组直接纳入 VPS 订阅 provider 的**全部节点**（仅排除信息节点），不再套名称正则；机场自带 provider 不再进入业务组。

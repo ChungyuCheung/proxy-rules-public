@@ -1,5 +1,15 @@
 # Shadowrocket 更新日志
 
+## 2026-11-17 21:15 UTC+8：大版本升级（cy.conf v6.0 / cy-simple.conf v2.0，融合 Homeport 静态住宅代理链架构）
+
+- `cy.conf` v5.39 → **v6.0**、`cy-simple.conf` v1.33 → **v2.0**：与 mihomo 第三代（`-v3.js v3.0.0`）全面对齐，引入 Homeport 静态住宅代理链（Proxy Chain / Relay）分组与风控分流规则。
+- 新增策略组（共 10 个纯手选 `select` 组，继续保持「顶层显式策略组」与「子组 `policy-regex-filter`」严格分层，不混用）：
+  - `🏠 住宅出口`（顶层组，可选 `⚡ 节点选择` 或 `🏠 住宅出口 VPS 手选`）与 `🏠 住宅出口 VPS 手选`（子组）：专门接管支付、人机验证、风控与指纹检测域名（Stripe、Persona、hCaptcha、Cloudflare 验证、reCAPTCHA、Sentry、Datadog、GrowthBook、Fathom、Segment、SiftScience、Intercom、Webshare、IPInfo）。
+  - `HP_Relay`（前置机场中转手选组）：供 Shadowrocket 首页添加的 Webshare Socks5 静态住宅节点在「代理链（Relay）」中引用，自动筛选台/日/新/美/韩机场节点（排除香港、倍率、IPv6、信息节点与住宅/VPS节点自身），解决自建 VPS 故障时 Webshare 住宅 IP 失效的问题。
+  - 顶层 `📧 邮件`、`🤖 AI`、`🌐 Google` 同步加入 `🏠 住宅出口` 选项；四个业务手选子组正则扩展为 `NovixLink|Webshare|Homeport|住宅|🏠|VPS|RackNerd`。
+- 补充 Claude / Anthropic 规则：新增 `2607:6bc0::/48` 与 `2607:6bc0:11::/48` IPv6 拒绝规则、Anthropic AS399358 专属 IP 段（`IP-CIDR,160.79.104.0/21` 与 `IP-ASN,399358`）、以及 `clau.de`、`claudemcpcontent.com`、`modelcontextprotocol.io` 后缀规则。
+- 验证：64 项单测全部通过（含 Shadowrocket 10 分组分层结构、正则匹配、防自引用与 `HP_Relay` 过滤断言）。
+
 ## 2026-11-14 20:16 UTC+8：VPS 手选筛选词扩展
 
 - cy.conf v5.39、cy-simple.conf v1.33：邮件、AI、Google 三个「VPS 手选」子组的节点名称正则从 `NovixLink|Webshare` 扩展为 `NovixLink|Webshare|VPS|RackNerd`（大小写不敏感）。
