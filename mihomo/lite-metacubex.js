@@ -1,5 +1,5 @@
-// ===== mihomo/lite-metacubex.js v1.28 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
-// 最后更新：2026-11-16
+// ===== mihomo/lite-metacubex.js v1.29 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本，TUN / 系统代理均可）=====
+// 最后更新：2026-11-17 22:10 UTC+8
 // 用途：内网/公司直连 + 系统 DNS；中国直连；Foxmail 与 AI 服务走自建 VPS；Google 默认跟随 AI，可手选其他出口（未填则走节点选择）；其余走「⚡ 节点选择」。
 // 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
@@ -68,10 +68,25 @@ const AI_SUFFIX_DOMAINS = [
     "sora.com",
     "ai.com",
     "chat.com",
+    "ant.dev",
     "anthropic.com",
+    "anthropic.team",
+    "antspace.dev",
+    "chatbotclaude.com",
+    "clau.de",
     "claude.ai",
+    "claude.app",
     "claude.com",
+    "claude.dev",
+    "claude.new",
+    "claude.site",
+    "claudeacademy.com",
+    "claudemcpclient.com",
+    "claudemcpcontent.com",
+    "claudepages.dev",
+    "claudestudio.com",
     "claudeusercontent.com",
+    "modelcontextprotocol.io",
     "x.ai",
     "grok.com",
     "grok.x.com",

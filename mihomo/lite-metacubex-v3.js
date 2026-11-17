@@ -1,5 +1,5 @@
-// ===== mihomo/lite-metacubex-v3.js v3.0.0 | 简约版 + MetaCubeX 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代，TUN / 系统代理均可）=====
-// 最后更新：2026-11-17 20:35 UTC+8
+// ===== mihomo/lite-metacubex-v3.js v3.0.1 | 简约版 + MetaCubeX 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代，TUN / 系统代理均可）=====
+// 最后更新：2026-11-17 22:10 UTC+8
 // 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合 0xkaka/homeport 静态住宅 IP 链式代理方案（Webshare 等）。
 // 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / 住宅出口）仍可通过
 //   「本机 → HP_Relay（机场节点中转）→ Webshare 静态住宅代理 → 目标站点」正常访问，不再因单点 VPS 故障导致住宅 IP 失效。
@@ -100,12 +100,24 @@ const AI_SUFFIX_DOMAINS = [
     "sora.com",
     "ai.com",
     "chat.com",
+    "ant.dev",
     "anthropic.com",
-    "claude.ai",
-    "claude.com",
+    "anthropic.team",
+    "antspace.dev",
+    "chatbotclaude.com",
     "clau.de",
-    "claudeusercontent.com",
+    "claude.ai",
+    "claude.app",
+    "claude.com",
+    "claude.dev",
+    "claude.new",
+    "claude.site",
+    "claudeacademy.com",
+    "claudemcpclient.com",
     "claudemcpcontent.com",
+    "claudepages.dev",
+    "claudestudio.com",
+    "claudeusercontent.com",
     "modelcontextprotocol.io",
     "x.ai",
     "grok.com",

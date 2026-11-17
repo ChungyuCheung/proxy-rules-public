@@ -1,5 +1,10 @@
 # mihomo 更新日志
 
+## 2026-11-17 22:10 UTC+8：补全 Claude / Anthropic 生态 17 个域名后缀至 AI 组
+
+- 第三代 `*-v3.js` v3.0.0 → **v3.0.1**、第二代 `*-v2.js` v1.1.0 → **v1.1.1**、第一代 v9.15 → **v9.16**（`lite-metacubex.js` v1.28 → **v1.29**）：
+- 在 `AI_SUFFIX_DOMAINS` 中补齐 Claude / Anthropic 全套 17 个域名后缀（含 `ant.dev`、`anthropic.com`、`anthropic.team`、`antspace.dev`、`chatbotclaude.com`、`clau.de`、`claude.ai`、`claude.app`、`claude.com`、`claude.dev`、`claude.new`、`claude.site`、`claudeacademy.com`、`claudemcpclient.com`、`claudemcpcontent.com`、`claudepages.dev`、`claudestudio.com`，并保留 `claudeusercontent.com`、`modelcontextprotocol.io`），统一走 `🤖 AI` 分组。
+
 ## 2026-11-17 20:35 UTC+8：第三代脚本（-v3 新文件，融合 Homeport 静态住宅 IP 链式代理）
 
 - 新增第三代五份文件（`tun-metacubex-v3.js`、`tun-loyalsoldier-v3.js`、`sysproxy-metacubex-v3.js`、`sysproxy-loyalsoldier-v3.js`、`lite-metacubex-v3.js`），版本号统一从 **v3.0.0** 起计数；第一代与第二代（`-v2.js`）文件保持不变。

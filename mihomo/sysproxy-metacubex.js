@@ -1,5 +1,5 @@
-// ===== mihomo/sysproxy-metacubex.js v9.15 | 系统代理模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本）=====
-// 最后更新：2026-11-16
+// ===== mihomo/sysproxy-metacubex.js v9.16 | 系统代理模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-17 22:10 UTC+8
 // 用途：同 tun-metacubex.js 的分流（Google 选择组（默认 AI/VPS，可手选）），但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
 // 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
@@ -64,10 +64,25 @@ const AI_SUFFIX_DOMAINS = [
     "sora.com",
     "ai.com",
     "chat.com",
+    "ant.dev",
     "anthropic.com",
+    "anthropic.team",
+    "antspace.dev",
+    "chatbotclaude.com",
+    "clau.de",
     "claude.ai",
+    "claude.app",
     "claude.com",
+    "claude.dev",
+    "claude.new",
+    "claude.site",
+    "claudeacademy.com",
+    "claudemcpclient.com",
+    "claudemcpcontent.com",
+    "claudepages.dev",
+    "claudestudio.com",
     "claudeusercontent.com",
+    "modelcontextprotocol.io",
     "x.ai",
     "grok.com",
     "grok.x.com",

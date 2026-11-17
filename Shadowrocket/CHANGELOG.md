@@ -1,5 +1,9 @@
 # Shadowrocket 更新日志
 
+## 2026-11-17 22:10 UTC+8：补全 Claude / Anthropic 生态 17 个域名后缀至 AI 组
+
+- `cy.conf` v6.0 → **v6.1**、`cy-simple.conf` v2.0 → **v2.1**：在本地 AI 规则区补齐 `ant.dev`、`anthropic.team`、`antspace.dev`、`chatbotclaude.com`、`claude.app`、`claude.dev`、`claude.new`、`claude.site`、`claudeacademy.com`、`claudemcpclient.com`、`claudepages.dev`、`claudestudio.com` 等全部 17 个 Claude/Anthropic 域名后缀，统一走 `🤖 AI` 分组。
+
 ## 2026-11-17 21:15 UTC+8：大版本升级（cy.conf v6.0 / cy-simple.conf v2.0，融合 Homeport 静态住宅代理链架构）
 
 - `cy.conf` v5.39 → **v6.0**、`cy-simple.conf` v1.33 → **v2.0**：与 mihomo 第三代（`-v3.js v3.0.0`）全面对齐，引入 Homeport 静态住宅代理链（Proxy Chain / Relay）分组与风控分流规则。

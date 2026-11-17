@@ -1,5 +1,5 @@
-// ===== mihomo/tun-metacubex-v2.js v1.1.0 | TUN 模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本·第二代）=====
-// 最后更新：2026-11-15
+// ===== mihomo/tun-metacubex-v2.js v1.1.1 | TUN 模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本·第二代）=====
+// 最后更新：2026-11-17 22:10 UTC+8
 // 第二代：与旧版 tun-metacubex.js（v9.x，VPS_URL 常量填写）并存；本版改用 VPS_URLS 数组，支持任意台数。
 // 第二代版本号从 v1.0.0 起独立计数，与旧版 v9.x 序列互不影响。
 // 用途：完整分流（公司/微软认证直连、Google 选择组（默认 AI/VPS，可手选）、广告拦截、Apple 直连等）；Foxmail 与 AI 服务走自建 VPS（未填则走节点选择）。需开启 TUN。
@@ -66,10 +66,25 @@ const AI_SUFFIX_DOMAINS = [
     "sora.com",
     "ai.com",
     "chat.com",
+    "ant.dev",
     "anthropic.com",
+    "anthropic.team",
+    "antspace.dev",
+    "chatbotclaude.com",
+    "clau.de",
     "claude.ai",
+    "claude.app",
     "claude.com",
+    "claude.dev",
+    "claude.new",
+    "claude.site",
+    "claudeacademy.com",
+    "claudemcpclient.com",
+    "claudemcpcontent.com",
+    "claudepages.dev",
+    "claudestudio.com",
     "claudeusercontent.com",
+    "modelcontextprotocol.io",
     "x.ai",
     "grok.com",
     "grok.x.com",
