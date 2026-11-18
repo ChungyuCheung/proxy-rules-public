@@ -1,5 +1,9 @@
 # Shadowrocket 更新日志
 
+## 2026-11-18 12:40 UTC+8：恢复 [MITM] 段支撑 App「模块」重写（cy.conf v6.3）
+
+- v6.2 移除 `[MITM]` 的判断不成立：模块（iRingo 天气/定位等）的 `[Rewrite]` 规则由 App「模块」自带、不写入配置文件，`[MITM] enable = true` 正是模块重写/脚本生效的必要开关，原有 6 个主机名也是这些模块的兜底（iRingo 官方说明「需要启用重写、脚本、MitM 功能」）。恢复 `enable = true`、`h2 = true` 与原主机名列表，并补充注释说明用途；v6.2 其余改动全部保持。`cy-simple.conf` 维持 v2.2（本就无 MITM 段）。
+
 ## 2026-11-18 12:20 UTC+8：遥测域名移出住宅链 + 手选组补齐 mihomo V3 节点名 + 移除遗留 MITM（cy.conf v6.2 / cy-simple.conf v2.2）
 
 - `cy.conf` v6.1 → **v6.2**、`cy-simple.conf` v2.1 → **v2.2**：`sentry.io`、`datadoghq.com`、`browser-intake-datadoghq.com`、`growthbook.io`、`usefathom.com`、`segment.io` 六个纯遥测/统计域名从「🏠 住宅出口」改走 `PROXY`——它们被大量外网网站嵌入，两跳住宅链（机场节点 → Webshare 住宅）会明显拖慢页面加载；新增 `# 2.06)` / `# 2.7)` 显式规则区，仍置于可选广告拦截规则之前，防止开启广告拦截后脚本被拦破坏页面。Stripe / hCaptcha / reCAPTCHA / Cloudflare 验证 / Persona / Sift / Intercom 等真正需要住宅 IP 的域名保持不变。
