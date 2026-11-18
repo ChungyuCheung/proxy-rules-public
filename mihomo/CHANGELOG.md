@@ -1,5 +1,10 @@
 # mihomo 更新日志
 
+## 2026-11-18 12:20 UTC+8：纯遥测域名移出住宅链（第三代 v3.0.1 → v3.0.2）
+
+- 五份 `*-v3.js` v3.0.1 → **v3.0.2**：新增 `TELEMETRY_SUFFIX_DOMAINS`（`sentry.io`、`datadoghq.com`、`browser-intake-datadoghq.com`、`growthbook.io`、`usefathom.com`、`segment.io`），六个纯遥测/统计域名从「🏠 住宅出口」改走「⚡ 节点选择」——它们被大量外网网站嵌入，两跳住宅链（机场节点 → Webshare 住宅）会明显拖慢页面加载；规则仍置于广告拦截 reject 之前，防止开启广告拦截后脚本被拦破坏页面。Stripe / hCaptcha / reCAPTCHA / Cloudflare 验证 / Persona / Sift / Intercom 等保持住宅出口不变。第一代 / 第二代脚本不改动。
+- 测试同步更新：`browser-intake-datadoghq.com` 断言改为 PROXY，新增 `sentry.io` 断言。
+
 ## 2026-11-17 22:10 UTC+8：补全 Claude / Anthropic 生态 17 个域名后缀至 AI 组
 
 - 第三代 `*-v3.js` v3.0.0 → **v3.0.1**、第二代 `*-v2.js` v1.1.0 → **v1.1.1**、第一代 v9.15 → **v9.16**（`lite-metacubex.js` v1.28 → **v1.29**）：

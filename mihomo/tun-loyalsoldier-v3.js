@@ -1,5 +1,5 @@
-// ===== mihomo/tun-loyalsoldier-v3.js v3.0.1 | TUN 模式 + Loyalsoldier 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代）=====
-// 最后更新：2026-11-17 22:10 UTC+8
+// ===== mihomo/tun-loyalsoldier-v3.js v3.0.2 | TUN 模式 + Loyalsoldier 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代）=====
+// 最后更新：2026-11-18 12:20 UTC+8
 // 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合 0xkaka/homeport 静态住宅 IP 链式代理方案（Webshare 等）。
 // 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / 住宅出口）仍可通过
 //   「本机 → HP_Relay（机场节点中转）→ Webshare 静态住宅代理 → 目标站点」正常访问，不再因单点 VPS 故障导致住宅 IP 失效。
@@ -160,7 +160,7 @@ const AI_IP_CIDRS = [
     "160.79.104.0/21",
 ]
 
-// 风控、支付、人机验证、客服与指纹检测域名：统一走「🏠 住宅出口」（置于广告拦截 reject 之前，防止遥测/验证域名被拦截导致封号）
+// 风控、支付、人机验证、客服与指纹检测域名：统一走「🏠 住宅出口」（置于广告拦截 reject 之前，防止验证域名被拦截导致封号）
 const HOMEPORT_SUFFIX_DOMAINS = [
     "stripe.com",
     "stripe.network",
@@ -169,17 +169,22 @@ const HOMEPORT_SUFFIX_DOMAINS = [
     "hcaptcha.com",
     "challenges.cloudflare.com",
     "recaptcha.net",
+    "siftscience.com",
+    "intercom.io",
+    "intercomcdn.com",
+    "webshare.io",
+    "ipinfo.io",
+]
+
+// 纯遥测/统计域名：被大量外网网站嵌入，走两跳住宅链会明显拖慢页面加载（v3.0.2 起改走主代理「⚡ 节点选择」）。
+// 仍置于广告拦截 reject 之前，防止开启广告拦截后脚本被拦破坏页面。
+const TELEMETRY_SUFFIX_DOMAINS = [
     "sentry.io",
     "datadoghq.com",
     "browser-intake-datadoghq.com",
     "growthbook.io",
     "usefathom.com",
     "segment.io",
-    "siftscience.com",
-    "intercom.io",
-    "intercomcdn.com",
-    "webshare.io",
-    "ipinfo.io",
 ]
 
 // 公司/内网域名: 一律直连
@@ -523,6 +528,7 @@ function main(config) {
         "RULE-SET,ai," + AI,
         ...AI_IP_CIDRS.map(c => "IP-CIDR," + c + "," + AI + ",no-resolve"),
         ...toSuffixRules(HOMEPORT_SUFFIX_DOMAINS, HOMEPORT),
+        ...toSuffixRules(TELEMETRY_SUFFIX_DOMAINS, PROXY),
         "DOMAIN-SUFFIX,discord.com," + PROXY,
         "DOMAIN-SUFFIX,discordapp.com," + PROXY,
         "DOMAIN-SUFFIX,discordapp.net," + PROXY,

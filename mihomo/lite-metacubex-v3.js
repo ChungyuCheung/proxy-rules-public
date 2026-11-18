@@ -1,5 +1,5 @@
-// ===== mihomo/lite-metacubex-v3.js v3.0.1 | 简约版 + MetaCubeX 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代，TUN / 系统代理均可）=====
-// 最后更新：2026-11-17 22:10 UTC+8
+// ===== mihomo/lite-metacubex-v3.js v3.0.2 | 简约版 + MetaCubeX 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代，TUN / 系统代理均可）=====
+// 最后更新：2026-11-18 12:20 UTC+8
 // 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合 0xkaka/homeport 静态住宅 IP 链式代理方案（Webshare 等）。
 // 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / 住宅出口）仍可通过
 //   「本机 → HP_Relay（机场节点中转）→ Webshare 静态住宅代理 → 目标站点」正常访问，不再因单点 VPS 故障导致住宅 IP 失效。
@@ -167,17 +167,21 @@ const HOMEPORT_SUFFIX_DOMAINS = [
     "hcaptcha.com",
     "challenges.cloudflare.com",
     "recaptcha.net",
+    "siftscience.com",
+    "intercom.io",
+    "intercomcdn.com",
+    "webshare.io",
+    "ipinfo.io",
+]
+
+// 纯遥测/统计域名：被大量外网网站嵌入，走两跳住宅链会明显拖慢页面加载（v3.0.2 起改走主代理「⚡ 节点选择」）
+const TELEMETRY_SUFFIX_DOMAINS = [
     "sentry.io",
     "datadoghq.com",
     "browser-intake-datadoghq.com",
     "growthbook.io",
     "usefathom.com",
     "segment.io",
-    "siftscience.com",
-    "intercom.io",
-    "intercomcdn.com",
-    "webshare.io",
-    "ipinfo.io",
 ]
 
 // 公司/内网域名：直连 + system DNS
@@ -443,6 +447,7 @@ function main(config) {
         "RULE-SET,ai," + AI,
         ...AI_IP_CIDRS.map((c) => "IP-CIDR," + c + "," + AI + ",no-resolve"),
         ...HOMEPORT_SUFFIX_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + "," + HOMEPORT),
+        ...TELEMETRY_SUFFIX_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + "," + PROXY),
         // 中国域名 / IP 直连
         "RULE-SET,cn,DIRECT",
         "RULE-SET,cncidr,DIRECT,no-resolve",

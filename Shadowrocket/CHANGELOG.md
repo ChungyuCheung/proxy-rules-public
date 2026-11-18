@@ -1,5 +1,13 @@
 # Shadowrocket 更新日志
 
+## 2026-11-18 12:20 UTC+8：遥测域名移出住宅链 + 手选组补齐 mihomo V3 节点名 + 移除遗留 MITM（cy.conf v6.2 / cy-simple.conf v2.2）
+
+- `cy.conf` v6.1 → **v6.2**、`cy-simple.conf` v2.1 → **v2.2**：`sentry.io`、`datadoghq.com`、`browser-intake-datadoghq.com`、`growthbook.io`、`usefathom.com`、`segment.io` 六个纯遥测/统计域名从「🏠 住宅出口」改走 `PROXY`——它们被大量外网网站嵌入，两跳住宅链（机场节点 → Webshare 住宅）会明显拖慢页面加载；新增 `# 2.06)` / `# 2.7)` 显式规则区，仍置于可选广告拦截规则之前，防止开启广告拦截后脚本被拦破坏页面。Stripe / hCaptcha / reCAPTCHA / Cloudflare 验证 / Persona / Sift / Intercom 等真正需要住宅 IP 的域名保持不变。
+- 四个「VPS 手选」子组的节点名正则补齐 mihomo V3 同款精确名 `^XUI-Direct$` 与 `^(WARP|VPNGate|Direct)-(Reality|Hy2)$`，消除两边筛选不一致（此前手机端看不到这些命名的 VPS 节点）。
+- `cy.conf` 移除遗留的 `[MITM]` 段：配置不含 `[Rewrite]` 重写规则时 MITM 无作用、徒增开销与证书校验失败风险；`weatherkit.apple.com` 的 PROXY 路由规则保留，iRingo 天气重写可在 App「模块」中单独启用。
+- mihomo 五个第三代脚本同步遥测域名调整（v3.0.1 → v3.0.2）；`kunyi-pro` / `kunqi-gz` 复核为内网单标签主机名（沿用全局扩展脚本 v4.5 的结论，非笔误），不改动。
+- 测试同步更新并全部通过（65 项）：`browser-intake-datadoghq.com` 断言改为 PROXY，新增 sentry.io 与 XUI-Direct / WARP-Reality 节点名断言。
+
 ## 2026-11-17 22:10 UTC+8：补全 Claude / Anthropic 生态 17 个域名后缀至 AI 组
 
 - `cy.conf` v6.0 → **v6.1**、`cy-simple.conf` v2.0 → **v2.1**：在本地 AI 规则区补齐 `ant.dev`、`anthropic.team`、`antspace.dev`、`chatbotclaude.com`、`claude.app`、`claude.dev`、`claude.new`、`claude.site`、`claudeacademy.com`、`claudemcpclient.com`、`claudepages.dev`、`claudestudio.com` 等全部 17 个 Claude/Anthropic 域名后缀，统一走 `🤖 AI` 分组。
