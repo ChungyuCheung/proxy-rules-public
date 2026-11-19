@@ -1,5 +1,5 @@
-// ===== mihomo/tun-metacubex-v3.js v3.0.5 | TUN 模式 + MetaCubeX .mrs 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代）=====
-// 最后更新：2026-11-19 13:36 UTC+8
+// ===== mihomo/tun-metacubex-v3.js v3.0.6 | TUN 模式 + MetaCubeX .mrs 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代）=====
+// 最后更新：2026-11-19 15:20 UTC+8
 // 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合 0xkaka/homeport 静态住宅 IP 链式代理方案（Webshare 等）。
 // 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / 住宅出口）仍可通过
 //   「本机 → HP_Relay（机场节点中转）→ Webshare 静态住宅代理 → 目标站点」正常访问，不再因单点 VPS 故障导致住宅 IP 失效。
@@ -100,6 +100,7 @@ const CLAUDE_EXACT_DOMAINS = [
 
 // 海外 AI 高频静态域名兜底（配合每日自动更新的 MetaCubeX category-ai-!cn.mrs 规则集，固定走 AI 组）
 const AI_EXACT_DOMAINS = [
+    "js.stripe.com",
     "copilot.microsoft.com",
     "copilot-proxy.githubusercontent.com",
 ]

@@ -1,5 +1,9 @@
 # mihomo 更新日志
 
+## 2026-11-19 15:20 UTC+8 · tun-metacubex-v3.js v3.0.6
+
+- ChatGPT 付款表单使用的 `js.stripe.com` 按完整主机名走「🤖 AI」。现有 `r.stripe.com` 精确规则继续走 AI，其他 Stripe 域名沿用现有住宅出口规则。
+
 ## 2026-11-19 12:46 UTC+8 · v1.0.1 / v2.0.1 / v3.0.4
 
 - Claude 主域继续按后缀分流。七个指定第三方入口按完整主机名匹配到「🤖 AI」，优先于通用 Google、住宅出口和遥测规则。
