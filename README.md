@@ -17,7 +17,7 @@
 
 同为 mihomo 内核，三个客户端通用，直接用 raw 链接导入。文件名 = 代理模式-规则集，选一个即可。
 
-### 第三代（最新推荐，`-v3` 文件，融合 Homeport 静态住宅链式代理 + `VPS_URLS` 数组）
+### V3 代（最新推荐，`-v3` 文件，v3.x，融合 Homeport 静态住宅链式代理 + `VPS_URLS` 数组）
 
 本机填写 `WEBSHARE_PROXIES`（借机场 `HP_Relay` 节点中转，VPS 故障时住宅 IP 仍可用）与 `VPS_URLS`；仓库均保持为空 `[]`。
 
@@ -32,7 +32,7 @@
 - **lite-metacubex-v3.js** — 简约版 + Homeport 住宅链式代理（TUN / 系统代理均可）
   `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/lite-metacubex-v3.js`
 
-### 第二代（`-v2` 文件，VPS_URLS 数组多 VPS）
+### V2 代（`-v2` 文件，v2.x，VPS_URLS 数组多 VPS）
 
 本机脚本副本的 `VPS_URLS` 数组里一行一条订阅，想要几台填几台；provider 自动编号 `my-vps-1…N`。
 
@@ -47,7 +47,7 @@
 - **lite-metacubex-v2.js** — 简约版：内网直连、中国直连、其余代理（TUN / 系统代理均可）
   `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/lite-metacubex-v2.js`
 
-### 旧版（v9.x / v1.x，`VPS_URL`～`VPS_URL_4` 四常量填写，最多四台）
+### V1 代（v1.x，`VPS_URL`～`VPS_URL_4` 四常量填写，最多四台）
 
 - **tun-metacubex.js** — TUN 模式 + MetaCubeX .mrs 规则
   `https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/tun-metacubex.js`

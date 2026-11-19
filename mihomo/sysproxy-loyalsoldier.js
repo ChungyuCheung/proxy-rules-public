@@ -1,7 +1,7 @@
-// ===== mihomo/sysproxy-loyalsoldier.js v9.16 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
-// 最后更新：2026-11-17 22:10 UTC+8
+// ===== mihomo/sysproxy-loyalsoldier.js v1.0.0 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本）=====
+// 最后更新：2026-11-19 09:54 UTC+8
 // 用途：同 tun-loyalsoldier.js 的分流（Google 选择组（默认 AI/VPS，可手选）），但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
-// 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
+// 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶（两者 SSH(22) 例外走主选择组）；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 分组：邮件 / AI / Google 为纯手选组；VPS 订阅的节点全部进入业务组（不按名称筛选，仅排除信息节点）。
 // 只在本机脚本副本填写 VPS_URL 至 VPS_URL_4，仓库保持为空；公司域名改 COMPANY_DOMAINS。
@@ -611,11 +611,12 @@ function cyVpsSelectors(config) {
 //   4) Foxmail 与 AI（仅桌面脚本，脚本顶部有 VPS_URL 时生效）：只走 VPS_URL 里的自建 VPS 节点；VPS_URL 留空则跟随主选择组。
 // =====================================================================
 const CY_VPS_IP_RULE = "IP-CIDR,216.36.82.250/32,DIRECT,no-resolve"
-// RackNerd VPS 直连（含 SSH；经机场节点连接会被断开），紧随 VPS 规则
+// RackNerd VPS 直连（SSH(22) 例外走主选择组），紧随 VPS 规则
 const CY_RACKNERD_IP_RULES = ["IP-CIDR,192.3.153.152/32,DIRECT,no-resolve"]
 // 大航海机场订阅面板 IP 直连（拒绝代理连接），紧随 VPS 规则
-// VPS SSH(22) 例外：走主选择组，置于 VPS 直连规则之前
+// VPS/RackNerd SSH(22) 例外：走主选择组，置于各自直连规则之前
 const CY_VPS_SSH_MATCH = "AND,((IP-CIDR,216.36.82.250/32,no-resolve),(DST-PORT,22))"
+const CY_RACKNERD_SSH_MATCH = "AND,((IP-CIDR,192.3.153.152/32,no-resolve),(DST-PORT,22))"
 const CY_AIRPORT_IP_RULES = ["IP-CIDR,47.242.128.61/32,DIRECT,no-resolve"]
 const CY_STUN_PORTS = "OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309))"
 const CY_FOREIGN_DOH = ["https://8.8.8.8/dns-query", "https://1.1.1.1/dns-query"]
@@ -664,7 +665,7 @@ function cyHarden20261103(config) {
     let proxy = matchRule ? matchRule.split(",")[1].trim() : ""
     if (!proxy || proxy === "DIRECT" || proxy === "REJECT") proxy = groups.length ? groups[0].name : "DIRECT"
 
-    const head = [...(proxy && proxy !== "DIRECT" ? [CY_VPS_SSH_MATCH + "," + proxy] : []), CY_VPS_IP_RULE, ...CY_RACKNERD_IP_RULES, ...CY_AIRPORT_IP_RULES]
+    const head = [...(proxy && proxy !== "DIRECT" ? [CY_VPS_SSH_MATCH + "," + proxy, CY_RACKNERD_SSH_MATCH + "," + proxy] : []), CY_VPS_IP_RULE, ...CY_RACKNERD_IP_RULES, ...CY_AIRPORT_IP_RULES]
 
     // ---- Foxmail / AI 只走自建 VPS（仅当脚本定义了 VPS_URL 且还没有对应规则/组时由这里补上）----
     if (typeof VPS_URL !== "undefined") {

@@ -1,9 +1,9 @@
-// ===== mihomo/tun-metacubex-v2.js v1.1.1 | TUN 模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本·第二代）=====
-// 最后更新：2026-11-17 22:10 UTC+8
-// 第二代：与旧版 tun-metacubex.js（v9.x，VPS_URL 常量填写）并存；本版改用 VPS_URLS 数组，支持任意台数。
-// 第二代版本号从 v1.0.0 起独立计数，与旧版 v9.x 序列互不影响。
+// ===== mihomo/tun-metacubex-v2.js v2.0.0 | TUN 模式 + MetaCubeX .mrs 规则（mihomo 覆写脚本·第二代）=====
+// 最后更新：2026-11-19 09:54 UTC+8
+// V2 代：与 V1 代 /.js（VPS_URL 四常量填写，最多四台）并存；本版用 VPS_URLS 数组，支持任意台数。
+// V2 代版本号从 v2.0.0 起计数；旧版为 V1 代（v1.x），第三代为 V3（-v3 文件，v3.x）。
 // 用途：完整分流（公司/微软认证直连、Google 选择组（默认 AI/VPS，可手选）、广告拦截、Apple 直连等）；Foxmail 与 AI 服务走自建 VPS（未填则走节点选择）。需开启 TUN。
-// 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
+// 通用：VPS 216.36.82.250、RackNerd 192.3.153.152 直连置顶（两者 SSH(22) 例外走主选择组）；中国+内网=系统 DNS，外网=DoH 经代理；STUN 不回落直连；无 WhatsApp。
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。
 // 分组：邮件 / AI / Google 为纯手选组；VPS_URLS 各订阅的节点全部进入业务组（不按名称筛选，仅排除信息节点）。
 // 只在本机脚本副本填写 VPS_URLS 数组，仓库保持为空；公司域名改 COMPANY_DOMAINS。
@@ -582,11 +582,12 @@ function cyVpsSelectors(config) {
 //   4) Foxmail 与 AI：业务分组由 cyVpsSelectors 重建为纯手选组；自建 VPS 订阅经顶部 VPS_URLS 数组加载。
 // =====================================================================
 const CY_VPS_IP_RULE = "IP-CIDR,216.36.82.250/32,DIRECT,no-resolve"
-// RackNerd VPS 直连（含 SSH；经机场节点连接会被断开），紧随 VPS 规则
+// RackNerd VPS 直连（SSH(22) 例外走主选择组），紧随 VPS 规则
 const CY_RACKNERD_IP_RULES = ["IP-CIDR,192.3.153.152/32,DIRECT,no-resolve"]
 // 大航海机场订阅面板 IP 直连（拒绝代理连接），紧随 VPS 规则
-// VPS SSH(22) 例外：走主选择组，置于 VPS 直连规则之前
+// VPS/RackNerd SSH(22) 例外：走主选择组，置于各自直连规则之前
 const CY_VPS_SSH_MATCH = "AND,((IP-CIDR,216.36.82.250/32,no-resolve),(DST-PORT,22))"
+const CY_RACKNERD_SSH_MATCH = "AND,((IP-CIDR,192.3.153.152/32,no-resolve),(DST-PORT,22))"
 const CY_AIRPORT_IP_RULES = ["IP-CIDR,47.242.128.61/32,DIRECT,no-resolve"]
 const CY_STUN_PORTS = "OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309))"
 const CY_FOREIGN_DOH = ["https://8.8.8.8/dns-query", "https://1.1.1.1/dns-query"]
@@ -635,7 +636,7 @@ function cyHarden20261103(config) {
     let proxy = matchRule ? matchRule.split(",")[1].trim() : ""
     if (!proxy || proxy === "DIRECT" || proxy === "REJECT") proxy = groups.length ? groups[0].name : "DIRECT"
 
-    const head = [...(proxy && proxy !== "DIRECT" ? [CY_VPS_SSH_MATCH + "," + proxy] : []), CY_VPS_IP_RULE, ...CY_RACKNERD_IP_RULES, ...CY_AIRPORT_IP_RULES]
+    const head = [...(proxy && proxy !== "DIRECT" ? [CY_VPS_SSH_MATCH + "," + proxy, CY_RACKNERD_SSH_MATCH + "," + proxy] : []), CY_VPS_IP_RULE, ...CY_RACKNERD_IP_RULES, ...CY_AIRPORT_IP_RULES]
 
     // ---- WebRTC/STUN（已有则不重复添加）----
     if (!rules.some((r) => typeof r === "string" && r.indexOf("3478") >= 0)) {

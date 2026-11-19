@@ -1,5 +1,11 @@
 # mihomo 更新日志
 
+## 2026-11-19 09:54 UTC+8：版本号按代重排 V1/V2；三代均支持 RackNerd SSH 走主代理
+
+- 版本号重排（按"粘贴 VPS 的方式"划分代际）：第一代（`VPS_URL`～`VPS_URL_4` 四常量，最多四台）重编为 **V1 代 v1.0.0**（原 v9.16 / v1.29）；第二代（`VPS_URLS` 数组，台数不限，`-v2` 文件）重编为 **V2 代 v2.0.0**（原 v1.1.1，文件名 `-v2` 与版本号对齐）；第三代 `-v3` 文件保持 v3.x 序列不变。
+- RackNerd SSH 例外（三代全部）：新增 `CY_RACKNERD_SSH_MATCH`，`AND,((IP-CIDR,192.3.153.152/32,no-resolve),(DST-PORT,22))` 与 216.36.82.250 相同置于直连规则之前——SSH/SCP 到 RackNerd 改走「⚡ 节点选择」，其余流量仍直连；替代此前"含 SSH 直连，经机场节点连接会被断开"的设定，如经节点连接不稳可移除。
+- 验证：65 项测试通过（含 RC port22 → PROXY / 无 UDP 时 REJECT 断言）；mihomo v1.19.13 原生语法检查 15 份脚本 × 0/1/2/4 条订阅共 60 份配置。
+
 ## 2026-11-18 12:20 UTC+8：纯遥测域名移出住宅链（第三代 v3.0.1 → v3.0.2）
 
 - 五份 `*-v3.js` v3.0.1 → **v3.0.2**：新增 `TELEMETRY_SUFFIX_DOMAINS`（`sentry.io`、`datadoghq.com`、`browser-intake-datadoghq.com`、`growthbook.io`、`usefathom.com`、`segment.io`），六个纯遥测/统计域名从「🏠 住宅出口」改走「⚡ 节点选择」——它们被大量外网网站嵌入，两跳住宅链（机场节点 → Webshare 住宅）会明显拖慢页面加载；规则仍置于广告拦截 reject 之前，防止开启广告拦截后脚本被拦破坏页面。Stripe / hCaptcha / reCAPTCHA / Cloudflare 验证 / Persona / Sift / Intercom 等保持住宅出口不变。第一代 / 第二代脚本不改动。

@@ -1,5 +1,5 @@
-// ===== mihomo/sysproxy-loyalsoldier-v3.js v3.0.2 | 系统代理模式 + Loyalsoldier 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代）=====
-// 最后更新：2026-11-18 12:20 UTC+8
+// ===== mihomo/sysproxy-loyalsoldier-v3.js v3.0.3 | 系统代理模式 + Loyalsoldier 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代）=====
+// 最后更新：2026-11-19 09:54 UTC+8
 // 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合 0xkaka/homeport 静态住宅 IP 链式代理方案（Webshare 等）。
 // 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / 住宅出口）仍可通过
 //   「本机 → HP_Relay（机场节点中转）→ Webshare 静态住宅代理 → 目标站点」正常访问，不再因单点 VPS 故障导致住宅 IP 失效。
@@ -705,11 +705,12 @@ function cyVpsSelectors(config) {
 //   4) 业务分组与住宅代理：由 cyVpsSelectors 重建为纯手选组；支持 VPS_URLS 与 WEBSHARE_PROXIES 双轨并行。
 // =====================================================================
 const CY_VPS_IP_RULE = "IP-CIDR,216.36.82.250/32,DIRECT,no-resolve"
-// RackNerd VPS 直连（含 SSH；经机场节点连接会被断开），紧随 VPS 规则
+// RackNerd VPS 直连（SSH(22) 例外走主选择组），紧随 VPS 规则
 const CY_RACKNERD_IP_RULES = ["IP-CIDR,192.3.153.152/32,DIRECT,no-resolve"]
 // 大航海机场订阅面板 IP 直连（拒绝代理连接），紧随 VPS 规则
-// VPS SSH(22) 例外：走主选择组，置于 VPS 直连规则之前
+// VPS/RackNerd SSH(22) 例外：走主选择组，置于各自直连规则之前
 const CY_VPS_SSH_MATCH = "AND,((IP-CIDR,216.36.82.250/32,no-resolve),(DST-PORT,22))"
+const CY_RACKNERD_SSH_MATCH = "AND,((IP-CIDR,192.3.153.152/32,no-resolve),(DST-PORT,22))"
 const CY_AIRPORT_IP_RULES = ["IP-CIDR,47.242.128.61/32,DIRECT,no-resolve"]
 const CY_STUN_PORTS = "OR,((DST-PORT,3478-3481),(DST-PORT,5349),(DST-PORT,19302-19309))"
 const CY_FOREIGN_DOH = ["https://8.8.8.8/dns-query", "https://1.1.1.1/dns-query"]
@@ -758,7 +759,7 @@ function cyHarden20261103(config) {
     let proxy = matchRule ? matchRule.split(",")[1].trim() : ""
     if (!proxy || proxy === "DIRECT" || proxy === "REJECT") proxy = groups.length ? groups[0].name : "DIRECT"
 
-    const head = [...(proxy && proxy !== "DIRECT" ? [CY_VPS_SSH_MATCH + "," + proxy] : []), CY_VPS_IP_RULE, ...CY_RACKNERD_IP_RULES, ...CY_AIRPORT_IP_RULES]
+    const head = [...(proxy && proxy !== "DIRECT" ? [CY_VPS_SSH_MATCH + "," + proxy, CY_RACKNERD_SSH_MATCH + "," + proxy] : []), CY_VPS_IP_RULE, ...CY_RACKNERD_IP_RULES, ...CY_AIRPORT_IP_RULES]
 
     // ---- Foxmail / Gmail 邮件规则（本脚本 main 不生成，还没有时由这里补上）----
     if (!rules.some((r) => typeof r === "string" && /PROCESS-NAME,Foxmail\.exe/.test(r))) {
