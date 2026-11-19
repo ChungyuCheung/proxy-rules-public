@@ -1,5 +1,9 @@
 # Shadowrocket 更新日志
 
+## 2026-11-19 17:25 UTC+8 · cy.conf v6.9
+
+- 从 `🤖 AI` 精确规则中移出 `js.stripe.com` 与 `r.stripe.com`，整套 Stripe 域名（`stripe.com`、`stripe.network`、`stripecdn.com`）统一归口到「🏠 住宅出口」，与 `tun-metacubex-v3.js v3.0.8` 保持一致。
+
 ## 2026-11-19 17:00 UTC+8 · cy.conf v6.8
 
 - 「🏠 住宅出口 VPS 手选」子组正则新增 `家宽|家寬|家庭` 关键词（与原有 `住宅` 合并），并排除 `稳定性|穩定性|普通节点|普通節點` 公告节点，不混入机房原生 IP。其余三个业务手选子组保持不变；需要 AI 与支付/风控共用同一家宽 IP 时，在顶层「🤖 AI」等组选择跟随「🏠 住宅出口」即可。
