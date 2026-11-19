@@ -1,5 +1,5 @@
-// ===== mihomo/tun-metacubex-v3.js v3.0.6 | TUN 模式 + MetaCubeX .mrs 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代）=====
-// 最后更新：2026-11-19 15:20 UTC+8
+// ===== mihomo/tun-metacubex-v3.js v3.0.7 | TUN 模式 + MetaCubeX .mrs 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代）=====
+// 最后更新：2026-11-19 17:00 UTC+8
 // 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合 0xkaka/homeport 静态住宅 IP 链式代理方案（Webshare 等）。
 // 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / 住宅出口）仍可通过
 //   「本机 → HP_Relay（机场节点中转）→ Webshare 静态住宅代理 → 目标站点」正常访问，不再因单点 VPS 故障导致住宅 IP 失效。
@@ -669,6 +669,10 @@ function cyVpsSelectors(config) {
     const pattern = "NovixLink|Webshare|^XUI-Direct$|^(WARP|VPNGate|Direct)-(Reality|Hy2)$" + extra
     const excluded = new RegExp(NODE_FILTER.replace("(?i)", ""), "i")
     const names = [...new Set((config.proxies || []).filter(p => p && !homeportNames.includes(p.name) && new RegExp(pattern, "i").test(p.name) && !excluded.test(p.name)).map(p => p.name))]
+    // 仅「🏠 住宅出口」额外纳入当前订阅中名称含住宅/家宽/家庭的节点（排除信息节点与稳定性公告，不混入机房原生 IP）
+    const residentialPattern = /住宅|家宽|家寬|家庭/i
+    const residentialExcluded = /稳定性|穩定性|普通节点|普通節點/i
+    const residentialNames = [...new Set((config.proxies || []).filter(p => p && !homeportNames.includes(p.name) && !names.includes(p.name) && residentialPattern.test(p.name) && !excluded.test(p.name) && !residentialExcluded.test(p.name)).map(p => p.name))]
 
     const vpsProviderNames = Object.keys(config["proxy-providers"] || {}).filter(k => /^my-vps(-\d+)?$/.test(k))
     const allProviders = Object.keys(config["proxy-providers"] || {})
@@ -697,7 +701,7 @@ function cyVpsSelectors(config) {
         { name: MAIL, type: "select", ...pool, proxies: [...homeportNames, ...names, HOMEPORT, PROXY] },
         { name: AI, type: "select", ...pool, proxies: [...homeportNames, ...names, HOMEPORT, PROXY] },
         { name: GOOGLE, type: "select", ...pool, proxies: [AI, HOMEPORT, ...homeportNames, ...names, PROXY] },
-        { name: HOMEPORT, type: "select", ...pool, proxies: [...homeportNames, ...names, PROXY] },
+        { name: HOMEPORT, type: "select", ...pool, proxies: [...homeportNames, ...names, ...residentialNames, PROXY] },
         {
             name: RELAY,
             type: "select",
