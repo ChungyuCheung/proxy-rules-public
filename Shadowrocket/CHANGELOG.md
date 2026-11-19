@@ -1,5 +1,10 @@
 # Shadowrocket 更新日志
 
+## 2026-11-19 18:05 UTC+8 · cy.conf v6.10
+
+- 策略组精简为极简 6 组结构（与 mihomo V3 对齐）：移除 4 个重复的 `xxx VPS 手选` 子组，`📧 邮件`、`🤖 AI`、`🌐 Google` 直接选择 `⚡ 节点选择` 或跟随 `🏠 住宅出口`；`🏠 住宅出口` 直接使用正则手选 VPS / Webshare / 订阅内住宅、家宽、家庭节点（点一层即可切换）。
+- 新增 RackNerd VPS SSH(22) 例外规则 `AND,((IP-CIDR,192.3.153.152/32,no-resolve),(DST-PORT,22)),PROXY` 置于其直连规则之前，其余流量继续直连（需选用不封 22 端口的节点）。
+
 ## 2026-11-19 17:25 UTC+8 · cy.conf v6.9
 
 - 从 `🤖 AI` 精确规则中移出 `js.stripe.com` 与 `r.stripe.com`，整套 Stripe 域名（`stripe.com`、`stripe.network`、`stripecdn.com`）统一归口到「🏠 住宅出口」，与 `tun-metacubex-v3.js v3.0.8` 保持一致。
