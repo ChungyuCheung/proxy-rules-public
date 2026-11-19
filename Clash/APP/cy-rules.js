@@ -1,5 +1,5 @@
-// ===== cy-rules.js v2.15 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
-// 最后更新：2026-11-11 17:00 UTC+8
+// ===== cy-rules.js v2.16 | iPhone「Clash」App / Clash Verge Rev 订阅覆写脚本（mihomo）=====
+// 最后更新：2026-11-19 12:46 UTC+8
 // 用途：与 Shadowrocket cy.conf 同一套分流（国内直连、海外代理、AI/交易所分地区），自建 VPS 216.36.82.250、RackNerd 192.3.153.152 直连；
 //       DNS / WebRTC 防泄漏（中国+内网=system，外网=DoH 经代理；STUN 不回落直连）。手机用 Gmail App，无 Foxmail 规则。
 // 用法：配置详情 → 覆写脚本 → 用 raw 链接导入，保存并选中；每个订阅都选上。公司域名在 COMPANY_DOMAINS。
@@ -16,6 +16,7 @@ const G_TW = "CY 🇹🇼 台湾最快";
 const G_UK = "CY 🇬🇧 英国最快";
 const G_EU = "CY 🇪🇺 欧盟最快";
 const G_BYBIT = "CY Bybit";
+const G_AI = "🤖 AI";
 
 const F_PH = "(?i)^.*(🇵🇭|菲律宾|菲律賓|马尼拉|馬尼拉|宿务|宿霧|\\b((PH|PHL|MNL|CEB|Philippines|Manila|Cebu)([-_ ]?[0-9]+)?)\\b).*$";
 const F_TW = "(?i)^.*(🇹🇼|台湾|台灣|臺灣|台北|臺北|台中|臺中|高雄|新北|桃园|桃園|\\b((TW|TWN|TPE|TSA|KHH|Taiwan|Taipei|Taichung|Kaohsiung)([-_ ]?[0-9]+)?)\\b).*$";
@@ -97,7 +98,7 @@ const BYBIT_SHARED_SUFFIX = [
 const PAYPAL_SUFFIX = ["paypal.com", "paypalobjects.com", "paypal.me"];
 const AI_SUFFIX = [
   "chatgpt.com", "openai.com", "openaiapi.com", "oaiusercontent.com", "oaistatic.com",
-  "sora.com", "ai.com", "anthropic.com", "claude.ai", "claudeusercontent.com",
+  "sora.com", "ai.com",
   "gemini.google.com", "aistudio.google.com", "makersuite.google.com", "notebooklm.google.com",
   "generativelanguage.googleapis.com", "proactivebackend-pa.googleapis.com",
   "x.ai", "grok.com", "githubcopilot.com", "github.com", "githubusercontent.com",
@@ -107,6 +108,25 @@ const AI_SUFFIX = [
   "replicate.com", "together.ai", "cohere.com", "groq.com", "fireworks.ai"
 ];
 const AI_EXACT = ["copilot.microsoft.com", "alkalimena-pa.clients6.google.com"];
+const CLAUDE_SUFFIX = [
+  "anthropic.com",
+  "clau.de",
+  "claude.ai",
+  "claude.app",
+  "claude.com",
+  "claudemcpcontent.com",
+  "claudeusercontent.com",
+];
+const CLAUDE_EXACT = [
+  "api-iam.intercom.io",
+  "nexus-websocket-a.intercom.io",
+  "us5.datadoghq.com",
+  "r.stripe.com",
+  "us.sentry.io",
+  "siftscience.com",
+  "fcmtoken.googleapis.com",
+  "http-intake.logs.us5.datadoghq.com",
+];
 const GOOGLE_QUIC = [
   "google.com", "googleapis.com", "gstatic.com", "googleusercontent.com",
   "ggpht.com", "googlevideo.com", "youtube.com", "youtu.be", "ytimg.com",
@@ -252,6 +272,14 @@ function main(config) {
     proxies: [G_STABLE, G_SELECT]
   });
 
+  groups.push({
+    name: G_AI,
+    type: "select",
+    proxies: [G_STABLE, G_SELECT],
+    "include-all": true,
+    "exclude-filter": INFO_FILTER
+  });
+
   const bybitProxies = [];
   if (hasEU) bybitProxies.push(G_EU);
   if (hasTW) bybitProxies.push(G_TW);
@@ -331,6 +359,8 @@ function main(config) {
     keywordRules(["bytick"], twPolicy),
     keywordRules(["bybit"], G_BYBIT),
     suffixRules(PAYPAL_SUFFIX, ukPolicy),
+    suffixRules(CLAUDE_SUFFIX, G_AI),
+    exactRules(CLAUDE_EXACT, G_AI),
     suffixRules(AI_SUFFIX, G_STABLE),
     exactRules(AI_EXACT, G_STABLE),
     [

@@ -1,5 +1,5 @@
-// ===== mihomo/sysproxy-loyalsoldier-v2.js v2.0.0 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本·第二代）=====
-// 最后更新：2026-11-19 09:54 UTC+8
+// ===== mihomo/sysproxy-loyalsoldier-v2.js v2.0.1 | 系统代理模式 + Loyalsoldier 规则（mihomo 覆写脚本·第二代）=====
+// 最后更新：2026-11-19 12:46 UTC+8
 // V2 代：与 V1 代 /.js（VPS_URL 四常量填写，最多四台）并存；本版用 VPS_URLS 数组，支持任意台数。
 // V2 代版本号从 v2.0.0 起计数；旧版为 V1 代（v1.x），第三代为 V3（-v3 文件，v3.x）。
 // 用途：同 tun-loyalsoldier-v2.js 的分流（Google 选择组（默认 AI/VPS，可手选）），但不开 TUN。系统代理管不到浏览器 UDP，WebRTC 需装浏览器防泄漏扩展或改用 TUN 版。
@@ -52,8 +52,19 @@ const AI_PROCESSES = [
 ]
 
 // 海外 AI 高频静态域名兜底（配合每日自动更新的 category-ai-!cn 规则集，固定走 AI 组）
-const AI_EXACT_DOMAINS = [
+// Claude 第三方入口精确匹配，优先于 Google 规则集和通用第三方分流。
+const CLAUDE_EXACT_DOMAINS = [
+    "api-iam.intercom.io",
+    "nexus-websocket-a.intercom.io",
+    "us5.datadoghq.com",
+    "r.stripe.com",
+    "us.sentry.io",
+    "siftscience.com",
+    "fcmtoken.googleapis.com",
     "http-intake.logs.us5.datadoghq.com",
+]
+
+const AI_EXACT_DOMAINS = [
     "copilot.microsoft.com",
     "copilot-proxy.githubusercontent.com",
 ]
@@ -451,7 +462,8 @@ function main(config) {
         // Office CDN 保持原 v5.8 行为
         "DOMAIN-SUFFIX,msocdn.com,DIRECT",
         // 仅阻断 Google/YouTube 的 QUIC，强制回退 TCP；须放在其代理规则之前。
-        // Google 先进入独立选择组，其余 AI 继续使用原 AI 分组。
+        // Claude 指定主机优先走 AI，Google 分组规则随后匹配。
+        ...toExactRules(CLAUDE_EXACT_DOMAINS, AI),
         ...companyAiRules(),
         ...toExactRules(AI_EXACT_DOMAINS, AI),
         ...toSuffixRules(AI_SUFFIX_DOMAINS, AI),

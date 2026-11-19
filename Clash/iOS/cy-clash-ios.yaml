@@ -1,6 +1,6 @@
 # =====================================================================
-# cy-clash-ios.yaml v1.8 | iPhone Clash 1.0.15 (171) / ProjectClash
-# 最后更新：2026-11-11 20:10 UTC+8
+# cy-clash-ios.yaml v1.9 | iPhone Clash 1.0.15 (171) / ProjectClash
+# 最后更新：2026-11-19 12:46 UTC+8
 # 基准：Shadowrocket cy.conf v5.26（2026-11-06）；静态规则顺序与策略保持一致。
 # 国内/内网直连；海外走 PROXY；邮件 / AI / Google 纯手动选择 NovixLink / Webshare 节点（固定 IP，不自动切换）。
 # 使用：填写 airport1~3 的 Clash/mihomo 订阅（含自建 VPS）；删除不用的 provider 及 use 引用。
@@ -374,6 +374,37 @@ rules:
 - DOMAIN-SUFFIX,paypalobjects.com,REJECT
 - SUB-RULE,(DOMAIN-SUFFIX,paypal.me),PROXY-OUT
 - DOMAIN-SUFFIX,paypal.me,REJECT
+# Claude 域名优先于 Google 规则集和通用代理规则。
+- SUB-RULE,(DOMAIN-SUFFIX,anthropic.com),AI-OUT
+- DOMAIN-SUFFIX,anthropic.com,REJECT
+- SUB-RULE,(DOMAIN-SUFFIX,clau.de),AI-OUT
+- DOMAIN-SUFFIX,clau.de,REJECT
+- SUB-RULE,(DOMAIN-SUFFIX,claude.ai),AI-OUT
+- DOMAIN-SUFFIX,claude.ai,REJECT
+- SUB-RULE,(DOMAIN-SUFFIX,claude.app),AI-OUT
+- DOMAIN-SUFFIX,claude.app,REJECT
+- SUB-RULE,(DOMAIN-SUFFIX,claude.com),AI-OUT
+- DOMAIN-SUFFIX,claude.com,REJECT
+- SUB-RULE,(DOMAIN-SUFFIX,claudemcpcontent.com),AI-OUT
+- DOMAIN-SUFFIX,claudemcpcontent.com,REJECT
+- SUB-RULE,(DOMAIN-SUFFIX,claudeusercontent.com),AI-OUT
+- DOMAIN-SUFFIX,claudeusercontent.com,REJECT
+- SUB-RULE,(DOMAIN,api-iam.intercom.io),AI-OUT
+- DOMAIN,api-iam.intercom.io,REJECT
+- SUB-RULE,(DOMAIN,nexus-websocket-a.intercom.io),AI-OUT
+- DOMAIN,nexus-websocket-a.intercom.io,REJECT
+- SUB-RULE,(DOMAIN,us5.datadoghq.com),AI-OUT
+- DOMAIN,us5.datadoghq.com,REJECT
+- SUB-RULE,(DOMAIN,r.stripe.com),AI-OUT
+- DOMAIN,r.stripe.com,REJECT
+- SUB-RULE,(DOMAIN,us.sentry.io),AI-OUT
+- DOMAIN,us.sentry.io,REJECT
+- SUB-RULE,(DOMAIN,siftscience.com),AI-OUT
+- DOMAIN,siftscience.com,REJECT
+- SUB-RULE,(DOMAIN,fcmtoken.googleapis.com),AI-OUT
+- DOMAIN,fcmtoken.googleapis.com,REJECT
+- SUB-RULE,(DOMAIN,http-intake.logs.us5.datadoghq.com),AI-OUT
+- DOMAIN,http-intake.logs.us5.datadoghq.com,REJECT
 - SUB-RULE,(RULE-SET,google),GOOGLE-OUT
 - RULE-SET,google,REJECT
 - SUB-RULE,(DOMAIN,accounts.google.com),GOOGLE-OUT
@@ -394,16 +425,6 @@ rules:
 - DOMAIN-SUFFIX,ai.com,REJECT
 - SUB-RULE,(DOMAIN-SUFFIX,chat.com),AI-OUT
 - DOMAIN-SUFFIX,chat.com,REJECT
-- SUB-RULE,(DOMAIN-SUFFIX,anthropic.com),AI-OUT
-- DOMAIN-SUFFIX,anthropic.com,REJECT
-- SUB-RULE,(DOMAIN-SUFFIX,claude.ai),AI-OUT
-- DOMAIN-SUFFIX,claude.ai,REJECT
-- SUB-RULE,(DOMAIN-SUFFIX,claude.com),AI-OUT
-- DOMAIN-SUFFIX,claude.com,REJECT
-- SUB-RULE,(DOMAIN-SUFFIX,claudeusercontent.com),AI-OUT
-- DOMAIN-SUFFIX,claudeusercontent.com,REJECT
-- SUB-RULE,(DOMAIN,http-intake.logs.us5.datadoghq.com),AI-OUT
-- DOMAIN,http-intake.logs.us5.datadoghq.com,REJECT
 - SUB-RULE,(DOMAIN,ai.google.dev),AI-OUT
 - DOMAIN,ai.google.dev,REJECT
 - SUB-RULE,(DOMAIN-SUFFIX,gemini.google.com),AI-OUT

@@ -1,5 +1,5 @@
-// ===== mihomo/lite-metacubex-v2.js v2.0.0 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本·第二代，TUN / 系统代理均可）=====
-// 最后更新：2026-11-19 09:54 UTC+8
+// ===== mihomo/lite-metacubex-v2.js v2.0.1 | 简约版 + MetaCubeX 规则（mihomo 覆写脚本·第二代，TUN / 系统代理均可）=====
+// 最后更新：2026-11-19 12:46 UTC+8
 // V2 代：与 V1 代 /.js（VPS_URL 四常量填写，最多四台）并存；本版用 VPS_URLS 数组，支持任意台数。
 // V2 代版本号从 v2.0.0 起计数；旧版为 V1 代（v1.x），第三代为 V3（-v3 文件，v3.x）。
 // 用途：内网/公司直连 + 系统 DNS；中国直连；Foxmail 与 AI 服务走自建 VPS；Google 默认跟随 AI，可手选其他出口（未填则走节点选择）；其余走「⚡ 节点选择」。
@@ -54,9 +54,20 @@ const AI_PROCESSES = [
     "codex.exe",
 ]
 
+// Claude 第三方入口精确匹配，优先于 Google 规则集和通用第三方分流。
+const CLAUDE_EXACT_DOMAINS = [
+    "api-iam.intercom.io",
+    "nexus-websocket-a.intercom.io",
+    "us5.datadoghq.com",
+    "r.stripe.com",
+    "us.sentry.io",
+    "siftscience.com",
+    "fcmtoken.googleapis.com",
+    "http-intake.logs.us5.datadoghq.com",
+]
+
 // 海外 AI 高频静态域名兜底（配合每日自动更新的 MetaCubeX category-ai-!cn.mrs 规则集，固定走 AI 组）
 const AI_EXACT_DOMAINS = [
-    "http-intake.logs.us5.datadoghq.com",
     "copilot.microsoft.com",
     "copilot-proxy.githubusercontent.com",
 ]
@@ -407,6 +418,7 @@ function main(config) {
         ...INTRANET_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT"),
         ...DIRECT_PUBLIC_DNS_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT"),
         // AI 服务与 MetaCubeX category-ai-!cn 规则集走 🤖 AI
+        ...CLAUDE_EXACT_DOMAINS.map((d) => "DOMAIN," + d + "," + AI),
         ...companyAiRules(),
         ...companyDomainRules(),
         ...companyRemoteRules(),

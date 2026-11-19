@@ -1,5 +1,9 @@
 # iOS 更新日志
 
+## 2026-11-19 12:46 UTC+8 · cy-clash-ios.yaml v1.9
+
+- 补齐 Claude 的七个主域后缀和七个指定第三方入口，统一进入「🤖 AI」。第三方入口按完整主机名匹配。沿用 AI-OUT 的 UDP 443 拒绝与同条件 REJECT 兜底。
+
 ## 2026-11-11 20:10 UTC+8 — cy-clash-ios.yaml v1.8
 
 - 移除 VPS 自动回退组；邮件、AI、Google 均为纯 select 手选节点，Google 也可手选跟随 AI。邮件/AI 初始 REJECT，须手动选具体节点。

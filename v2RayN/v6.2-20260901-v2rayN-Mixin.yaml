@@ -1,8 +1,9 @@
-# v2RayN Mixin v6.3 | v2rayN 7.x（mihomo 内核）| JSON 也是合法 YAML
+# v2RayN Mixin v6.4 | v2rayN 7.x（mihomo 内核）| JSON 也是合法 YAML
 # 用法：复制到 v2rayN\guiConfigs\Mixin.yaml，并开启 ClashUIItem.EnableMixinContent。
 # 用途：Loyalsoldier 分流；自建 VPS 216.36.82.250 直连；DNS（中国+内网=system，外网=DoH 经代理）/WebRTC 防泄漏。
 # Foxmail：静态文件不能填 VPS_URL，「📧 Foxmail」默认 REJECT。要走自建 VPS，只在本机加 "proxy-providers": {"my-vps": {"type":"http","url":"你的VPS订阅","path":"./providers/my-vps.yaml","interval":86400}}，
 #   并把该组改成 {"name":"📧 Foxmail","type":"fallback","use":["my-vps"],"url":"https://www.gstatic.com/generate_204","interval":300}。
+# Claude 域名走「🤖 AI」，默认跟随「⚡ 节点选择」，可在 AI 组单独选节点。
 # 更新日志：CHANGELOG.md
 {
     "tcp-concurrent": true,
@@ -10,6 +11,13 @@
         {
             "name": "⚡ 节点选择",
             "type": "select",
+            "include-all": true,
+            "exclude-filter": "(?i)(到期|剩余|过期|有效期|官网|官方|订阅|套餐|重置|流量|距离|网址|客服|expire|traffic|reset)"
+        },
+        {
+            "name": "🤖 AI",
+            "type": "select",
+            "proxies": ["⚡ 节点选择"],
             "include-all": true,
             "exclude-filter": "(?i)(到期|剩余|过期|有效期|官网|官方|订阅|套餐|重置|流量|距离|网址|客服|expire|traffic|reset)"
         },
@@ -167,6 +175,21 @@
         "DOMAIN-SUFFIX,msedge.net,DIRECT",
         "DOMAIN-SUFFIX,msocdn.com,DIRECT",
         "AND,((NETWORK,udp),(DST-PORT,443),(OR,((DOMAIN-SUFFIX,google.com),(DOMAIN-SUFFIX,googleapis.com),(DOMAIN-SUFFIX,gstatic.com),(DOMAIN-SUFFIX,googleusercontent.com),(DOMAIN-SUFFIX,ggpht.com),(DOMAIN-SUFFIX,googlevideo.com),(DOMAIN-SUFFIX,youtube.com),(DOMAIN-SUFFIX,youtu.be),(DOMAIN-SUFFIX,ytimg.com),(DOMAIN-SUFFIX,youtubei.googleapis.com),(DOMAIN-SUFFIX,youtube-nocookie.com),(DOMAIN-SUFFIX,googleadservices.com)))),REJECT",
+        "DOMAIN-SUFFIX,anthropic.com,🤖 AI",
+        "DOMAIN-SUFFIX,clau.de,🤖 AI",
+        "DOMAIN-SUFFIX,claude.ai,🤖 AI",
+        "DOMAIN-SUFFIX,claude.app,🤖 AI",
+        "DOMAIN-SUFFIX,claude.com,🤖 AI",
+        "DOMAIN-SUFFIX,claudemcpcontent.com,🤖 AI",
+        "DOMAIN-SUFFIX,claudeusercontent.com,🤖 AI",
+        "DOMAIN,api-iam.intercom.io,🤖 AI",
+        "DOMAIN,nexus-websocket-a.intercom.io,🤖 AI",
+        "DOMAIN,us5.datadoghq.com,🤖 AI",
+        "DOMAIN,r.stripe.com,🤖 AI",
+        "DOMAIN,us.sentry.io,🤖 AI",
+        "DOMAIN,siftscience.com,🤖 AI",
+        "DOMAIN,fcmtoken.googleapis.com,🤖 AI",
+        "DOMAIN,http-intake.logs.us5.datadoghq.com,🤖 AI",
         "DOMAIN-SUFFIX,google.com,⚡ 节点选择",
         "DOMAIN-SUFFIX,googleapis.com,⚡ 节点选择",
         "DOMAIN-SUFFIX,gstatic.com,⚡ 节点选择",

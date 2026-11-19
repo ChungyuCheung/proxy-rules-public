@@ -1,5 +1,9 @@
 # Shadowrocket 更新日志
 
+## 2026-11-19 12:46 UTC+8 · cy.conf v6.5 / cy-simple.conf v2.4
+
+- Claude 主域继续按后缀分流。七个指定第三方入口按完整主机名匹配到「🤖 AI」，优先于通用 Google、住宅出口和遥测规则。
+
 ## 2026-11-18 13:10 UTC+8：邮件组补齐 googlemail.com，与 mihomo V3 对齐（cy.conf v6.4 / cy-simple.conf v2.3）
 
 - `cy.conf` v6.3 → **v6.4**、`cy-simple.conf` v2.2 → **v2.3**：📧 邮件组在 imap / smtp / pop.gmail.com 三条收发信规则后新增 `DOMAIN-SUFFIX,googlemail.com,📧 邮件`（Gmail 旧别名域，部分区域用作发信地址），与 mihomo V3 的 `MAIL_SUFFIX_DOMAINS` 对齐；该规则置于全部 Google 规则之前（`DOMAIN-SUFFIX,gmail.com,🌐 Google` 与远程 google 规则集均会收录此域），确保别名域跟随邮件出口而非被 Google 组吸收。Gmail 网页 / API / 登录 / 附件域名继续走 🌐 Google 不变。

@@ -1,5 +1,5 @@
-// ===== mihomo/lite-metacubex-v3.js v3.0.3 | 简约版 + MetaCubeX 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代，TUN / 系统代理均可）=====
-// 最后更新：2026-11-19 09:54 UTC+8
+// ===== mihomo/lite-metacubex-v3.js v3.0.4 | 简约版 + MetaCubeX 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代，TUN / 系统代理均可）=====
+// 最后更新：2026-11-19 12:46 UTC+8
 // 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合 0xkaka/homeport 静态住宅 IP 链式代理方案（Webshare 等）。
 // 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / 住宅出口）仍可通过
 //   「本机 → HP_Relay（机场节点中转）→ Webshare 静态住宅代理 → 目标站点」正常访问，不再因单点 VPS 故障导致住宅 IP 失效。
@@ -84,9 +84,20 @@ const HOMEPORT_PROCESSES = [
     "com.google.android.apps.walletnfcrel",
 ]
 
+// Claude 第三方入口精确匹配，优先于 Google 规则集和通用第三方分流。
+const CLAUDE_EXACT_DOMAINS = [
+    "api-iam.intercom.io",
+    "nexus-websocket-a.intercom.io",
+    "us5.datadoghq.com",
+    "r.stripe.com",
+    "us.sentry.io",
+    "siftscience.com",
+    "fcmtoken.googleapis.com",
+    "http-intake.logs.us5.datadoghq.com",
+]
+
 // 海外 AI 高频静态域名兜底（配合每日自动更新的 MetaCubeX category-ai-!cn.mrs 规则集，固定走 AI 组）
 const AI_EXACT_DOMAINS = [
-    "http-intake.logs.us5.datadoghq.com",
     "copilot.microsoft.com",
     "copilot-proxy.githubusercontent.com",
 ]
@@ -439,6 +450,7 @@ function main(config) {
         ...INTRANET_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT"),
         ...DIRECT_PUBLIC_DNS_DOMAINS.map((d) => "DOMAIN-SUFFIX," + d + ",DIRECT"),
         // Google / AI / 住宅出口分流
+        ...CLAUDE_EXACT_DOMAINS.map((d) => "DOMAIN," + d + "," + AI),
         ...companyAiRules(),
         ...companyDomainRules(),
         ...companyRemoteRules(),
