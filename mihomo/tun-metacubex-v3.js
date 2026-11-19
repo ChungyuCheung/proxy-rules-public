@@ -1,5 +1,5 @@
-// ===== mihomo/tun-metacubex-v3.js v3.0.4 | TUN 模式 + MetaCubeX .mrs 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代）=====
-// 最后更新：2026-11-19 12:46 UTC+8
+// ===== mihomo/tun-metacubex-v3.js v3.0.5 | TUN 模式 + MetaCubeX .mrs 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代）=====
+// 最后更新：2026-11-19 13:36 UTC+8
 // 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合 0xkaka/homeport 静态住宅 IP 链式代理方案（Webshare 等）。
 // 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / 住宅出口）仍可通过
 //   「本机 → HP_Relay（机场节点中转）→ Webshare 静态住宅代理 → 目标站点」正常访问，不再因单点 VPS 故障导致住宅 IP 失效。
@@ -9,7 +9,7 @@
 // 分组说明（共 6 个纯手选 select 组）：
 //   - ⚡ 节点选择：日常上网主组（仅含机场节点，隔离自建 VPS 与 🏠 住宅节点）
 //   - 📧 Foxmail：邮件组（含机场中转 🏠 Webshare 节点、自建 VPS 节点、🏠 住宅出口、⚡ 节点选择）
-//   - 🤖 AI：AI 业务组（同上；补充 Claude/MCP 专属域名、Anthropic AS399358 IPv4 段及移动端进程）
+//   - 🤖 AI：AI 业务组（同上；补充 Claude/MCP 专属域名、Anthropic IPv4 段及移动端进程）
 //   - 🌐 Google：Google/YouTube/Gemini 组（默认跟随 🤖 AI，可切 🏠 住宅出口、各 Webshare/VPS 节点或 ⚡ 节点选择）
 //   - 🏠 住宅出口：专为风控/支付/人机验证（Stripe、Cloudflare 验证、hCaptcha、reCAPTCHA、Sentry、Datadog、Persona、IPInfo、Webshare 等）设立的住宅出口组
 //   - HP_Relay：Webshare 静态住宅代理的前置中转组（type: select，默认首选「⚡ 节点选择」，也可手选台/日/新/美/韩机场节点或 DIRECT）
@@ -166,9 +166,10 @@ const AI_SUFFIX_DOMAINS = [
     "exaone.ai",
 ]
 
-// Anthropic AS399358 专属 IPv4 段（无需客户端额外安装 GeoASN 库即可覆盖 AS399358）
+// Anthropic IPv4 地址段，含官方公布的 153.61.224.0/22 入站地址。
 const AI_IP_CIDRS = [
     "160.79.104.0/21",
+    "153.61.224.0/22",
 ]
 
 // 风控、支付、人机验证、客服与指纹检测域名：统一走「🏠 住宅出口」（置于广告拦截 reject 之前，防止验证域名被拦截导致封号）
