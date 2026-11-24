@@ -1,5 +1,10 @@
 # Shadowrocket 更新日志
 
+## 2026-11-24 13:40 UTC+8 · cy.conf v6.12
+
+- 新增 `⚡ Relay-Auto` 自动最低延迟前置跳板组（`url-test`，`interval=180`，`tolerance=30`），并将 `🔗 Relay` 改为默认跟随 `⚡ Relay-Auto`（共 7 个全英文策略组，与 `tun-metacubex-v3.js v3.2.0` 对齐）。
+- `⚡ Relay-Auto` 正则同步支持英文地区名（`Japan`、`United States` 等）并精准排除 `>1` 倍率节点（`X5`、`X1.5`、`3x`、`x2` 等，保留 `≤1` 倍率）、家宽/家庭节点与公告节点。
+
 ## 2026-11-24 12:45 UTC+8 · cy.conf v6.11
 
 - 6 大策略组全部统一为英文命名（与 `tun-metacubex-v3.js v3.1.0` 对齐）：`⚡ 节点选择` → `⚡ Proxy`、`📧 邮件` → `📧 Mail`、`🏠 住宅出口` → `🏠 Residential`、`HP_Relay` → `🔗 Relay`，保留 `🤖 AI`、`🌐 Google`。

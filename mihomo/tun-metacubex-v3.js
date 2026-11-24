@@ -1,20 +1,21 @@
-// ===== mihomo/tun-metacubex-v3.js v3.1.0 | TUN 模式 + MetaCubeX .mrs 规则 + 静态住宅链式代理（mihomo 覆写脚本·第三代）=====
-// 最后更新：2026-11-24 12:45 UTC+8
+// ===== mihomo/tun-metacubex-v3.js v3.2.0 | TUN 模式 + MetaCubeX .mrs 规则 + 静态住宅链式代理（mihomo 覆写脚本·第三代）=====
+// 最后更新：2026-11-24 13:40 UTC+8
 // 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合静态住宅 / ISP 代理链式转发方案（支持 Oxylabs / Webshare 等任意 SOCKS5/HTTP 代理服务）。
 // 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / Residential）仍可通过
-//   「本机 → 🔗 Relay（机场节点前置中转）→ 静态住宅 / ISP 代理 → 目标站点」正常访问，不再因单点 VPS 故障导致住宅 IP 失效。
+//   「本机 → 🔗 Relay（默认跟随 ⚡ Relay-Auto 自动选最低延迟 ≤1x 节点，超时自动切换）→ 静态住宅 / ISP 代理 → 目标站点」正常访问，且目标站点看到的住宅落地 IP 恒定不变。
 // 链路说明：
-//   1) 机场中转链路：本机 → 🔗 Relay（手选组，默认跟随「⚡ Proxy」，也可单独指定台/日/新/美/韩 1x 机场节点或 DIRECT）→ 🏠 ISP-N → 目标服务
+//   1) 机场中转链路：本机 → 🔗 Relay（默认 ⚡ Relay-Auto 自动测速容灾，支持 RELAY_URLS 跨机场订阅合并，也可手选单节点或 DIRECT）→ 🏠 ISP-N → 目标服务
 //   2) 自建 VPS 链路：本机 → VPS_URLS 中的自建 VPS 节点 → 目标服务
-// 分组说明（共 6 个纯手选 select 组，全部统一英文命名）：
-//   - ⚡ Proxy：日常上网主组（仅含机场节点，隔离自建 VPS 与 🏠 住宅节点）
+// 分组说明（共 7 个策略组，全部统一英文命名）：
+//   - ⚡ Proxy：日常上网主组（仅含当前订阅机场节点，隔离自建 VPS、RELAY_URLS 与 🏠 住宅节点）
 //   - 📧 Foxmail：邮件组（含链式住宅节点、自建 VPS 节点、🏠 Residential、⚡ Proxy）
 //   - 🤖 AI：AI 业务组（同上；补充 Claude/MCP 专属域名、Anthropic IPv4 段及移动端进程）
 //   - 🌐 Google：Google/YouTube/Gemini 组（默认跟随 🤖 AI，可切 🏠 Residential、各住宅/VPS 节点或 ⚡ Proxy）
 //   - 🏠 Residential：专为风控/支付/人机验证（Stripe、Cloudflare 验证、hCaptcha、reCAPTCHA、Persona、Sift、Intercom、IPInfo 等）设立的住宅落地组
-//   - 🔗 Relay：静态住宅 / ISP 代理的前置加密中转组（type: select，默认首选「⚡ Proxy」，也可手选台/日/新/美/韩机场节点或 DIRECT）
+//   - 🔗 Relay：静态住宅 / ISP 代理的前置加密中转组（type: select，默认首选 ⚡ Relay-Auto，也可手选具体节点、⚡ Proxy 或 DIRECT）
+//   - ⚡ Relay-Auto：前置中转自动最低延迟组（type: url-test，每 180 秒测速 + 故障自动切换，汇集当前订阅与 RELAY_URLS 中台/日/新/美/韩 ≤1 倍率非家宽节点）
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。需开启 TUN。
-// 隐私与同步安全：VPS_URLS 与 IP_PROXIES 只在本机客户端脚本副本填写，仓库中保持为空 []（防同步到公开仓库泄露账密）。
+// 隐私与同步安全：VPS_URLS、IP_PROXIES 与 RELAY_URLS 只在本机客户端脚本副本填写，仓库中保持为空 []（防同步到公开仓库泄露账密）。
 // 更新日志：CHANGELOG.md
 const PROXY = "⚡ Proxy"
 const MAIL = "📧 Foxmail"
@@ -22,6 +23,7 @@ const AI = "🤖 AI"
 const GOOGLE = "🌐 Google"
 const RESIDENTIAL = "🏠 Residential"
 const RELAY = "🔗 Relay"
+const RELAY_AUTO = "⚡ Relay-Auto"
 
 // ==================== 仅在本机填写（切勿提交到仓库）====================
 // 1) 自建 VPS 订阅链接（Clash/mihomo 格式），逐行粘贴到下面数组，一行一条，行尾保留英文逗号。
@@ -43,12 +45,21 @@ const IP_PROXIES = [
     // "US 美国 Oxylabs|disp.oxylabs.io:8001:user-your_name:your_pass",
     // "198.51.100.10:6321:your_user:your_pass",
 ]
+
+// 3) 跨机场前置中转订阅池（Clash/mihomo 格式，可选）：
+//    可填入多个主力/备用机场订阅链接，节点仅汇入 ⚡ Relay-Auto 与 🔗 Relay 参与最低延迟自动选择与跨机场故障切换，
+//    不会混入日常主组 ⚡ Proxy 或业务组；留空 [] 则仅在当前激活订阅内自动选最低延迟节点。
+const RELAY_URLS = [
+    // "https://example.com/airport-backup-1",
+    // "https://example.com/airport-backup-2",
+]
 // =====================================================================
 
-// 🔗 Relay 机场前置中转节点筛选规则（筛选台/日/新/美/韩优质节点，排除香港、倍率、IPv6、信息节点与 🏠 住宅节点自身）
-const RELAY_FILTER = "(?i)(台湾|台灣|日本|新加坡|美国|美國|韩国|韓國|\\b(TW|JP|SG|US|KR)\\b)"
+// 🔗 Relay / ⚡ Relay-Auto 前置中转节点筛选规则（筛选台/日/新/美/韩 ≤1 倍率优质专线节点，排除 >1 倍率、家宽、香港、IPv6、信息公告与 🏠 住宅节点自身）
+const RELAY_FILTER =
+    "(?i)(台湾|台灣|日本|新加坡|美国|美國|韩国|韓國|Taiwan|Japan|Singapore|United\\s*States|America|Korea|\\b(TW|JP|SG|US|USA|KR)\\b)"
 const RELAY_EXCLUDE =
-    "(?i)(^🏠|^🔗|倍率|IPv6|到期|剩余|过期|有效期|官网|官方|订阅|套餐|重置|流量|距离|网址|客服|失联|故障|香港|\\bHK\\b|expire|traffic|reset)"
+    "(?i)(^🏠|^🔗|^⚡|家庭|家宽|家寬|住宅|Residential|Oxylabs|Webshare|NovixLink|RackNerd|倍率|(^|[^0-9.])(1\\.[1-9][0-9]*|[2-9][0-9]*(\\.[0-9]+)?)\\s*(x|倍)($|[^a-z0-9])|(^|[^a-z0-9]|ip)x\\s*(1\\.[1-9][0-9]*|[2-9][0-9]*(\\.[0-9]+)?)($|[^0-9])|IPv6|到期|剩余|剩餘|过期|有效期|官网|官網|官方|订阅|訂閱|套餐|重置|流量|距离|网址|客服|失联|故障|更新|提醒|公告|周期|测速|測速|延迟|延遲|无脑|無腦|香港|Hong\\s*Kong|\\bHK\\b|expire|traffic|remaining|reset)"
 
 const RULE_CDN = "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release"
 const MRS_BASE = "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo"
@@ -397,12 +408,14 @@ function main(config) {
         config["find-process-mode"] = "strict"
     }
 
-    // ---- 1. 手动选择组 + Foxmail 组 + AI 组 ----
-    // 自建 VPS provider（仅当 VPS_URLS 已在本机填写；按填写顺序自动编号 my-vps-1…N）
+    // ---- 1. 手动选择组 + Foxmail 组 + AI 组 + 跨机场 Relay 订阅池 ----
+    // 自建 VPS provider（my-vps-1…N）与跨机场中转 provider（my-relay-1…N），均仅在本机填写时创建并与日常主组隔离
     const vpsUrls = Array.isArray(VPS_URLS) ? VPS_URLS.filter(u => typeof u === "string" && u.trim() !== "").map(u => u.trim()) : []
     const vpsProviderNames = vpsUrls.map((_, i) => "my-vps-" + (i + 1))
-    const vpsOn = vpsUrls.length > 0
-    if (vpsOn) {
+    const relayUrls = Array.isArray(RELAY_URLS) ? RELAY_URLS.filter(u => typeof u === "string" && u.trim() !== "").map(u => u.trim()) : []
+    const relayProviderNames = relayUrls.map((_, i) => "my-relay-" + (i + 1))
+    const customProvidersOn = vpsUrls.length > 0 || relayUrls.length > 0
+    if (customProvidersOn) {
         if (!config["proxy-providers"] || typeof config["proxy-providers"] !== "object" || Array.isArray(config["proxy-providers"])) {
             config["proxy-providers"] = {}
         }
@@ -421,16 +434,32 @@ function main(config) {
                 },
             }
         })
+        relayUrls.forEach((url, i) => {
+            config["proxy-providers"][relayProviderNames[i]] = {
+                type: "http",
+                url,
+                proxy: PROXY,
+                interval: 86400,
+                path: "./providers/" + relayProviderNames[i] + ".yaml",
+                "health-check": {
+                    enable: true,
+                    url: "https://www.gstatic.com/generate_204",
+                    interval: 180,
+                },
+            }
+        })
     }
 
-    const otherProviders = Object.keys(config["proxy-providers"] || {}).filter(n => !vpsProviderNames.includes(n))
+    const otherProviders = Object.keys(config["proxy-providers"] || {}).filter(
+        n => !vpsProviderNames.includes(n) && !relayProviderNames.includes(n)
+    )
 
     config["proxy-groups"] = [
         {
             name: PROXY,
             type: "select",
-            // 启用 my-vps 时，主组不纳入该 provider（订阅自带的 provider 仍保留）
-            ...(vpsOn
+            // 启用 my-vps / my-relay 时，主组不纳入这些专用 provider（订阅自带的 provider 仍保留）
+            ...(customProvidersOn
                 ? { "include-all-proxies": true, ...(otherProviders.length ? { use: otherProviders } : {}) }
                 : { "include-all": true }),
             "exclude-filter": NODE_FILTER,
@@ -438,7 +467,7 @@ function main(config) {
         // 业务组在 cyVpsSelectors 中统一重建为纯手选 select 组（含链式静态住宅节点与 VPS 节点）
         { name: MAIL, type: "select", proxies: [PROXY] },
         { name: AI, type: "select", proxies: [PROXY] },
-        ...companyProxyGroups(vpsOn, otherProviders),
+        ...companyProxyGroups(customProvidersOn, otherProviders),
     ]
 
     // ---- 2. MetaCubeX meta-rules-dat (.mrs) 规则集 ----
@@ -674,15 +703,18 @@ function cyVpsSelectors(config) {
     const residentialNames = [...new Set((config.proxies || []).filter(p => p && !ipProxyNames.includes(p.name) && !names.includes(p.name) && residentialPattern.test(p.name) && !excluded.test(p.name) && !residentialExcluded.test(p.name)).map(p => p.name))]
 
     const vpsProviderNames = Object.keys(config["proxy-providers"] || {}).filter(k => /^my-vps(-\d+)?$/.test(k))
+    const relayProviderNames = Object.keys(config["proxy-providers"] || {}).filter(k => /^my-relay-\d+$/.test(k))
     const allProviders = Object.keys(config["proxy-providers"] || {})
     const vpsProviders = allProviders.filter(k => vpsProviderNames.includes(k))
-    const otherProviders = allProviders.filter(k => !vpsProviderNames.includes(k))
+    const relayProviders = allProviders.filter(k => relayProviderNames.includes(k))
+    const otherProviders = allProviders.filter(k => !vpsProviderNames.includes(k) && !relayProviderNames.includes(k))
+    const hasCustomProviders = vpsProviders.length > 0 || relayProviders.length > 0
     const mainExclude = ipProxyNames.length ? NODE_FILTER.replace("(?i)(", "(?i)(^🏠|") : NODE_FILTER
 
     config["proxy-groups"] = (config["proxy-groups"] || []).map(g => {
         if (!g || g.name !== PROXY) return g
         const next = Object.assign({}, g, { "exclude-filter": mainExclude })
-        if (vpsProviders.length) {
+        if (hasCustomProviders) {
             next["include-all-proxies"] = true
             delete next["include-all"]
             if (otherProviders.length) next.use = otherProviders
@@ -692,11 +724,16 @@ function cyVpsSelectors(config) {
     })
 
     const pool = { ...(vpsProviderNames.length ? { use: vpsProviderNames } : {}), "exclude-filter": NODE_FILTER, "empty-fallback": "REJECT" }
-    const relayPool = vpsProviders.length
-        ? { "include-all-proxies": true, ...(otherProviders.length ? { use: otherProviders } : {}) }
+    const relayUse = [...otherProviders, ...relayProviders]
+    const relayPool = hasCustomProviders
+        ? { "include-all-proxies": true, ...(relayUse.length ? { use: relayUse } : {}) }
         : { "include-all": true }
+    const relayFilterRe = new RegExp(RELAY_FILTER.replace("(?i)", ""), "i")
+    const relayExcludeRe = new RegExp(RELAY_EXCLUDE.replace("(?i)", ""), "i")
+    const hasInlineRelay = (config.proxies || []).some(p => p && p.name && relayFilterRe.test(p.name) && !relayExcludeRe.test(p.name))
+    const relayAutoFallback = (!hasInlineRelay && relayUse.length === 0) ? { proxies: [PROXY] } : {}
 
-    config["proxy-groups"] = config["proxy-groups"].filter(g => ![MAIL, AI, GOOGLE, RESIDENTIAL, RELAY].includes(g.name)).concat([
+    config["proxy-groups"] = config["proxy-groups"].filter(g => ![MAIL, AI, GOOGLE, RESIDENTIAL, RELAY, RELAY_AUTO].includes(g.name)).concat([
         { name: MAIL, type: "select", ...pool, proxies: [...ipProxyNames, ...names, RESIDENTIAL, PROXY] },
         { name: AI, type: "select", ...pool, proxies: [...ipProxyNames, ...names, RESIDENTIAL, PROXY] },
         { name: GOOGLE, type: "select", ...pool, proxies: [AI, RESIDENTIAL, ...ipProxyNames, ...names, PROXY] },
@@ -704,7 +741,19 @@ function cyVpsSelectors(config) {
         {
             name: RELAY,
             type: "select",
-            proxies: [PROXY, "DIRECT"],
+            proxies: [RELAY_AUTO, PROXY, "DIRECT"],
+            ...relayPool,
+            filter: RELAY_FILTER,
+            "exclude-filter": RELAY_EXCLUDE,
+        },
+        {
+            name: RELAY_AUTO,
+            type: "url-test",
+            url: "https://www.gstatic.com/generate_204",
+            interval: 180,
+            tolerance: 30,
+            lazy: true,
+            ...relayAutoFallback,
             ...relayPool,
             filter: RELAY_FILTER,
             "exclude-filter": RELAY_EXCLUDE,

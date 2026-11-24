@@ -1,5 +1,11 @@
 # mihomo 更新日志
 
+## 2026-11-24 13:40 UTC+8 · tun-metacubex-v3.js v3.2.0
+
+- 新增 `⚡ Relay-Auto` 前置中转自动最低延迟组（`type: url-test`，`interval: 180`，`tolerance: 30`），并将 `🔗 Relay` 默认首选项设为 `⚡ Relay-Auto`（保留手动切换具体节点、`⚡ Proxy` 或 `DIRECT` 的能力，共 7 个策略组）。第 1 跳机场节点超时或高延迟时自动无感切换至下一个最低延迟节点，第 2 跳住宅落地出口 IP 保持恒定不变。
+- 新增 `RELAY_URLS = []` 跨机场中转订阅池数组（仅在本机脚本副本填写，仓库保持为空）：自动创建 `my-relay-1…N` provider 并仅汇入 `⚡ Relay-Auto` 与 `🔗 Relay` 参与跨机场自动选路与容灾切换，与日常主组 `⚡ Proxy` 及各业务组严格隔离。
+- 升级 `RELAY_FILTER` 与 `RELAY_EXCLUDE`（纯 Go RE2 语法）：支持英文地区名（`Japan`、`United States`、`Singapore`、`Taiwan`、`Korea`），并精准排除 `>1` 倍率节点（`X5`、`X1.5`、`3x`、`｜x2`、`原生IPx2`、`2倍` 等，保留 `X0.5`、`0.7倍`、`1x`、`x1`）、机场家宽/家庭慢节点及公告节点，防止后台自动测速误选高倍率节点消耗流量。
+
 ## 2026-11-24 12:45 UTC+8 · tun-metacubex-v3.js v3.1.0
 
 - 策略组名称全部统一为专业英文（共 6 个纯手选 `select` 组）：`⚡ 节点选择` → `⚡ Proxy`、`🏠 住宅出口` → `🏠 Residential`、`HP_Relay` → `🔗 Relay`，保留 `📧 Foxmail`、`🤖 AI`、`🌐 Google`。
