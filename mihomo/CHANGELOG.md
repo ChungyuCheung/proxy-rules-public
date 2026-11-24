@@ -1,5 +1,9 @@
 # mihomo 更新日志
 
+## 2026-11-24 17:35 UTC+8 · tun-metacubex-v3.js v3.3.1
+
+- 新增 `RELAY_EXTRA_EXCLUDE = ""` 可选常量（仓库保持为空），支持按正则快速拉黑体检发现的不支持二次代理转发的个别中转节点（如 `"台湾C|日本C"`），无需修改内置 `RELAY_EXCLUDE`。
+
 ## 2026-11-24 16:22 UTC+8 · tun-metacubex-v3.js v3.3.0
 
 - 精简为 6 个策略组：移除多余的 `⚡ Relay-Auto` 嵌套层，直接将 `🔗 Relay` 设为 `type: url-test`（每 180 秒自动测速 + 30ms 防抖 + 超时自动切换，汇集当前订阅与 `RELAY_URLS` 中 `≤1x` 节点）。

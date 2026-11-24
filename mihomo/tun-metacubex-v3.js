@@ -1,5 +1,5 @@
-// ===== mihomo/tun-metacubex-v3.js v3.3.0 | TUN 模式 + MetaCubeX .mrs 规则 + 静态住宅链式代理（mihomo 覆写脚本·第三代）=====
-// 最后更新：2026-11-24 16:22 UTC+8
+// ===== mihomo/tun-metacubex-v3.js v3.3.1 | TUN 模式 + MetaCubeX .mrs 规则 + 静态住宅链式代理（mihomo 覆写脚本·第三代）=====
+// 最后更新：2026-11-24 17:35 UTC+8
 // 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合静态住宅 / ISP 代理链式转发方案（支持 Oxylabs / Webshare 等任意 HTTP/SOCKS5 代理服务）。
 // 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / Residential）仍可通过
 //   「本机 → 🔗 Relay（自动选最低延迟 ≤1x 节点，超时自动切换）→ 静态住宅 / ISP 代理 → 目标站点」正常访问，且目标站点看到的住宅落地 IP 恒定不变。
@@ -51,6 +51,8 @@ const RELAY_URLS = [
     // "https://example.com/airport-backup-1",
     // "https://example.com/airport-backup-2",
 ]
+// 可选：额外排除不支持二次转发的个别中转节点名称（正则片段，用 | 分隔，如 "台湾C|日本C"；仓库保持为空 ""）。
+const RELAY_EXTRA_EXCLUDE = ""
 // =====================================================================
 
 // 🔗 Relay 前置中转节点筛选规则（筛选台/日/新/美/韩 ≤1 倍率优质专线节点，排除 >1 倍率、家宽、香港、IPv6、信息公告与 🏠 住宅节点自身）
@@ -726,8 +728,10 @@ function cyVpsSelectors(config) {
     const relayPool = hasCustomProviders
         ? { "include-all-proxies": true, ...(relayUse.length ? { use: relayUse } : {}) }
         : { "include-all": true }
+    const extraRelayEx = typeof RELAY_EXTRA_EXCLUDE === "string" && RELAY_EXTRA_EXCLUDE.trim() !== "" ? "|" + RELAY_EXTRA_EXCLUDE.trim() : ""
+    const relayExclude = extraRelayEx ? RELAY_EXCLUDE.replace(/\)$/, extraRelayEx + ")") : RELAY_EXCLUDE
     const relayFilterRe = new RegExp(RELAY_FILTER.replace("(?i)", ""), "i")
-    const relayExcludeRe = new RegExp(RELAY_EXCLUDE.replace("(?i)", ""), "i")
+    const relayExcludeRe = new RegExp(relayExclude.replace("(?i)", ""), "i")
     const hasInlineRelay = (config.proxies || []).some(p => p && p.name && relayFilterRe.test(p.name) && !relayExcludeRe.test(p.name))
     const hasRelayCandidates = hasInlineRelay || relayUse.length > 0
 
@@ -744,7 +748,7 @@ function cyVpsSelectors(config) {
             tolerance: 30,
             lazy: true,
             ...(hasRelayCandidates
-                ? { ...relayPool, filter: RELAY_FILTER, "exclude-filter": RELAY_EXCLUDE }
+                ? { ...relayPool, filter: RELAY_FILTER, "exclude-filter": relayExclude }
                 : { proxies: [PROXY] }),
         },
     ])
