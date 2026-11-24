@@ -1,5 +1,10 @@
 # mihomo 更新日志
 
+## 2026-11-24 15:02 UTC+8 · tun-metacubex-v3.js v3.2.1
+
+- 修复 `🔗 Relay` 中未显示 `⚡ Relay-Auto` 与 `⚡ Proxy` 的问题：mihomo 内核的 `filter` / `exclude-filter` 会同时过滤显式 `proxies` 列表，`🔗 Relay` 的 `filter` 现显式放行 `^⚡ (Relay-Auto|Proxy)$|^DIRECT$` 且从 `RELAY_EXCLUDE` 移除 `^⚡`，确保 `⚡ Relay-Auto` 固定排在第 1 默认项、不再因过滤被剔除而回退到 `DIRECT`。
+- 当没有任何匹配的候选跳板节点与 `RELAY_URLS` 时，`⚡ Relay-Auto` 回退 `proxies: [⚡ Proxy]` 时不再附带 `filter`，防止空配置下连回退项也被过滤。
+
 ## 2026-11-24 13:40 UTC+8 · tun-metacubex-v3.js v3.2.0
 
 - 新增 `⚡ Relay-Auto` 前置中转自动最低延迟组（`type: url-test`，`interval: 180`，`tolerance: 30`），并将 `🔗 Relay` 默认首选项设为 `⚡ Relay-Auto`（保留手动切换具体节点、`⚡ Proxy` 或 `DIRECT` 的能力，共 7 个策略组）。第 1 跳机场节点超时或高延迟时自动无感切换至下一个最低延迟节点，第 2 跳住宅落地出口 IP 保持恒定不变。

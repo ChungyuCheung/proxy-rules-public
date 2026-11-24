@@ -1,5 +1,5 @@
-// ===== mihomo/tun-metacubex-v3.js v3.2.0 | TUN 模式 + MetaCubeX .mrs 规则 + 静态住宅链式代理（mihomo 覆写脚本·第三代）=====
-// 最后更新：2026-11-24 13:40 UTC+8
+// ===== mihomo/tun-metacubex-v3.js v3.2.1 | TUN 模式 + MetaCubeX .mrs 规则 + 静态住宅链式代理（mihomo 覆写脚本·第三代）=====
+// 最后更新：2026-11-24 15:02 UTC+8
 // 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合静态住宅 / ISP 代理链式转发方案（支持 Oxylabs / Webshare 等任意 SOCKS5/HTTP 代理服务）。
 // 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / Residential）仍可通过
 //   「本机 → 🔗 Relay（默认跟随 ⚡ Relay-Auto 自动选最低延迟 ≤1x 节点，超时自动切换）→ 静态住宅 / ISP 代理 → 目标站点」正常访问，且目标站点看到的住宅落地 IP 恒定不变。
@@ -59,7 +59,7 @@ const RELAY_URLS = [
 const RELAY_FILTER =
     "(?i)(台湾|台灣|日本|新加坡|美国|美國|韩国|韓國|Taiwan|Japan|Singapore|United\\s*States|America|Korea|\\b(TW|JP|SG|US|USA|KR)\\b)"
 const RELAY_EXCLUDE =
-    "(?i)(^🏠|^🔗|^⚡|家庭|家宽|家寬|住宅|Residential|Oxylabs|Webshare|NovixLink|RackNerd|倍率|(^|[^0-9.])(1\\.[1-9][0-9]*|[2-9][0-9]*(\\.[0-9]+)?)\\s*(x|倍)($|[^a-z0-9])|(^|[^a-z0-9]|ip)x\\s*(1\\.[1-9][0-9]*|[2-9][0-9]*(\\.[0-9]+)?)($|[^0-9])|IPv6|到期|剩余|剩餘|过期|有效期|官网|官網|官方|订阅|訂閱|套餐|重置|流量|距离|网址|客服|失联|故障|更新|提醒|公告|周期|测速|測速|延迟|延遲|无脑|無腦|香港|Hong\\s*Kong|\\bHK\\b|expire|traffic|remaining|reset)"
+    "(?i)(^🏠|^🔗|家庭|家宽|家寬|住宅|Residential|Oxylabs|Webshare|NovixLink|RackNerd|倍率|(^|[^0-9.])(1\\.[1-9][0-9]*|[2-9][0-9]*(\\.[0-9]+)?)\\s*(x|倍)($|[^a-z0-9])|(^|[^a-z0-9]|ip)x\\s*(1\\.[1-9][0-9]*|[2-9][0-9]*(\\.[0-9]+)?)($|[^0-9])|IPv6|到期|剩余|剩餘|过期|有效期|官网|官網|官方|订阅|訂閱|套餐|重置|流量|距离|网址|客服|失联|故障|更新|提醒|公告|周期|测速|測速|延迟|延遲|无脑|無腦|香港|Hong\\s*Kong|\\bHK\\b|expire|traffic|remaining|reset)"
 
 const RULE_CDN = "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release"
 const MRS_BASE = "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo"
@@ -731,7 +731,10 @@ function cyVpsSelectors(config) {
     const relayFilterRe = new RegExp(RELAY_FILTER.replace("(?i)", ""), "i")
     const relayExcludeRe = new RegExp(RELAY_EXCLUDE.replace("(?i)", ""), "i")
     const hasInlineRelay = (config.proxies || []).some(p => p && p.name && relayFilterRe.test(p.name) && !relayExcludeRe.test(p.name))
-    const relayAutoFallback = (!hasInlineRelay && relayUse.length === 0) ? { proxies: [PROXY] } : {}
+    const hasRelayCandidates = hasInlineRelay || relayUse.length > 0
+    // 注意：mihomo 的 filter / exclude-filter 会同时作用于显式 proxies 数组，
+    // 因此 🔗 Relay 的 filter 必须显式放行 ⚡ Relay-Auto、⚡ Proxy 与 DIRECT，否则子策略组会被内核过滤剔除导致回退 DIRECT！
+    const relaySelectFilter = RELAY_FILTER.replace("(?i)(", "(?i)(^⚡ (Relay-Auto|Proxy)$|^DIRECT$|")
 
     config["proxy-groups"] = config["proxy-groups"].filter(g => ![MAIL, AI, GOOGLE, RESIDENTIAL, RELAY, RELAY_AUTO].includes(g.name)).concat([
         { name: MAIL, type: "select", ...pool, proxies: [...ipProxyNames, ...names, RESIDENTIAL, PROXY] },
@@ -743,7 +746,7 @@ function cyVpsSelectors(config) {
             type: "select",
             proxies: [RELAY_AUTO, PROXY, "DIRECT"],
             ...relayPool,
-            filter: RELAY_FILTER,
+            filter: relaySelectFilter,
             "exclude-filter": RELAY_EXCLUDE,
         },
         {
@@ -753,10 +756,9 @@ function cyVpsSelectors(config) {
             interval: 180,
             tolerance: 30,
             lazy: true,
-            ...relayAutoFallback,
-            ...relayPool,
-            filter: RELAY_FILTER,
-            "exclude-filter": RELAY_EXCLUDE,
+            ...(hasRelayCandidates
+                ? { ...relayPool, filter: RELAY_FILTER, "exclude-filter": RELAY_EXCLUDE }
+                : { proxies: [PROXY] }),
         },
     ])
     return config
