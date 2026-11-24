@@ -1,5 +1,11 @@
 # mihomo 更新日志
 
+## 2026-11-24 12:45 UTC+8 · tun-metacubex-v3.js v3.1.0
+
+- 策略组名称全部统一为专业英文（共 6 个纯手选 `select` 组）：`⚡ 节点选择` → `⚡ Proxy`、`🏠 住宅出口` → `🏠 Residential`、`HP_Relay` → `🔗 Relay`，保留 `📧 Foxmail`、`🤖 AI`、`🌐 Google`。
+- 静态住宅 / ISP 代理参数去品牌化：`WEBSHARE_PROXIES` 重命名为 `IP_PROXIES`（支持 Oxylabs、Webshare 等任意 SOCKS5/HTTP 住宅代理），解析函数改为 `cyParseIpProxies`，未指定自定义名称时的默认节点前缀改为 `🏠 ISP-序号 (服务器)`；内联 VPS 节点匹配正则扩展 `Oxylabs|ISP`。
+- `CUSTOM_RULES` 新增 `DOMAIN-SUFFIX,oxylabs.io,⚡ Proxy`（与 `brightdata.com` 一致走主代理组），避免指纹浏览器或命令行连接 `disp.oxylabs.io` 接入点时误入住宅组产生双层套娃。
+
 ## 2026-11-19 17:25 UTC+8 · tun-metacubex-v3.js v3.0.8
 
 - 从 `🤖 AI` 精确域名中移出 `js.stripe.com` 与 `r.stripe.com`，整套 Stripe 域名（`stripe.com`、`stripe.network`、`stripecdn.com`）统一归口到「🏠 住宅出口」，避免 `🤖 AI` 与「🏠 住宅出口」选择不同节点时 Stripe 自身 IP 分裂或受限节点波及其他网站的 Stripe 付款。

@@ -1,5 +1,10 @@
 # Shadowrocket 更新日志
 
+## 2026-11-24 12:45 UTC+8 · cy.conf v6.11
+
+- 6 大策略组全部统一为英文命名（与 `tun-metacubex-v3.js v3.1.0` 对齐）：`⚡ 节点选择` → `⚡ Proxy`、`📧 邮件` → `📧 Mail`、`🏠 住宅出口` → `🏠 Residential`、`HP_Relay` → `🔗 Relay`，保留 `🤖 AI`、`🌐 Google`。
+- `🏠 Residential` 与 `🔗 Relay` 节点筛选正则补充 `Oxylabs|ISP|Residential` 匹配与 `🔗` 排除，兼容各家静态住宅 / ISP 代理命名；代理商接入域名新增 `DOMAIN-SUFFIX,brightdata.com,PROXY` 与 `DOMAIN-SUFFIX,oxylabs.io,PROXY`。
+
 ## 2026-11-19 18:05 UTC+8 · cy.conf v6.10
 
 - 策略组精简为极简 6 组结构（与 mihomo V3 对齐）：移除 4 个重复的 `xxx VPS 手选` 子组，`📧 邮件`、`🤖 AI`、`🌐 Google` 直接选择 `⚡ 节点选择` 或跟随 `🏠 住宅出口`；`🏠 住宅出口` 直接使用正则手选 VPS / Webshare / 订阅内住宅、家宽、家庭节点（点一层即可切换）。

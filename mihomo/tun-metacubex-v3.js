@@ -1,27 +1,27 @@
-// ===== mihomo/tun-metacubex-v3.js v3.0.8 | TUN 模式 + MetaCubeX .mrs 规则 + Homeport 住宅链式代理（mihomo 覆写脚本·第三代）=====
-// 最后更新：2026-11-19 17:25 UTC+8
-// 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合 0xkaka/homeport 静态住宅 IP 链式代理方案（Webshare 等）。
-// 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / 住宅出口）仍可通过
-//   「本机 → HP_Relay（机场节点中转）→ Webshare 静态住宅代理 → 目标站点」正常访问，不再因单点 VPS 故障导致住宅 IP 失效。
+// ===== mihomo/tun-metacubex-v3.js v3.1.0 | TUN 模式 + MetaCubeX .mrs 规则 + 静态住宅链式代理（mihomo 覆写脚本·第三代）=====
+// 最后更新：2026-11-24 12:45 UTC+8
+// 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合静态住宅 / ISP 代理链式转发方案（支持 Oxylabs / Webshare 等任意 SOCKS5/HTTP 代理服务）。
+// 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / Residential）仍可通过
+//   「本机 → 🔗 Relay（机场节点前置中转）→ 静态住宅 / ISP 代理 → 目标站点」正常访问，不再因单点 VPS 故障导致住宅 IP 失效。
 // 链路说明：
-//   1) 机场中转链路：本机 → HP_Relay（手选组，默认跟随「⚡ 节点选择」，也可单独指定台/日/新/美/韩机场节点或 DIRECT）→ 🏠 Webshare-N → 目标服务
-//   2) 自建 VPS 链路：本机 → VPS_URLS 中的自建 VPS / VPS 绑定的 Webshare 节点 → 目标服务
-// 分组说明（共 6 个纯手选 select 组）：
-//   - ⚡ 节点选择：日常上网主组（仅含机场节点，隔离自建 VPS 与 🏠 住宅节点）
-//   - 📧 Foxmail：邮件组（含机场中转 🏠 Webshare 节点、自建 VPS 节点、🏠 住宅出口、⚡ 节点选择）
+//   1) 机场中转链路：本机 → 🔗 Relay（手选组，默认跟随「⚡ Proxy」，也可单独指定台/日/新/美/韩 1x 机场节点或 DIRECT）→ 🏠 ISP-N → 目标服务
+//   2) 自建 VPS 链路：本机 → VPS_URLS 中的自建 VPS 节点 → 目标服务
+// 分组说明（共 6 个纯手选 select 组，全部统一英文命名）：
+//   - ⚡ Proxy：日常上网主组（仅含机场节点，隔离自建 VPS 与 🏠 住宅节点）
+//   - 📧 Foxmail：邮件组（含链式住宅节点、自建 VPS 节点、🏠 Residential、⚡ Proxy）
 //   - 🤖 AI：AI 业务组（同上；补充 Claude/MCP 专属域名、Anthropic IPv4 段及移动端进程）
-//   - 🌐 Google：Google/YouTube/Gemini 组（默认跟随 🤖 AI，可切 🏠 住宅出口、各 Webshare/VPS 节点或 ⚡ 节点选择）
-//   - 🏠 住宅出口：专为风控/支付/人机验证（Stripe、Cloudflare 验证、hCaptcha、reCAPTCHA、Sentry、Datadog、Persona、IPInfo、Webshare 等）设立的住宅出口组
-//   - HP_Relay：Webshare 静态住宅代理的前置中转组（type: select，默认首选「⚡ 节点选择」，也可手选台/日/新/美/韩机场节点或 DIRECT）
+//   - 🌐 Google：Google/YouTube/Gemini 组（默认跟随 🤖 AI，可切 🏠 Residential、各住宅/VPS 节点或 ⚡ Proxy）
+//   - 🏠 Residential：专为风控/支付/人机验证（Stripe、Cloudflare 验证、hCaptcha、reCAPTCHA、Persona、Sift、Intercom、IPInfo 等）设立的住宅落地组
+//   - 🔗 Relay：静态住宅 / ISP 代理的前置加密中转组（type: select，默认首选「⚡ Proxy」，也可手选台/日/新/美/韩机场节点或 DIRECT）
 // 用法：Bettbox / Clash Verge Rev / FlClash 的「覆写/脚本」里用 raw 链接导入并挂到订阅；关闭「覆写 DNS」（FlClash 还要关「追加系统 DNS」）。需开启 TUN。
-// 隐私与同步安全：VPS_URLS 与 WEBSHARE_PROXIES 只在本机客户端脚本副本填写，仓库中保持为空 []（防同步到公开仓库泄露账密）。
+// 隐私与同步安全：VPS_URLS 与 IP_PROXIES 只在本机客户端脚本副本填写，仓库中保持为空 []（防同步到公开仓库泄露账密）。
 // 更新日志：CHANGELOG.md
-const PROXY = "⚡ 节点选择"
+const PROXY = "⚡ Proxy"
 const MAIL = "📧 Foxmail"
 const AI = "🤖 AI"
 const GOOGLE = "🌐 Google"
-const HOMEPORT = "🏠 住宅出口"
-const RELAY = "HP_Relay"
+const RESIDENTIAL = "🏠 Residential"
+const RELAY = "🔗 Relay"
 
 // ==================== 仅在本机填写（切勿提交到仓库）====================
 // 1) 自建 VPS 订阅链接（Clash/mihomo 格式），逐行粘贴到下面数组，一行一条，行尾保留英文逗号。
@@ -33,22 +33,22 @@ const VPS_URLS = [
 // 可选：当前订阅自带节点中额外匹配的名称（正则片段；VPS_URLS 订阅的节点不受名称筛选，全部显示）。
 const VPS_EXTRA_FILTER = ""
 
-// 2) Webshare 静态住宅 IP 代理清单（Homeport 链式代理：经 HP_Relay 机场节点中转，VPS 故障时依然可用）
+// 2) 静态住宅 / ISP 代理清单（链式代理：经 🔗 Relay 机场节点前置中转，支持 Oxylabs / Webshare 等服务）
 //    支持格式：
-//      - "IP:端口:用户名:密码"（自动命名为 "🏠 Webshare-序号 (IP)"，默认 socks5）
-//      - "自定义名称|IP:端口:用户名:密码"（自定义节点名，自动补 🏠 前缀）
-//      - 对象格式：{ name: "🏠 Webshare-1", type: "socks5", server: "x.x.x.x", port: 1234, username: "u", password: "p" }
+//      - "服务器:端口:用户名:密码"（自动命名为 "🏠 ISP-序号 (服务器)"，默认 socks5）
+//      - "自定义名称|服务器:端口:用户名:密码"（自定义节点名，自动补 🏠 前缀；注意自定义名中请勿再包含竖线 |）
+//      - 对象格式：{ name: "🏠 US Oxylabs", type: "socks5", server: "disp.oxylabs.io", port: 8001, username: "user-xxx", password: "xxx" }
 //    只在本机 Bettbox / Clash Verge Rev / FlClash 脚本副本里填写，切勿提交到仓库（会泄露代理账密）！
-const WEBSHARE_PROXIES = [
+const IP_PROXIES = [
+    // "US 美国 Oxylabs|disp.oxylabs.io:8001:user-your_name:your_pass",
     // "198.51.100.10:6321:your_user:your_pass",
-    // "198.51.100.11:7359:your_user:your_pass",
 ]
 // =====================================================================
 
-// HP_Relay 机场前置中转节点筛选规则（筛选台/日/新/美/韩优质节点，排除香港、倍率、IPv6、信息节点与 🏠 住宅节点自身）
+// 🔗 Relay 机场前置中转节点筛选规则（筛选台/日/新/美/韩优质节点，排除香港、倍率、IPv6、信息节点与 🏠 住宅节点自身）
 const RELAY_FILTER = "(?i)(台湾|台灣|日本|新加坡|美国|美國|韩国|韓國|\\b(TW|JP|SG|US|KR)\\b)"
 const RELAY_EXCLUDE =
-    "(?i)(^🏠|倍率|IPv6|到期|剩余|过期|有效期|官网|官方|订阅|套餐|重置|流量|距离|网址|客服|失联|故障|香港|\\bHK\\b|expire|traffic|reset)"
+    "(?i)(^🏠|^🔗|倍率|IPv6|到期|剩余|过期|有效期|官网|官方|订阅|套餐|重置|流量|距离|网址|客服|失联|故障|香港|\\bHK\\b|expire|traffic|reset)"
 
 const RULE_CDN = "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release"
 const MRS_BASE = "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo"
@@ -59,9 +59,10 @@ const NODE_FILTER =
 // ---- 自定义高优先级规则 ----
 const CUSTOM_RULES = [
     'DOMAIN-SUFFIX,brightdata.com,' + PROXY,
+    'DOMAIN-SUFFIX,oxylabs.io,' + PROXY,
 ]
 
-// Anthropic IPv6 拒绝（防 IPv6 绕过住宅出口触发 Claude 风控封号）
+// Anthropic IPv6 拒绝（防 IPv6 绕过 🏠 Residential 触发 Claude 风控封号）
 const ANTHROPIC_IPV6_REJECT_RULES = [
     "IP-CIDR6,2607:6bc0::/48,REJECT,no-resolve",
     "IP-CIDR6,2607:6bc0:11::/48,REJECT,no-resolve",
@@ -81,8 +82,8 @@ const AI_PROCESSES = [
     "com.openai.chatgpt",
 ]
 
-// 住宅出口专属进程（Google 钱包风控）
-const HOMEPORT_PROCESSES = [
+// 住宅落地组专属进程（Google 钱包风控）
+const RESIDENTIAL_PROCESSES = [
     "com.google.android.apps.walletnfcrel",
 ]
 
@@ -171,8 +172,8 @@ const AI_IP_CIDRS = [
     "153.61.224.0/22",
 ]
 
-// 风控、支付、人机验证、客服与指纹检测域名：统一走「🏠 住宅出口」（置于广告拦截 reject 之前，防止验证域名被拦截导致封号）
-const HOMEPORT_SUFFIX_DOMAINS = [
+// 风控、支付、人机验证、客服与指纹检测域名：统一走「🏠 Residential」（置于广告拦截 reject 之前，防止验证域名被拦截导致封号）
+const RESIDENTIAL_SUFFIX_DOMAINS = [
     "stripe.com",
     "stripe.network",
     "stripecdn.com",
@@ -187,7 +188,7 @@ const HOMEPORT_SUFFIX_DOMAINS = [
     "ipinfo.io",
 ]
 
-// 纯遥测/统计域名：被大量外网网站嵌入，走两跳住宅链会明显拖慢页面加载（v3.0.2 起改走主代理「⚡ 节点选择」）。
+// 纯遥测/统计域名：被大量外网网站嵌入，走两跳住宅链会明显拖慢页面加载（v3.0.2 起改走主代理「⚡ Proxy」）。
 // 仍置于广告拦截 reject 之前，防止开启广告拦截后脚本被拦破坏页面。
 const TELEMETRY_SUFFIX_DOMAINS = [
     "sentry.io",
@@ -409,7 +410,7 @@ function main(config) {
             config["proxy-providers"][vpsProviderNames[i]] = {
                 type: "http",
                 url,
-                // 订阅经「⚡ 节点选择」（机场节点）下载：国内直连海外 VPS 的明文 http 常被重置（EOF）
+                // 订阅经「⚡ Proxy」（机场节点）下载：国内直连海外 VPS 的明文 http 常被重置（EOF）
                 proxy: PROXY,
                 interval: 86400,
                 path: "./providers/" + vpsProviderNames[i] + ".yaml",
@@ -434,7 +435,7 @@ function main(config) {
                 : { "include-all": true }),
             "exclude-filter": NODE_FILTER,
         },
-        // 业务组在 cyVpsSelectors 中统一重建为纯手选 select 组（含 Homeport 住宅节点与 VPS 节点）
+        // 业务组在 cyVpsSelectors 中统一重建为纯手选 select 组（含链式静态住宅节点与 VPS 节点）
         { name: MAIL, type: "select", proxies: [PROXY] },
         { name: AI, type: "select", proxies: [PROXY] },
         ...companyProxyGroups(vpsOn, otherProviders),
@@ -497,10 +498,10 @@ function main(config) {
         ...ANTHROPIC_IPV6_REJECT_RULES,
 
         googleQuicRule(),
-        // 独立应用进程优先匹配（Google / AI / 住宅出口）
+        // 独立应用进程优先匹配（Google / AI / Residential）
         ...GOOGLE_PROCESSES.map(p => `PROCESS-NAME,${p},${GOOGLE}`),
         ...AI_PROCESSES.map(p => `PROCESS-NAME,${p},${AI}`),
-        ...HOMEPORT_PROCESSES.map(p => `PROCESS-NAME,${p},${HOMEPORT}`),
+        ...RESIDENTIAL_PROCESSES.map(p => `PROCESS-NAME,${p},${RESIDENTIAL}`),
 
         // Foxmail 与 Gmail 收发信服务器走 MAIL 组（置于其他规则之前）
         ...MAIL_PROCESSES.map(p => `AND,((PROCESS-NAME,${p}),(NOT,((GEOIP,CN,no-resolve)))),${MAIL}`),
@@ -526,14 +527,14 @@ function main(config) {
         "DOMAIN-SUFFIX,msedge.net,DIRECT",
         "DOMAIN-SUFFIX,msocdn.com,DIRECT",
 
-        // Claude 指定主机优先走 AI，常规 Google 和住宅出口规则随后匹配。
+        // Claude 指定主机优先走 AI，常规 Google 和 Residential 规则随后匹配。
         ...toExactRules(CLAUDE_EXACT_DOMAINS, AI),
         ...companyAiRules(),
         ...toExactRules(AI_EXACT_DOMAINS, AI),
         ...toSuffixRules(AI_SUFFIX_DOMAINS, AI),
         "RULE-SET,ai," + AI,
         ...AI_IP_CIDRS.map(c => "IP-CIDR," + c + "," + AI + ",no-resolve"),
-        ...toSuffixRules(HOMEPORT_SUFFIX_DOMAINS, HOMEPORT),
+        ...toSuffixRules(RESIDENTIAL_SUFFIX_DOMAINS, RESIDENTIAL),
         ...toSuffixRules(TELEMETRY_SUFFIX_DOMAINS, PROXY),
         "DOMAIN-SUFFIX,discord.com," + PROXY,
         "DOMAIN-SUFFIX,discordapp.com," + PROXY,
@@ -598,8 +599,8 @@ function main(config) {
     return cyVpsSelectors(cyHarden20261103(config))
 }
 
-// 解析 WEBSHARE_PROXIES，生成绑定 dialer-proxy: HP_Relay 的 socks5/http 静态住宅代理节点
-function cyParseWebshareProxies(list) {
+// 解析 IP_PROXIES，生成绑定 dialer-proxy: 🔗 Relay 的 socks5/http 静态住宅/ISP 代理节点
+function cyParseIpProxies(list) {
     if (!Array.isArray(list)) return []
     const out = []
     list.forEach((raw) => {
@@ -608,7 +609,7 @@ function cyParseWebshareProxies(list) {
             const server = String(raw.server || "").trim()
             const port = Number(raw.port)
             if (!server || !Number.isFinite(port) || port <= 0) return
-            const baseName = raw.name ? String(raw.name).trim() : `🏠 Webshare-${out.length + 1} (${server})`
+            const baseName = raw.name ? String(raw.name).trim() : `🏠 ISP-${out.length + 1} (${server})`
             const name = baseName.startsWith("🏠") ? baseName : `🏠 ${baseName}`
             const node = {
                 name,
@@ -638,7 +639,7 @@ function cyParseWebshareProxies(list) {
         const username = parts[2] !== undefined ? parts[2].trim() : ""
         const password = parts.slice(3).join(":").trim()
         if (!server || !Number.isFinite(port) || port <= 0) return
-        const baseName = customName || `🏠 Webshare-${out.length + 1} (${server})`
+        const baseName = customName || `🏠 ISP-${out.length + 1} (${server})`
         const name = baseName.startsWith("🏠") ? baseName : `🏠 ${baseName}`
         const node = {
             name,
@@ -654,29 +655,29 @@ function cyParseWebshareProxies(list) {
     return out
 }
 
-// 重建业务选择组与 Homeport 链式住宅代理组（MAIL / AI / GOOGLE / 🏠 住宅出口 / HP_Relay）
+// 重建业务选择组与链式住宅代理组（MAIL / AI / GOOGLE / 🏠 Residential / 🔗 Relay）
 function cyVpsSelectors(config) {
-    const homeportProxies = cyParseWebshareProxies(typeof WEBSHARE_PROXIES !== "undefined" ? WEBSHARE_PROXIES : [])
-    const homeportNames = homeportProxies.map(p => p.name)
-    if (homeportProxies.length) {
+    const ipProxies = cyParseIpProxies(typeof IP_PROXIES !== "undefined" ? IP_PROXIES : [])
+    const ipProxyNames = ipProxies.map(p => p.name)
+    if (ipProxies.length) {
         if (!Array.isArray(config.proxies)) config.proxies = []
-        config.proxies = config.proxies.filter(p => p && !homeportNames.includes(p.name)).concat(homeportProxies)
+        config.proxies = config.proxies.filter(p => p && !ipProxyNames.includes(p.name)).concat(ipProxies)
     }
 
     const extra = typeof VPS_EXTRA_FILTER === "string" && VPS_EXTRA_FILTER.trim() !== "" ? "|" + VPS_EXTRA_FILTER.trim() : ""
-    const pattern = "NovixLink|Webshare|^XUI-Direct$|^(WARP|VPNGate|Direct)-(Reality|Hy2)$" + extra
+    const pattern = "NovixLink|Oxylabs|ISP|Webshare|^XUI-Direct$|^(WARP|VPNGate|Direct)-(Reality|Hy2)$" + extra
     const excluded = new RegExp(NODE_FILTER.replace("(?i)", ""), "i")
-    const names = [...new Set((config.proxies || []).filter(p => p && !homeportNames.includes(p.name) && new RegExp(pattern, "i").test(p.name) && !excluded.test(p.name)).map(p => p.name))]
-    // 仅「🏠 住宅出口」额外纳入当前订阅中名称含住宅/家宽/家庭的节点（排除信息节点与稳定性公告，不混入机房原生 IP）
+    const names = [...new Set((config.proxies || []).filter(p => p && !ipProxyNames.includes(p.name) && new RegExp(pattern, "i").test(p.name) && !excluded.test(p.name)).map(p => p.name))]
+    // 仅「🏠 Residential」额外纳入当前订阅中名称含住宅/家宽/家庭的节点（排除信息节点与稳定性公告，不混入机房原生 IP）
     const residentialPattern = /住宅|家宽|家寬|家庭/i
     const residentialExcluded = /稳定性|穩定性|普通节点|普通節點/i
-    const residentialNames = [...new Set((config.proxies || []).filter(p => p && !homeportNames.includes(p.name) && !names.includes(p.name) && residentialPattern.test(p.name) && !excluded.test(p.name) && !residentialExcluded.test(p.name)).map(p => p.name))]
+    const residentialNames = [...new Set((config.proxies || []).filter(p => p && !ipProxyNames.includes(p.name) && !names.includes(p.name) && residentialPattern.test(p.name) && !excluded.test(p.name) && !residentialExcluded.test(p.name)).map(p => p.name))]
 
     const vpsProviderNames = Object.keys(config["proxy-providers"] || {}).filter(k => /^my-vps(-\d+)?$/.test(k))
     const allProviders = Object.keys(config["proxy-providers"] || {})
     const vpsProviders = allProviders.filter(k => vpsProviderNames.includes(k))
     const otherProviders = allProviders.filter(k => !vpsProviderNames.includes(k))
-    const mainExclude = homeportNames.length ? NODE_FILTER.replace("(?i)(", "(?i)(^🏠|") : NODE_FILTER
+    const mainExclude = ipProxyNames.length ? NODE_FILTER.replace("(?i)(", "(?i)(^🏠|") : NODE_FILTER
 
     config["proxy-groups"] = (config["proxy-groups"] || []).map(g => {
         if (!g || g.name !== PROXY) return g
@@ -695,11 +696,11 @@ function cyVpsSelectors(config) {
         ? { "include-all-proxies": true, ...(otherProviders.length ? { use: otherProviders } : {}) }
         : { "include-all": true }
 
-    config["proxy-groups"] = config["proxy-groups"].filter(g => ![MAIL, AI, GOOGLE, HOMEPORT, RELAY].includes(g.name)).concat([
-        { name: MAIL, type: "select", ...pool, proxies: [...homeportNames, ...names, HOMEPORT, PROXY] },
-        { name: AI, type: "select", ...pool, proxies: [...homeportNames, ...names, HOMEPORT, PROXY] },
-        { name: GOOGLE, type: "select", ...pool, proxies: [AI, HOMEPORT, ...homeportNames, ...names, PROXY] },
-        { name: HOMEPORT, type: "select", ...pool, proxies: [...homeportNames, ...names, ...residentialNames, PROXY] },
+    config["proxy-groups"] = config["proxy-groups"].filter(g => ![MAIL, AI, GOOGLE, RESIDENTIAL, RELAY].includes(g.name)).concat([
+        { name: MAIL, type: "select", ...pool, proxies: [...ipProxyNames, ...names, RESIDENTIAL, PROXY] },
+        { name: AI, type: "select", ...pool, proxies: [...ipProxyNames, ...names, RESIDENTIAL, PROXY] },
+        { name: GOOGLE, type: "select", ...pool, proxies: [AI, RESIDENTIAL, ...ipProxyNames, ...names, PROXY] },
+        { name: RESIDENTIAL, type: "select", ...pool, proxies: [...ipProxyNames, ...names, ...residentialNames, PROXY] },
         {
             name: RELAY,
             type: "select",
@@ -724,7 +725,7 @@ function cyVpsSelectors(config) {
 //      - 其余外网域名、以及 IP 规则需要的解析 → 外网加密 DoH（Google 8.8.8.8 / Cloudflare 1.1.1.1），经代理发出
 //      - 不使用 fallback（避免回落到明文/国内 DNS），fake-ip 模式，关闭 IPv6 解析
 //      - 机场节点域名用加密 DoH（阿里 / 腾讯，按 IP 写），节点必须直连才能解析，所以不走代理
-//   4) 业务分组与住宅代理：由 cyVpsSelectors 重建为纯手选组；支持 VPS_URLS 与 WEBSHARE_PROXIES 双轨并行。
+//   4) 业务分组与住宅代理：由 cyVpsSelectors 重建为纯手选组；支持 VPS_URLS 与 IP_PROXIES 双轨并行。
 // =====================================================================
 const CY_VPS_IP_RULE = "IP-CIDR,216.36.82.250/32,DIRECT,no-resolve"
 // RackNerd VPS 直连（SSH(22) 例外走主选择组），紧随 VPS 规则
@@ -745,7 +746,7 @@ const CY_CN_MAIL_DOMAINS = ["88.com", "email.cn", "qq.com", "foxmail.com", "exma
 // 在原代理规则的位置阻断 QUIC，并拒绝因节点不支持 UDP 而跳过的连接。
 // 不前置全局 UDP 拒绝：先命中的公司/国内/内网 DIRECT 仍保持直连。
 function cyProtectProxyRules(rules) {
-    const policies = [PROXY, CY_MAIL, CY_AI, GOOGLE, HOMEPORT]
+    const policies = [PROXY, CY_MAIL, CY_AI, GOOGLE, RESIDENTIAL]
     const guarded = []
     for (const rule of rules) {
         const parts = rule.split(",")
