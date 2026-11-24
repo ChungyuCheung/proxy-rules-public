@@ -1,5 +1,10 @@
 # mihomo 更新日志
 
+## 2026-11-24 16:22 UTC+8 · tun-metacubex-v3.js v3.3.0
+
+- 精简为 6 个策略组：移除多余的 `⚡ Relay-Auto` 嵌套层，直接将 `🔗 Relay` 设为 `type: url-test`（每 180 秒自动测速 + 30ms 防抖 + 超时自动切换，汇集当前订阅与 `RELAY_URLS` 中 `≤1x` 节点）。
+- `IP_PROXIES` 默认协议从 `socks5` 升级为 `http`（`HTTP CONNECT` 将认证合并到首包，省去 2 次跨国握手 RTT，实测冷建连提速 40%～3x；如需 SOCKS5 仍可通过对象格式显式指定 `type: "socks5"`）。
+
 ## 2026-11-24 15:02 UTC+8 · tun-metacubex-v3.js v3.2.1
 
 - 修复 `🔗 Relay` 中未显示 `⚡ Relay-Auto` 与 `⚡ Proxy` 的问题：mihomo 内核的 `filter` / `exclude-filter` 会同时过滤显式 `proxies` 列表，`🔗 Relay` 的 `filter` 现显式放行 `^⚡ (Relay-Auto|Proxy)$|^DIRECT$` 且从 `RELAY_EXCLUDE` 移除 `^⚡`，确保 `⚡ Relay-Auto` 固定排在第 1 默认项、不再因过滤被剔除而回退到 `DIRECT`。

@@ -1,5 +1,9 @@
 # Shadowrocket 更新日志
 
+## 2026-11-24 16:22 UTC+8 · cy.conf v6.13
+
+- 精简恢复 6 大全英文策略组（与 `tun-metacubex-v3.js v3.3.0` 对齐）：移除多余的 `⚡ Relay-Auto` 嵌套层，直接将 `🔗 Relay` 改为 `url-test` 自动测速容灾组。
+
 ## 2026-11-24 13:40 UTC+8 · cy.conf v6.12
 
 - 新增 `⚡ Relay-Auto` 自动最低延迟前置跳板组（`url-test`，`interval=180`，`tolerance=30`），并将 `🔗 Relay` 改为默认跟随 `⚡ Relay-Auto`（共 7 个全英文策略组，与 `tun-metacubex-v3.js v3.2.0` 对齐）。
