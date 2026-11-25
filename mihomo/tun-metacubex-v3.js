@@ -1,5 +1,5 @@
-// ===== mihomo/tun-metacubex-v3.js v3.3.1 | TUN 模式 + MetaCubeX .mrs 规则 + 静态住宅链式代理（mihomo 覆写脚本·第三代）=====
-// 最后更新：2026-11-24 17:35 UTC+8
+// ===== mihomo/tun-metacubex-v3.js v3.3.2 | TUN 模式 + MetaCubeX .mrs 规则 + 静态住宅链式代理（mihomo 覆写脚本·第三代）=====
+// 最后更新：2026-11-25 13:47 UTC+8
 // 第三代（V3）：在第二代（VPS_URLS 数组）基础上，融合静态住宅 / ISP 代理链式转发方案（支持 Oxylabs / Webshare 等任意 HTTP/SOCKS5 代理服务）。
 // 核心解决痛点：当自建 VPS 故障、失联或流量耗尽时，业务组（AI / Foxmail / Google / Residential）仍可通过
 //   「本机 → 🔗 Relay（自动选最低延迟 ≤1x 节点，超时自动切换）→ 静态住宅 / ISP 代理 → 目标站点」正常访问，且目标站点看到的住宅落地 IP 恒定不变。
@@ -77,6 +77,12 @@ const CUSTOM_RULES = [
 const ANTHROPIC_IPV6_REJECT_RULES = [
     "IP-CIDR6,2607:6bc0::/48,REJECT,no-resolve",
     "IP-CIDR6,2607:6bc0:11::/48,REJECT,no-resolve",
+]
+
+// play.googleapis.com：拒绝 language_server.exe / agy.exe 进程访问
+const PLAY_GOOGLEAPIS_PROCESS_REJECT_RULES = [
+    "AND,((DOMAIN,play.googleapis.com),(PROCESS-NAME,language_server.exe)),REJECT",
+    "AND,((DOMAIN,play.googleapis.com),(PROCESS-NAME,agy.exe)),REJECT",
 ]
 
 // Foxmail 进程与 Gmail 收发信服务器，固定走 MAIL 组
@@ -525,6 +531,7 @@ function main(config) {
         "IP-CIDR6,fc00::/7,DIRECT,no-resolve",
         "IP-CIDR6,fe80::/10,DIRECT,no-resolve",
         ...ANTHROPIC_IPV6_REJECT_RULES,
+        ...PLAY_GOOGLEAPIS_PROCESS_REJECT_RULES,
 
         googleQuicRule(),
         // 独立应用进程优先匹配（Google / AI / Residential）

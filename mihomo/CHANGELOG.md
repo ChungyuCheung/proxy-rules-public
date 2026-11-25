@@ -1,5 +1,9 @@
 # mihomo 更新日志
 
+## 2026-11-25 13:47 UTC+8 · tun-metacubex-v3.js v3.3.2
+
+- 新增 `PLAY_GOOGLEAPIS_PROCESS_REJECT_RULES`：拒绝 `language_server.exe`、`agy.exe` 访问 `play.googleapis.com`，置于 Anthropic IPv6 拒绝规则之后、`googleQuicRule()` 与进程分流规则之前。
+
 ## 2026-11-24 17:35 UTC+8 · tun-metacubex-v3.js v3.3.1
 
 - 新增 `RELAY_EXTRA_EXCLUDE = ""` 可选常量（仓库保持为空），支持按正则快速拉黑体检发现的不支持二次代理转发的个别中转节点（如 `"台湾C|日本C"`），无需修改内置 `RELAY_EXCLUDE`。
