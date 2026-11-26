@@ -1,5 +1,10 @@
 # Shadowrocket 更新日志
 
+## 2026-11-26 13:23 UTC+8 · cy.conf v6.15
+
+- 恢复六组布局，在 `🏠 Residential` 直接选具体节点，去掉 v6.14 的 VPS 与静态 IP 子组。新增 `^Novix-` 匹配，兼容新版 Novix 节点名，并沿用旧名、`🏠` 前缀和家宽筛选。
+- `🔗 Relay` 排除 `Novix-` 出口节点。更新后在 `🏠 Residential` 重选一次。
+
 ## 2026-11-26 13:10 UTC+8 · cy.conf v6.14
 
 - `🏠 Residential` 新增 `🏡 IP Proxy` 和 `🖥 VPS` 两个手选子组。VPS 子组绑定本机 `VPS Exit` 订阅，按来源纳入节点并过滤信息项，兼容供应商改名。

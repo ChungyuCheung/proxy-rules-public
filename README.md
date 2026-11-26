@@ -5,7 +5,7 @@
 | 配置 | 适用客户端 | 版本 | 下载与更新日志 |
 | --- | --- | --- | --- |
 | mihomo V3 TUN | Bettbox、Clash Verge Rev、FlClash | **v3.3.2** | [下载脚本](https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/mihomo/tun-metacubex-v3.js) · [更新日志](mihomo/CHANGELOG.md) |
-| Shadowrocket 完整版 | Shadowrocket（iOS） | **v6.14** | [下载配置](https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy.conf) · [更新日志](Shadowrocket/CHANGELOG.md) |
+| Shadowrocket 完整版 | Shadowrocket（iOS） | **v6.15** | [下载配置](https://raw.githubusercontent.com/ChungyuCheung/proxy-rules-public/main/Shadowrocket/cy.conf) · [更新日志](Shadowrocket/CHANGELOG.md) |
 
 ## mihomo V3 TUN
 
@@ -53,9 +53,8 @@ const RELAY_EXTRA_EXCLUDE = ""
 
 1. 在「配置」页点右上角「+」，粘贴 `cy.conf` 下载链接。下载后选中该配置。
 2. 在首页导入自己的节点或订阅，选一个可用节点，将「全局路由」设为「配置」，然后连接。
-3. 使用 VPS 时，在首页把现有 VPS 订阅的备注设为 `VPS Exit`，或编辑 `🖥 VPS` 子组，在「订阅 → 服务器节点」选择现有订阅。换链接时在原卡片上编辑并更新。
-4. 使用静态 IP 时，在首页新增 **HTTP** 或 **SOCKS5** 节点，备注以 `🏠` 开头，例如 `🏠 US ISP`。需要前置跳板时，在节点的「代理链」选择 `🔗 Relay`。
-5. 在 `🖥 VPS` 或 `🏡 IP Proxy` 内选具体节点，再在 `🏠 Residential` 选择对应子组。需要共用该出口的 AI、Google 或邮件组可以选 `🏠 Residential`。升级后重选一次出口。
+3. 在首页导入或更新 VPS 订阅，确认节点已加载。静态 IP 可通过 **HTTP** 或 **SOCKS5** 添加，备注以 `🏠` 开头。需要前置跳板时，在节点的「代理链」选择 `🔗 Relay`。
+4. 在 `🏠 Residential` 直接选择具体节点。让需要共用此出口的 AI、Google 或邮件组选择 `🏠 Residential`。从 v6.14 升级后重选一次出口。
 
 更新时在「配置」页更新这份配置。自行编辑过 `cy.conf` 时，先备份本地修改。
 
@@ -67,7 +66,7 @@ const RELAY_EXTRA_EXCLUDE = ""
 | `🤖 AI` | ChatGPT、Claude 等 AI 服务。需要住宅出口时选 `🏠 Residential`，也可使用组内其他可用出口。 |
 | `🌐 Google` | Google、YouTube、Gemini 等服务。如需与 AI 共用出口，手动选 `🤖 AI`。 |
 | `📧 Foxmail` / `📧 Mail` | mihomo 的邮件组为 `📧 Foxmail`，Shadowrocket 为 `📧 Mail`。可选 `⚡ Proxy` 或 `🏠 Residential`。 |
-| `🏠 Residential` | mihomo 在组内选节点。Shadowrocket 选择 `🖥 VPS` 或 `🏡 IP Proxy` 子组。 |
+| `🏠 Residential` | 在组内直接选择 VPS、静态 IP 或家宽节点。 |
 | `🔗 Relay` | 为静态住宅代理提供第一跳，按节点名筛选候选并自动测速。走住宅链时，第二跳的住宅节点决定访问站点所用的出口。 |
 
 ## 验证与排查
