@@ -1,5 +1,10 @@
 # Shadowrocket 更新日志
 
+## 2026-11-26 13:10 UTC+8 · cy.conf v6.14
+
+- `🏠 Residential` 新增 `🏡 IP Proxy` 和 `🖥 VPS` 两个手选子组。VPS 子组绑定本机 `VPS Exit` 订阅，按来源纳入节点并过滤信息项，兼容供应商改名。
+- 静态 IP 节点的备注统一支持 `🏠` 前缀，保留订阅家宽和旧静态代理备注匹配。升级后需在 `🏠 Residential` 重新选一次子组，并在子组内选具体节点。
+
 ## 2026-11-24 16:22 UTC+8 · cy.conf v6.13
 
 - 精简恢复 6 大全英文策略组（与 `tun-metacubex-v3.js v3.3.0` 对齐）：移除多余的 `⚡ Relay-Auto` 嵌套层，直接将 `🔗 Relay` 改为 `url-test` 自动测速容灾组。
